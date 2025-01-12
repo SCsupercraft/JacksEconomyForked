@@ -70,7 +70,25 @@ public class CurrencyItem extends Item implements IDisablable {
             return super.use(pLevel, pPlayer, pUsedHand);
         }
 
-        if (wallet.getItem() instanceof WalletItem walletItem) {
+        if (wallet.getItem() instanceof InfiniteWalletItem walletItem) {
+            long insertCount = itemStack.getCount();
+
+            if (insertCount <= 0) {
+                return super.use(pLevel, pPlayer, pUsedHand);
+            }
+
+            if (!pPlayer.isCrouching()) {
+                insertCount = 1;
+            }
+
+            BigDecimal balanceAdded = this.value.multiply(new BigDecimal(insertCount));
+            WalletItem.setBalance(wallet, WalletItem.getBalance(wallet).add(balanceAdded));
+            itemStack.shrink((int)insertCount);
+
+            if (pPlayer instanceof ServerPlayer serverPlayer) {
+                Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(balanceAdded));
+            }
+        } else if (wallet.getItem() instanceof WalletItem walletItem) {
             BigDecimal left = BigDecimal.valueOf(walletItem.getCapacity()).subtract(WalletItem.getBalance(wallet));
             BigDecimal fraction = left.divide(value, RoundingMode.UP).setScale(0, RoundingMode.UP);
 

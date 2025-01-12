@@ -3,6 +3,8 @@ package me.khajiitos.jackseconomy.init;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.block.*;
 import me.khajiitos.jackseconomy.config.Config;
+import me.khajiitos.jackseconomy.create.CreateCheck;
+import me.khajiitos.jackseconomy.create.CreateItemBlockReg;
 import me.khajiitos.jackseconomy.item.*;
 import me.khajiitos.jackseconomy.util.CurrencyType;
 import me.khajiitos.jackseconomy.util.IDisablable;
@@ -27,16 +29,15 @@ public class ItemBlockReg {
 
     public static final RegistryObject<ExporterBlock> EXPORTER = BLOCKS.register("exporter", ExporterBlock::new);
     public static final RegistryObject<ImporterBlock> IMPORTER = BLOCKS.register("importer", ImporterBlock::new);
-    public static final RegistryObject<MechanicalExporterBlock> MECHANICAL_EXPORTER = BLOCKS.register("mechanical_exporter", MechanicalExporterBlock::new);
-    public static final RegistryObject<MechanicalImporterBlock> MECHANICAL_IMPORTER = BLOCKS.register("mechanical_importer", MechanicalImporterBlock::new);
-
+    public static final RegistryObject<MechanicalExporterBlock> MECHANICAL_EXPORTER = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_EXPORTER : null;
+    public static final RegistryObject<MechanicalImporterBlock> MECHANICAL_IMPORTER = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_IMPORTER : null;
     public static final RegistryObject<CurrencyConverterBlock> CURRENCY_CONVERTER = BLOCKS.register("currency_converter", CurrencyConverterBlock::new);
     public static final RegistryObject<AdminShopBlock> ADMIN_SHOP = BLOCKS.register("admin_shop", AdminShopBlock::new);
 
     public static final RegistryObject<BlockItem> EXPORTER_ITEM = ITEMS.register("exporter", () -> new BlockItem(EXPORTER.get(), new Item.Properties()));
     public static final RegistryObject<BlockItem> IMPORTER_ITEM = ITEMS.register("importer", () -> new BlockItem(IMPORTER.get(), new Item.Properties()));
-    public static final RegistryObject<BlockItem> MECHANICAL_EXPORTER_ITEM = ITEMS.register("mechanical_exporter", () -> new BlockItem(MECHANICAL_EXPORTER.get(), new Item.Properties()));
-    public static final RegistryObject<BlockItem> MECHANICAL_IMPORTER_ITEM = ITEMS.register("mechanical_importer", () -> new BlockItem(MECHANICAL_IMPORTER.get(), new Item.Properties()));
+    public static final RegistryObject<BlockItem> MECHANICAL_EXPORTER_ITEM = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_EXPORTER_ITEM : null;
+    public static final RegistryObject<BlockItem> MECHANICAL_IMPORTER_ITEM = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_IMPORTER_ITEM : null;
     public static final RegistryObject<BlockItem> CURRENCY_CONVERTER_ITEM = ITEMS.register("currency_converter", () -> new BlockItem(CURRENCY_CONVERTER.get(), new Item.Properties()) {
         @Override
         public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag) {
@@ -87,6 +88,7 @@ public class ItemBlockReg {
     public static final RegistryObject<WalletItem> INTERMEDIATE_WALLET_ITEM = ITEMS.register("intermediate_wallet", () -> new WalletItem(() -> Config.intermediateWalletCapacity));
     public static final RegistryObject<WalletItem> ADVANCED_WALLET_ITEM = ITEMS.register("advanced_wallet", () -> new WalletItem(() -> Config.advancedWalletCapacity));
     public static final RegistryObject<WalletItem> THE_PHAT_WALLET_ITEM = ITEMS.register("the_phat_wallet", () -> new WalletItem(() -> Config.thePhatWalletCapacity));
+    public static final RegistryObject<InfiniteWalletItem> INFINITE_WALLET_ITEM = ITEMS.register("infinite_wallet", () -> new InfiniteWalletItem());
     public static final RegistryObject<OIMWalletItem> WALLET_ITEM = ITEMS.register("wallet", OIMWalletItem::new);
 
     public static final RegistryObject<CheckItem> CHECK_ITEM = ITEMS.register("check", CheckItem::new);
@@ -99,8 +101,10 @@ public class ItemBlockReg {
     public static final RegistryObject<CreativeModeTab> tab = CREATIVE_MODE_TABS.register("jackseconomy", () -> CreativeModeTab.builder().icon(() -> new ItemStack(ItemBlockReg.EXPORTER_ITEM.get())).title(Component.translatable("itemGroup.jackseconomy")).displayItems((params, output) -> {
         output.accept(ItemBlockReg.EXPORTER_ITEM.get());
         output.accept(ItemBlockReg.IMPORTER_ITEM.get());
-        output.accept(ItemBlockReg.MECHANICAL_IMPORTER_ITEM.get());
-        output.accept(ItemBlockReg.MECHANICAL_EXPORTER_ITEM.get());
+        if (CreateCheck.isInstalled()) {
+            output.accept(ItemBlockReg.MECHANICAL_EXPORTER_ITEM.get());
+            output.accept(ItemBlockReg.MECHANICAL_IMPORTER_ITEM.get());
+        }
         output.accept(ItemBlockReg.CURRENCY_CONVERTER_ITEM.get());
         output.accept(ItemBlockReg.ADMIN_SHOP_ITEM.get());
         output.accept(ItemBlockReg.PENNY_ITEM.get());
@@ -129,6 +133,7 @@ public class ItemBlockReg {
         output.accept(ItemBlockReg.INTERMEDIATE_WALLET_ITEM.get());
         output.accept(ItemBlockReg.ADVANCED_WALLET_ITEM.get());
         output.accept(ItemBlockReg.THE_PHAT_WALLET_ITEM.get());
+        output.accept(ItemBlockReg.INFINITE_WALLET_ITEM.get());
         output.accept(ItemBlockReg.WALLET_ITEM.get());
         output.accept(ItemBlockReg.GOLDEN_EXPORTER_TICKET_ITEM.get());
         output.accept(ItemBlockReg.EMPTY_EXPORTER_TICKET_ITEM.get());

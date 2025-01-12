@@ -35,6 +35,7 @@ import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -285,20 +286,25 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
         if (pButton == 0) {
             for (ClickableCurrencyItem item : this.clickableCurrencyItems) {
                 if (pMouseX > item.x() && pMouseX <= item.x() + item.width && pMouseY > item.y && pMouseY <= item.y + item.height) {
-                    int count;
+                    BigDecimal count;
 
                     BigDecimal balance = getBalance();
                     BigDecimal worth = item.currencyType.worth;
 
+                    JacksEconomy.LOGGER.info("Balance: " + balance.toString());
+                    JacksEconomy.LOGGER.info("Worth: " + worth.toString());
+
                     if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
-                        count = Math.min(64, balance.divide(worth, RoundingMode.DOWN).intValue());
+                        count = BigDecimal.valueOf(64).min(balance.divide(worth, RoundingMode.DOWN));
                     } else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL)) {
-                        count = Math.min(10, balance.divide(worth, RoundingMode.DOWN).intValue());
+                        count = BigDecimal.valueOf(10).min(balance.divide(worth, RoundingMode.DOWN));
                     } else {
-                        count = Math.min(1, balance.divide(worth, RoundingMode.DOWN).intValue());
+                        count = BigDecimal.valueOf(1).min(balance.divide(worth, RoundingMode.DOWN));
                     }
 
-                    if (count > 0) {
+                    JacksEconomy.LOGGER.info("Amount to Buy: " + count);
+
+                    if (count.compareTo(BigDecimal.ZERO) > 0) {
                         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.F));
                         Packets.sendToServer(new WithdrawBalanceSpecificPacket(count, item.currencyType));
                         return true;

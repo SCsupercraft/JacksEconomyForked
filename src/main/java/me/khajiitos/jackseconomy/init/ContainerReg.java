@@ -1,6 +1,8 @@
 package me.khajiitos.jackseconomy.init;
 
 import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.create.CreateCheck;
+import me.khajiitos.jackseconomy.create.CreateContainerReg;
 import me.khajiitos.jackseconomy.menu.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -21,8 +23,8 @@ public class ContainerReg {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, JacksEconomy.MOD_ID);
     public static final RegistryObject<MenuType<ExporterMenu>> EXPORTER_MENU = MENU_TYPES.register("exporter", regBlockMenu(ExporterMenu::new));
     public static final RegistryObject<MenuType<ImporterMenu>> IMPORTER_MENU = MENU_TYPES.register("importer", regBlockMenu(ImporterMenu::new));
-    public static final RegistryObject<MenuType<MechanicalExporterMenu>> MECHANICAL_EXPORTER_MENU = MENU_TYPES.register("mechanical_exporter", regBlockMenu(MechanicalExporterMenu::new));
-    public static final RegistryObject<MenuType<MechanicalImporterMenu>> MECHANICAL_IMPORTER_MENU = MENU_TYPES.register("mechanical_importer", regBlockMenu(MechanicalImporterMenu::new));
+    public static final RegistryObject<MenuType<MechanicalExporterMenu>> MECHANICAL_EXPORTER_MENU = CreateCheck.isInstalled() ? CreateContainerReg.MECHANICAL_EXPORTER_MENU : null;
+    public static final RegistryObject<MenuType<MechanicalImporterMenu>> MECHANICAL_IMPORTER_MENU = CreateCheck.isInstalled() ? CreateContainerReg.MECHANICAL_IMPORTER_MENU : null;
     public static final RegistryObject<MenuType<CurrencyConverterMenu>> CURRENCY_CONVERTER_MENU = MENU_TYPES.register("currency_converter", regBlockMenu(CurrencyConverterMenu::new));
     public static final RegistryObject<MenuType<WalletMenu>> WALLET_MENU = MENU_TYPES.register("wallet", regItemMenu(WalletMenu::new));
     public static final RegistryObject<MenuType<OIMWalletMenu>> OIM_WALLET_MENU = MENU_TYPES.register("oim_wallet", regItemMenu(OIMWalletMenu::new));
@@ -35,15 +37,15 @@ public class ContainerReg {
     }
 
     // Borrowed from Calemi's Economy
-    static <M extends AbstractContainerMenu> Supplier<MenuType<M>> regBlockMenu(BlockMenuFactory<M> factory) {
+    public static <M extends AbstractContainerMenu> Supplier<MenuType<M>> regBlockMenu(BlockMenuFactory<M> factory) {
         return () -> new MenuType<>(factory, FeatureFlagSet.of());
     }
 
-    static <M extends AbstractContainerMenu> Supplier<MenuType<M>> regItemMenu(ItemMenuFactory<M> factory) {
+    public static <M extends AbstractContainerMenu> Supplier<MenuType<M>> regItemMenu(ItemMenuFactory<M> factory) {
         return () -> new MenuType<>(factory, FeatureFlagSet.of());
     }
 
-    interface BlockMenuFactory<M extends AbstractContainerMenu> extends IContainerFactory<M> {
+    public interface BlockMenuFactory<M extends AbstractContainerMenu> extends IContainerFactory<M> {
         default M create(int windowId, Inventory inv, FriendlyByteBuf data) {
             return this.create(windowId, inv, data.readBlockPos());
         }
@@ -51,7 +53,7 @@ public class ContainerReg {
         M create(int var1, Inventory var2, BlockPos var3);
     }
 
-    interface ItemMenuFactory<M extends AbstractContainerMenu> extends IContainerFactory<M> {
+    public interface ItemMenuFactory<M extends AbstractContainerMenu> extends IContainerFactory<M> {
 
         @Override
         default M create(int windowId, Inventory inv, FriendlyByteBuf data) {

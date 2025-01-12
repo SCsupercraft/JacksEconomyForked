@@ -26,20 +26,20 @@ public class WithdrawBalanceSpecificHandler {
             return;
         }
 
-        if (msg.items() < 1) {
+        if (msg.items().compareTo(BigDecimal.ONE) < 0) {
             return;
         }
 
-        BigDecimal amount = msg.currencyType().worth.multiply(new BigDecimal(msg.items()));
+        BigDecimal amount = msg.currencyType().worth.multiply(msg.items());
         ItemStack walletStack = walletMenu.getItemStack();
 
         if (WalletItem.getBalance(walletStack).compareTo(amount) < 0) {
             return;
         }
 
-        int itemsLeft = msg.items();
-        while (itemsLeft > 0) {
-            int stackAmount = Math.min(64, itemsLeft);
+        BigDecimal itemsLeft = msg.items();
+        while (itemsLeft.compareTo(BigDecimal.ZERO) > 0) {
+            int stackAmount = BigDecimal.valueOf(64).min(itemsLeft).intValue();
             ItemStack itemStack = new ItemStack(msg.currencyType().item, stackAmount);
 
             if (!sender.getInventory().add(itemStack)) {
@@ -47,7 +47,7 @@ public class WithdrawBalanceSpecificHandler {
                 sender.level().addFreshEntity(itemEntity);
             }
 
-            itemsLeft -= stackAmount;
+            itemsLeft = itemsLeft.subtract(BigDecimal.valueOf(stackAmount));
         }
 
         WalletItem.setBalance(walletStack, WalletItem.getBalance(walletStack).subtract(amount));

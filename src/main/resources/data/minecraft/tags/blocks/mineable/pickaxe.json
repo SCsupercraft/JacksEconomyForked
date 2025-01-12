@@ -2,8 +2,14 @@
   "values": [
     "jackseconomy:exporter",
     "jackseconomy:importer",
-    "jackseconomy:mechanical_exporter",
-    "jackseconomy:mechanical_importer",
+    {
+      "id": "jackseconomy:mechanical_exporter",
+      "required": false
+    },
+    {
+      "id": "jackseconomy:mechanical_importer",
+      "required": false
+    },
     "jackseconomy:currency_converter",
     "jackseconomy:admin_shop"
   ]

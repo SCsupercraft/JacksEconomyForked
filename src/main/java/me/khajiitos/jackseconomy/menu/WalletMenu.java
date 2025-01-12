@@ -5,6 +5,7 @@ import me.khajiitos.jackseconomy.init.ContainerReg;
 import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.item.CheckItem;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
+import me.khajiitos.jackseconomy.item.InfiniteWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.packet.UpdateWalletBalancePacket;
 import me.khajiitos.jackseconomy.packet.WalletBalanceDifPacket;
@@ -88,7 +89,33 @@ public class WalletMenu extends AbstractContainerMenu {
         for (int i = 0; i < 9; i++) {
             ItemStack input = this.container.getItem(i);
 
-            if (!input.isEmpty() && this.itemStack.getItem() instanceof WalletItem walletItem) {
+            if (!input.isEmpty() && this.itemStack.getItem() instanceof InfiniteWalletItem walletItem) {
+                BigDecimal value;
+
+                if (input.getItem() instanceof CurrencyItem currencyItem) {
+                    value = currencyItem.value;
+                } else if (input.getItem() instanceof CheckItem) {
+                    value = CheckItem.getBalance(input);
+                } else {
+                    continue;
+                }
+
+                int count = input.getCount();
+
+                BigDecimal oldBalance = WalletItem.getBalance(itemStack);
+                BigDecimal dif = value.multiply(BigDecimal.valueOf(count));
+                BigDecimal newBalance = oldBalance.add(dif);
+
+                WalletItem.setBalance(itemStack, newBalance);
+
+                JacksEconomy.server.getPlayerList().getPlayers().forEach(serverPlayer -> {
+                    if (serverPlayer.containerMenu == this) {
+                        Packets.sendToClient(serverPlayer, new UpdateWalletBalancePacket(newBalance));
+                        Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(dif));
+                    }
+                });
+                input.setCount(0);
+            } else if (!input.isEmpty() && this.itemStack.getItem() instanceof WalletItem walletItem) {
                 BigDecimal value;
 
                 if (input.getItem() instanceof CurrencyItem currencyItem) {

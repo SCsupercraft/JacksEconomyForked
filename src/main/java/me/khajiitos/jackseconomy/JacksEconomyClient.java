@@ -1,13 +1,13 @@
 package me.khajiitos.jackseconomy;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import me.khajiitos.jackseconomy.init.BlockEntityReg;
+import me.khajiitos.jackseconomy.create.CreateCheck;
+import me.khajiitos.jackseconomy.create.CreateClient;
 import me.khajiitos.jackseconomy.init.ContainerReg;
 import me.khajiitos.jackseconomy.listener.ClientEventListeners;
 import me.khajiitos.jackseconomy.listener.ClientRenderEventListeners;
 import me.khajiitos.jackseconomy.price.ItemDescription;
 import me.khajiitos.jackseconomy.price.PricesItemPriceInfo;
-import me.khajiitos.jackseconomy.renderer.MechanicalTransactionMachineRenderer;
 import me.khajiitos.jackseconomy.screen.*;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -44,8 +44,6 @@ public class JacksEconomyClient {
     public static void onClientSetup(FMLClientSetupEvent e) {
         MenuScreens.register(ContainerReg.EXPORTER_MENU.get(), ExporterScreen::new);
         MenuScreens.register(ContainerReg.IMPORTER_MENU.get(), ImporterScreen::new);
-        MenuScreens.register(ContainerReg.MECHANICAL_EXPORTER_MENU.get(), MechanicalExporterScreen::new);
-        MenuScreens.register(ContainerReg.MECHANICAL_IMPORTER_MENU.get(), MechanicalImporterScreen::new);
         MenuScreens.register(ContainerReg.WALLET_MENU.get(), WalletScreen::new);
         MenuScreens.register(ContainerReg.OIM_WALLET_MENU.get(), OIMWalletScreen::new);
         MenuScreens.register(ContainerReg.ADMIN_SHOP_MENU.get(), AdminShopScreen::new);
@@ -53,16 +51,7 @@ public class JacksEconomyClient {
         MenuScreens.register(ContainerReg.IMPORTER_TICKET_CREATOR_MENU.get(), TicketCreatorScreen::new);
         MenuScreens.register(ContainerReg.EXPORTER_TICKET_CREATOR_MENU.get(), TicketCreatorScreen::new);
 
-        /*
-        InstancedRenderRegistry.configure(BlockEntityReg.MECHANICAL_IMPORTER.get())
-                .factory(HorizontalHalfShaftInstance::new)
-                //.skipRender(be -> false)
-                .apply();
-
-        InstancedRenderRegistry.configure(BlockEntityReg.MECHANICAL_EXPORTER.get())
-                .factory(HorizontalHalfShaftInstance::new)
-                //.skipRender(be -> false)
-                .apply();*/
+        if (CreateCheck.isInstalled()) { CreateClient.onClientSetup(e); }
     }
 
     public static void onKeybindRegister(RegisterKeyMappingsEvent e) {
@@ -70,7 +59,6 @@ public class JacksEconomyClient {
     }
 
     public static void onRegisterBlockEntityRenderers(EntityRenderersEvent.RegisterRenderers e) {
-        e.registerBlockEntityRenderer(BlockEntityReg.MECHANICAL_EXPORTER.get(), MechanicalTransactionMachineRenderer::new);
-        e.registerBlockEntityRenderer(BlockEntityReg.MECHANICAL_IMPORTER.get(), MechanicalTransactionMachineRenderer::new);
+        if (CreateCheck.isInstalled()) { CreateClient.onRegisterBlockEntityRenderers(e); }
     }
 }

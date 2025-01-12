@@ -1,5 +1,6 @@
 package me.khajiitos.jackseconomy.item;
 
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import me.khajiitos.jackseconomy.util.IDisablable;
@@ -23,6 +24,10 @@ public class WalletItem extends Item implements IDisablable {
     public WalletItem(Supplier<ForgeConfigSpec.ConfigValue<Double>> capacity) {
         super(new Properties().stacksTo(1));
         this.capacity = capacity;
+    }
+    public WalletItem() {
+        super(new Properties().stacksTo(1));
+        this.capacity = null;
     }
 
     public double getCapacity() {

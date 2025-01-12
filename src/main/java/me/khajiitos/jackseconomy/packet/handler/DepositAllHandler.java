@@ -6,6 +6,7 @@ import me.khajiitos.jackseconomy.curios.CuriosWallet;
 import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.item.CheckItem;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
+import me.khajiitos.jackseconomy.item.InfiniteWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.packet.DepositAllPacket;
 import me.khajiitos.jackseconomy.packet.UpdateWalletBalancePacket;
@@ -39,38 +40,64 @@ public class DepositAllHandler {
 
         BigDecimal startingBalance = WalletItem.getBalance(walletItemStack);
 
-        currencyItems.forEach(itemStack -> {
-            BigDecimal value;
-            if (itemStack.getItem() instanceof CurrencyItem currencyItem) {
-                value = currencyItem.value;
-            } else if (itemStack.getItem() instanceof CheckItem) {
-                value = CheckItem.getBalance(itemStack);
-            } else {
-                return;
-            }
+        if (walletItemStack.getItem() instanceof InfiniteWalletItem) {
+            currencyItems.forEach(itemStack -> {
+                BigDecimal value;
+                if (itemStack.getItem() instanceof CurrencyItem currencyItem) {
+                    value = currencyItem.value;
+                } else if (itemStack.getItem() instanceof CheckItem) {
+                    value = CheckItem.getBalance(itemStack);
+                } else {
+                    return;
+                }
 
-            int count = itemStack.getCount();
+                int count = itemStack.getCount();
 
-            BigDecimal oldBalance = WalletItem.getBalance(walletItemStack);
-            BigDecimal freeBalance = BigDecimal.valueOf(walletItem.getCapacity()).subtract(oldBalance);
+                BigDecimal oldBalance = WalletItem.getBalance(walletItemStack);
+                BigDecimal dif = value.multiply(BigDecimal.valueOf(count));
+                BigDecimal newBalance = oldBalance.add(dif);
 
-            BigDecimal fraction = freeBalance.divide(value, RoundingMode.UP).setScale(0, RoundingMode.UP);
+                WalletItem.setBalance(walletItemStack, newBalance);
 
-            int toConsume = (int)(value.compareTo(BigDecimal.ZERO) == 0 ? count : Math.min(fraction.longValue(), count));
+                //Packets.sendToClient(sender, new UpdateWalletBalancePacket(newBalance));
+                //Packets.sendToClient(sender, new WalletBalanceDifPacket(dif));
 
-            if (toConsume <= 0) {
-                return;
-            }
+                itemStack.setCount(0);
+            });
+        } else {
+            currencyItems.forEach(itemStack -> {
+                BigDecimal value;
+                if (itemStack.getItem() instanceof CurrencyItem currencyItem) {
+                    value = currencyItem.value;
+                } else if (itemStack.getItem() instanceof CheckItem) {
+                    value = CheckItem.getBalance(itemStack);
+                } else {
+                    return;
+                }
 
-            BigDecimal dif = value.multiply(BigDecimal.valueOf(toConsume));
-            BigDecimal newBalance = oldBalance.add(dif);
-            WalletItem.setBalance(walletItemStack, newBalance);
+                int count = itemStack.getCount();
 
-            //Packets.sendToClient(sender, new UpdateWalletBalancePacket(newBalance));
-            //Packets.sendToClient(sender, new WalletBalanceDifPacket(dif));
+                BigDecimal oldBalance = WalletItem.getBalance(walletItemStack);
+                BigDecimal freeBalance = BigDecimal.valueOf(walletItem.getCapacity()).subtract(oldBalance);
 
-            itemStack.setCount(count - toConsume);
-        });
+                BigDecimal fraction = freeBalance.divide(value, RoundingMode.UP).setScale(0, RoundingMode.UP);
+
+                int toConsume = (int)(value.compareTo(BigDecimal.ZERO) == 0 ? count : Math.min(fraction.longValue(), count));
+
+                if (toConsume <= 0) {
+                    return;
+                }
+
+                BigDecimal dif = value.multiply(BigDecimal.valueOf(toConsume));
+                BigDecimal newBalance = oldBalance.add(dif);
+                WalletItem.setBalance(walletItemStack, newBalance);
+
+                //Packets.sendToClient(sender, new UpdateWalletBalancePacket(newBalance));
+                //Packets.sendToClient(sender, new WalletBalanceDifPacket(dif));
+
+                itemStack.setCount(count - toConsume);
+            });
+        }
 
         BigDecimal newBalance = WalletItem.getBalance(walletItemStack);
 
