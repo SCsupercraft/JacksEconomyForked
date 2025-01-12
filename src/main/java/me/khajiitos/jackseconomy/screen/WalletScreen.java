@@ -35,7 +35,6 @@ import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -141,7 +140,7 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
             PlayerFaceRenderer.draw(guiGraphics, Minecraft.getInstance().player.getSkinTextureLocation(), this.leftPos + 75 + 4, this.topPos + 40 + 15, 25);
         }
 
-        if (this.itemStack.getItem() instanceof WalletItem walletItem && WalletItem.getBalance(itemStack).compareTo(BigDecimal.valueOf(walletItem.getCapacity())) >= 0) {
+        if (this.itemStack.getItem() instanceof WalletItem walletItem && WalletItem.getBalance(itemStack).compareTo(BigDecimal.valueOf(walletItem.getCapacity())) > 0) {
             guiGraphics.drawCenteredString(Minecraft.getInstance().font, Component.translatable("jackseconomy.capacity_overflow_reached").withStyle(ChatFormatting.RED), this.width / 2, this.topPos - 15, 0xFFFFFFFF);
         }
 
@@ -291,9 +290,6 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
                     BigDecimal balance = getBalance();
                     BigDecimal worth = item.currencyType.worth;
 
-                    JacksEconomy.LOGGER.info("Balance: " + balance.toString());
-                    JacksEconomy.LOGGER.info("Worth: " + worth.toString());
-
                     if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
                         count = BigDecimal.valueOf(64).min(balance.divide(worth, RoundingMode.DOWN));
                     } else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL)) {
@@ -301,8 +297,6 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
                     } else {
                         count = BigDecimal.valueOf(1).min(balance.divide(worth, RoundingMode.DOWN));
                     }
-
-                    JacksEconomy.LOGGER.info("Amount to Buy: " + count);
 
                     if (count.compareTo(BigDecimal.ZERO) > 0) {
                         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.F));

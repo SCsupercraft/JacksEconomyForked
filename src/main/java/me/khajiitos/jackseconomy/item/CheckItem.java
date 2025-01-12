@@ -71,7 +71,8 @@ public class CheckItem extends Item implements IDisablable {
             return super.use(pLevel, pPlayer, pUsedHand);
         }
 
-        BigDecimal left = BigDecimal.valueOf(walletItem.getCapacity()).subtract(WalletItem.getBalance(wallet));
+        BigDecimal oldBalance = WalletItem.getBalance(wallet);
+        BigDecimal left = BigDecimal.valueOf(walletItem.getCapacity()).subtract(oldBalance);
 
         BigDecimal checkValue = CheckItem.getBalance(itemStack);
 
@@ -79,11 +80,11 @@ public class CheckItem extends Item implements IDisablable {
             return super.use(pLevel, pPlayer, pUsedHand);
         }
 
-        WalletItem.setBalance(wallet, WalletItem.getBalance(wallet).add(checkValue));
+        BigDecimal newBalance = CurrencyHelper.addMoney(checkValue, wallet, pPlayer);
         itemStack.shrink(1);
 
         if (pPlayer instanceof ServerPlayer serverPlayer) {
-            Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(checkValue));
+            Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(newBalance.subtract(oldBalance)));
         }
 
         pPlayer.level().playSound(null, pPlayer.blockPosition(), Sounds.CASH.get(), SoundSource.PLAYERS, 1.f, 1.f);

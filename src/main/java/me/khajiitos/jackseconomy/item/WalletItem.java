@@ -1,6 +1,5 @@
 package me.khajiitos.jackseconomy.item;
 
-import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import me.khajiitos.jackseconomy.util.IDisablable;
@@ -43,7 +42,7 @@ public class WalletItem extends Item implements IDisablable {
     }
 
     public static void setBalance(ItemStack itemStack, double balance) {
-        setBalance(itemStack, new BigDecimal(balance));
+        setBalance(itemStack, BigDecimal.valueOf(balance));
     }
 
     public static void setBalance(ItemStack itemStack, BigDecimal balance) {

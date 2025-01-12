@@ -11,6 +11,7 @@ import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.packet.DepositAllPacket;
 import me.khajiitos.jackseconomy.packet.UpdateWalletBalancePacket;
 import me.khajiitos.jackseconomy.packet.WalletBalanceDifPacket;
+import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
@@ -100,6 +101,9 @@ public class DepositAllHandler {
         }
 
         BigDecimal newBalance = WalletItem.getBalance(walletItemStack);
+        if (walletItemStack.getItem() instanceof WalletItem) {
+            newBalance = CurrencyHelper.giveChange(sender, walletItemStack);
+        }
 
         if (startingBalance.compareTo(newBalance) != 0) {
             Packets.sendToClient(sender, new UpdateWalletBalancePacket(newBalance));

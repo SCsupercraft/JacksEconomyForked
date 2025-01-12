@@ -81,15 +81,17 @@ public class CurrencyItem extends Item implements IDisablable {
                 insertCount = 1;
             }
 
+            BigDecimal oldBalance = WalletItem.getBalance(wallet);
             BigDecimal balanceAdded = this.value.multiply(new BigDecimal(insertCount));
-            WalletItem.setBalance(wallet, WalletItem.getBalance(wallet).add(balanceAdded));
+            BigDecimal newBalance = CurrencyHelper.addMoney(balanceAdded, wallet, pPlayer);
             itemStack.shrink((int)insertCount);
 
             if (pPlayer instanceof ServerPlayer serverPlayer) {
-                Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(balanceAdded));
+                Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(newBalance.subtract(oldBalance)));
             }
         } else if (wallet.getItem() instanceof WalletItem walletItem) {
-            BigDecimal left = BigDecimal.valueOf(walletItem.getCapacity()).subtract(WalletItem.getBalance(wallet));
+            BigDecimal oldBalance = WalletItem.getBalance(wallet);
+            BigDecimal left = BigDecimal.valueOf(walletItem.getCapacity()).subtract(oldBalance);
             BigDecimal fraction = left.divide(value, RoundingMode.UP).setScale(0, RoundingMode.UP);
 
             long insertCount = Math.min(fraction.longValue(), itemStack.getCount());
@@ -103,11 +105,11 @@ public class CurrencyItem extends Item implements IDisablable {
             }
 
             BigDecimal balanceAdded = this.value.multiply(new BigDecimal(insertCount));
-            WalletItem.setBalance(wallet, WalletItem.getBalance(wallet).add(balanceAdded));
+            BigDecimal newBalance = CurrencyHelper.addMoney(balanceAdded, wallet, pPlayer);
             itemStack.shrink((int)insertCount);
 
             if (pPlayer instanceof ServerPlayer serverPlayer) {
-                Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(balanceAdded));
+                Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(newBalance.subtract(oldBalance)));
             }
         } else if (wallet.getItem() instanceof OIMWalletItem walletItem) {
             LazyOptional<IItemHandler> cap = wallet.getCapability(ForgeCapabilities.ITEM_HANDLER);

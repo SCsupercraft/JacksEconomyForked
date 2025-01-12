@@ -27,12 +27,9 @@ import org.slf4j.Logger;
 public class JacksEconomy {
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final String MOD_ID = "jackseconomy";
-    public static boolean isCreateLoaded = false;
     public static MinecraftServer server;
 
     public JacksEconomy() {
-        isCreateLoaded = net.minecraftforge.fml.ModList.get().isLoaded("create");
-
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new ConfigEventListeners());
         MinecraftForge.EVENT_BUS.register(new OtherEventListeners());

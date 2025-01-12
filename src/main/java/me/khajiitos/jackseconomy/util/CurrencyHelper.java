@@ -1,6 +1,10 @@
 package me.khajiitos.jackseconomy.util;
 
 import me.khajiitos.jackseconomy.config.Config;
+import me.khajiitos.jackseconomy.item.InfiniteWalletItem;
+import me.khajiitos.jackseconomy.item.WalletItem;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.math.BigDecimal;
@@ -35,6 +39,65 @@ public class CurrencyHelper {
             }
         }
         return items;
+    }
+
+    public static BigDecimal addMoney(BigDecimal money, ItemStack wallet, Player player) {
+        if (wallet.getItem() instanceof WalletItem) {
+            BigDecimal balance = WalletItem.getBalance(wallet);
+            BigDecimal newBalance = balance.add(money);
+
+            WalletItem.setBalance(wallet, newBalance);
+            return giveChange(player, wallet);
+        }
+        return null;
+    }
+    public static BigDecimal giveChange(Player player, ItemStack itemStack) {
+        if (itemStack.getItem() instanceof InfiniteWalletItem walletItem) {
+            return WalletItem.getBalance(itemStack);
+        } else if (itemStack.getItem() instanceof WalletItem walletItem) {
+            BigDecimal capacity = BigDecimal.valueOf(walletItem.getCapacity());
+            BigDecimal balance = WalletItem.getBalance(itemStack);
+
+            if (balance.compareTo(capacity) > 0) {
+                double change = balance.subtract(capacity).doubleValue();
+
+                change = giveChange(player, change, CurrencyType.THOUSAND_DOLLAR_BILL);
+                change = giveChange(player, change, CurrencyType.HUNDRED_DOLLAR_BILL);
+                change = giveChange(player, change, CurrencyType.FIFTY_DOLLAR_BILL);
+                change = giveChange(player, change, CurrencyType.TWENTY_DOLLAR_BILL);
+                change = giveChange(player, change, CurrencyType.TEN_DOLLAR_BILL);
+                change = giveChange(player, change, CurrencyType.FIVE_DOLLAR_BILL);
+                change = giveChange(player, change, CurrencyType.DOLLAR_BILL);
+                change = giveChange(player, change, CurrencyType.QUARTER);
+                change = giveChange(player, change, CurrencyType.DIME);
+                change = giveChange(player, change, CurrencyType.NICKEL);
+                giveChange(player, change, CurrencyType.PENNY);
+
+                WalletItem.setBalance(itemStack, capacity);
+                return capacity;
+            }
+            return balance;
+        }
+        return null;
+    }
+    public static double giveChange(Player player, double amount, CurrencyType currencyType) {
+        double worth = currencyType.worth.doubleValue();
+        double count = Math.floor(amount / worth);
+        double itemsLeft = count;
+
+        while (itemsLeft > 0) {
+            int items = (int) Math.min(64, count);
+            ItemStack itemStack = new ItemStack(currencyType.item, items);
+
+            //if (!player.getInventory().add(itemStack)) {
+                ItemEntity itemEntity = new ItemEntity(player.level(), player.getX(), player.getY(), player.getZ(), itemStack);
+                player.level().addFreshEntity(itemEntity);
+            //}
+
+            itemsLeft -= items;
+        }
+
+        return amount - (count * worth);
     }
 
     // 1.0 -> $1.00

@@ -9,6 +9,7 @@ import me.khajiitos.jackseconomy.item.InfiniteWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.packet.UpdateWalletBalancePacket;
 import me.khajiitos.jackseconomy.packet.WalletBalanceDifPacket;
+import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import me.khajiitos.jackseconomy.util.IDisablable;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -19,7 +20,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 public class WalletMenu extends AbstractContainerMenu {
     public final Container container;
@@ -129,26 +129,21 @@ public class WalletMenu extends AbstractContainerMenu {
                 int count = input.getCount();
 
                 BigDecimal oldBalance = WalletItem.getBalance(itemStack);
-                BigDecimal freeBalance = BigDecimal.valueOf(walletItem.getCapacity()).subtract(oldBalance);
 
-                BigDecimal fraction = freeBalance.divide(value, RoundingMode.UP).setScale(0, RoundingMode.UP);
-                int toConsume = (int)(value.compareTo(BigDecimal.ZERO) == 0 ? count : Math.min(fraction.longValue(), count));
-
-                if (toConsume <= 0) {
+                if (oldBalance.compareTo(BigDecimal.valueOf(walletItem.getCapacity())) >= 0) {
                     return;
                 }
 
-                BigDecimal dif = value.multiply(BigDecimal.valueOf(toConsume));
-                BigDecimal newBalance = oldBalance.add(dif);
-                WalletItem.setBalance(itemStack, newBalance);
-
                 JacksEconomy.server.getPlayerList().getPlayers().forEach(serverPlayer -> {
                     if (serverPlayer.containerMenu == this) {
+                        BigDecimal dif = value.multiply(BigDecimal.valueOf(count));
+                        BigDecimal newBalance = CurrencyHelper.addMoney(dif, itemStack, serverPlayer);
+
                         Packets.sendToClient(serverPlayer, new UpdateWalletBalancePacket(newBalance));
-                        Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(dif));
+                        Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(newBalance.subtract(oldBalance)));
                     }
                 });
-                input.setCount(count - toConsume);
+                input.setCount(0);
             }
         }
     }
