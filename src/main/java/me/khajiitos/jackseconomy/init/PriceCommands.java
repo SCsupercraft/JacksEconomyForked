@@ -22,9 +22,18 @@ public class PriceCommands {
                 .then(Commands.literal("set")
                         .then(Commands.literal("exporter").then(Commands.argument("price", DoubleArgumentType.doubleArg(-1.0)).executes(PriceCommands::setExporterPrice).then(Commands.literal("strip_nbt").executes(PriceCommands::setExporterPriceStripNbt))))
                         .then(Commands.literal("importer").then(Commands.argument("price", DoubleArgumentType.doubleArg(-1.0)).executes(PriceCommands::setImporterPrice).then(Commands.literal("strip_nbt").executes(PriceCommands::setImporterPriceStripNbt))))
-                ));
+                )
+                .then(Commands.literal("reload")
+                        .executes(PriceCommands::reloadPrices)
+                )
+        );
     }
 
+    private static int reloadPrices(CommandContext<CommandSourceStack> ctx) {
+        ItemPriceManager.load();
+        ctx.getSource().sendSystemMessage(Component.translatable("jackseconomy.prices_reloaded").withStyle(ChatFormatting.GREEN));
+        return 1;
+    }
     private static int setImporterPrice(CommandContext<CommandSourceStack> ctx) {
         return setImporterPrice(ctx, false);
     }

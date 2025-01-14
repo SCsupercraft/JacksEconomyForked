@@ -147,5 +147,18 @@
   "jackseconomy.shift_right_click_to_edit_stage": "L-Shift + Right-click to edit required stage",
   "jackseconomy.shift_middle_click_to_remove_stage": "L-Shift + Middle-click to remove required stage",
   "jackseconomy.item_disabled": "Disabled",
-  "jackseconomy.admin_shop_saved": "Admin shop saved!"
+  "jackseconomy.admin_shop_saved": "Admin shop saved!",
+  "jackseconomy.prices_reloaded": "Reloaded prices from file!",
+  "jackseconomy.ponder.exporting.header": "Exporting Items",
+  "jackseconomy.ponder.exporting.text_1": "Exporters can be used to automate the process of selling items.",
+  "jackseconomy.ponder.exporting.text_2": "Exporters need manifests to function, without them they are useless.",
+  "jackseconomy.ponder.exporting.text_3": "Exporters take a while to sell items, so make sure you have enough of them to avoid overflows.",
+  "jackseconomy.ponder.importing.header": "Importing Items",
+  "jackseconomy.ponder.importing.text_1": "Importers can be used to automate the process of buying items.",
+  "jackseconomy.ponder.importing.text_2": "Importers need manifests to function, without them they are useless.",
+  "jackseconomy.ponder.importing.text_3": "Importers take a while to buy items, so make sure you have enough of them to sustain your needs.",
+  "jackseconomy.ponder.converting_currency.header": "Converting Currency",
+  "jackseconomy.ponder.converting_currency.text_1": "Currency converters can be used to convert money into other forms, such as dollar bills to ten dollar bills.",
+  "jackseconomy.ponder.converting_currency.text_2": "Currency converters don't use power, unlike other machines.",
+  "jackseconomy.ponder.converting_currency.text_3": "They convert currencies instantly, so no need to wait."
 }

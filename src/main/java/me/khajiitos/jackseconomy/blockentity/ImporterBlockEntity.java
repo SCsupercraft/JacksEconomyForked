@@ -185,7 +185,7 @@ public class ImporterBlockEntity extends TransactionMachineBlockEntity implement
     }
 
     public int getEnergyUsagePerTick() {
-        return Config.baseExporterEnergyUsage.get() + (int)Math.ceil(Math.pow(this.speed * 64.0, 1.25));
+        return Config.baseImporterEnergyUsage.get() + (int)Math.ceil(Math.pow(this.speed * 64.0, 1.25));
     }
 
     // what a stupid name
