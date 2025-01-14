@@ -4,7 +4,7 @@
 
 - Added ponders (Requires Create)
 - Added `/price reload` to reload prices without restarting the server
-- Fixed an issue where importers use the wrong config option
+- Fixed an issue where importers used the wrong config option
 
 ## 1.2.2-1.1.0
 
