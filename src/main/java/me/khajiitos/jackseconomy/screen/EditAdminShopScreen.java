@@ -6,7 +6,7 @@ import me.khajiitos.jackseconomy.gamestages.GameStagesCheck;
 import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.menu.AdminShopMenu;
 import me.khajiitos.jackseconomy.packet.UpdateAdminShopPacket;
-import me.khajiitos.jackseconomy.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.screen.widget.BetterScrollPanel;
 import me.khajiitos.jackseconomy.screen.widget.EditCategoryEntry;
 import me.khajiitos.jackseconomy.screen.widget.FloatingEditBoxWidget;

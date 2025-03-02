@@ -3,7 +3,9 @@ package me.khajiitos.jackseconomy.listener;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.ClientConfig;
 import me.khajiitos.jackseconomy.config.Config;
-import me.khajiitos.jackseconomy.price.ItemPriceManager;
+import me.khajiitos.jackseconomy.data.PurchaseManager;
+import me.khajiitos.jackseconomy.data.StockMarketManager;
+import me.khajiitos.jackseconomy.data.price.PriceManager;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -13,8 +15,12 @@ public class ConfigEventListeners {
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent e) {
-        ItemPriceManager.load();
         JacksEconomy.server = e.getServer();
+
+        PriceManager.load();
+
+        StockMarketManager.init();
+        PurchaseManager.init();
     }
 
     @SubscribeEvent
@@ -39,6 +45,9 @@ public class ConfigEventListeners {
 
     @SubscribeEvent
     public void onServerStopped(ServerStoppedEvent e) {
+        StockMarketManager.stop();
+        PurchaseManager.stop();
+
         JacksEconomy.server = null;
     }
 }

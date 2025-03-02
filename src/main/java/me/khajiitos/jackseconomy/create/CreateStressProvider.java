@@ -13,9 +13,9 @@ public class CreateStressProvider {
 		BlockStressValues.registerProvider(JacksEconomy.MOD_ID, new BlockStressValues.IStressValueProvider() {
 			@Override
 			public double getImpact(Block block) {
-				if (block == ItemBlockReg.MECHANICAL_EXPORTER.get()) {
+				if (block == ItemBlockReg.MECHANICAL_EXPORTER.get() || block == ItemBlockReg.MECHANICAL_FLUID_EXPORTER.get()) {
 					return Config.mechanicalExporterStressPerRPM.get();
-				} else if (block == ItemBlockReg.MECHANICAL_IMPORTER.get()) {
+				} else if (block == ItemBlockReg.MECHANICAL_IMPORTER.get() || block == ItemBlockReg.MECHANICAL_FLUID_IMPORTER.get()) {
 					return Config.mechanicalImporterStressPerRPM.get();
 				}
 				return 0;

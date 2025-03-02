@@ -14,7 +14,7 @@ import me.khajiitos.jackseconomy.item.OIMWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.menu.AdminShopMenu;
 import me.khajiitos.jackseconomy.packet.AcknowledgeUnlocksPacket;
-import me.khajiitos.jackseconomy.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.screen.widget.BetterScrollPanel;
 import me.khajiitos.jackseconomy.screen.widget.CategoryEntry;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;

@@ -1,7 +1,7 @@
 package me.khajiitos.jackseconomy.packet;
 
 import me.khajiitos.jackseconomy.packet.handler.AdminShopPurchaseHandler;
-import me.khajiitos.jackseconomy.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;

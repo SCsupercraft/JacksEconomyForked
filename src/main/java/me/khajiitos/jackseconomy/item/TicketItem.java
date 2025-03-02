@@ -1,6 +1,6 @@
 package me.khajiitos.jackseconomy.item;
 
-import me.khajiitos.jackseconomy.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -56,6 +56,29 @@ public abstract class TicketItem extends Item {
         itemStack.getOrCreateTag().put("Items", tag);
     }
 
+    public static int getMaxProcessCount(ItemStack itemStack) {
+        if (!(itemStack.getItem() instanceof TicketItem)) {
+            return 0;
+        }
+
+        CompoundTag nbtTag = itemStack.getTag();
+
+        if (nbtTag == null || !nbtTag.contains("MaxProcessCount", Tag.TAG_INT)) {
+            return 1;
+        }
+
+        return nbtTag.getInt("MaxProcessCount");
+    }
+
+    public static void setMaxProcessCount(ItemStack itemStack, int processCount) {
+        if (!(itemStack.getItem() instanceof TicketItem)) {
+            return;
+        }
+
+        CompoundTag nbtTag = itemStack.getOrCreateTag();
+        nbtTag.putInt("MaxProcessCount", processCount);
+    }
+
     @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         List<ItemDescription> itemDescriptions = getItems(pStack);
@@ -64,6 +87,12 @@ public abstract class TicketItem extends Item {
             if (itemDescription.item() != Items.AIR) {
                 pTooltipComponents.add(Component.literal("- ").append(itemDescription.item().getDescription().copy()).withStyle(ChatFormatting.AQUA));
             }
+        }
+
+        int processCount = getMaxProcessCount(pStack);
+        if (processCount > 0) {
+            pTooltipComponents.add(Component.empty());
+            pTooltipComponents.add(Component.translatable("jackseconomy.ticket_process_count", processCount).withStyle(ChatFormatting.GREEN));
         }
     }
 }

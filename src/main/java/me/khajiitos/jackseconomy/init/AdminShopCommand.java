@@ -5,7 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.menu.AdminShopMenu;
 import me.khajiitos.jackseconomy.packet.AdminShopSchemaPacket;
-import me.khajiitos.jackseconomy.price.ItemPriceManager;
+import me.khajiitos.jackseconomy.data.price.PriceManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
@@ -36,7 +36,7 @@ public class AdminShopCommand {
         ServerPlayer player = ctx.getSource().getPlayer();
 
         if (player != null) {
-            CompoundTag compoundTag = ItemPriceManager.toAdminShopSchemaCompound(player);
+            CompoundTag compoundTag = PriceManager.toAdminShopSchemaCompound(player);
             NetworkHooks.openScreen(player, new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new AdminShopMenu(pContainerId, pPlayerInventory), Component.empty()));
             Packets.sendToClient(player, new AdminShopSchemaPacket(compoundTag));
         }

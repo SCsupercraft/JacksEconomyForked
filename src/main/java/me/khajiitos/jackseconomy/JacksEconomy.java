@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import me.khajiitos.jackseconomy.config.ClientConfig;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.create.CreateCheck;
-import me.khajiitos.jackseconomy.create.CreatePonder;
 import me.khajiitos.jackseconomy.create.CreateStressProvider;
 import me.khajiitos.jackseconomy.curios.CuriosCheck;
 import me.khajiitos.jackseconomy.curios.CuriosHandler;
@@ -57,13 +56,12 @@ public class JacksEconomy {
 
         if (CreateCheck.isInstalled()) {
             CreateStressProvider.init();
-            CreatePonder.register();
         }
 
         GameStagesManager.init();
     }
 
     public static void onRegisterCommands(RegisterCommandsEvent e) {
-        PriceCommands.register(e.getDispatcher());
+        EconomyCommand.register(e.getDispatcher());
     }
 }

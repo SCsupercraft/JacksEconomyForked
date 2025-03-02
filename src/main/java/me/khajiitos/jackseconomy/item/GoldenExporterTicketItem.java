@@ -20,5 +20,11 @@ public class GoldenExporterTicketItem extends ExporterTicketItem {
     @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         pTooltipComponents.add(Component.translatable("jackseconomy.golden_exporter_manifest_description").withStyle(ChatFormatting.GOLD));
+
+        int processCount = getMaxProcessCount(pStack);
+        if (processCount > 0) {
+            pTooltipComponents.add(Component.empty());
+            pTooltipComponents.add(Component.translatable("jackseconomy.ticket_process_count", processCount).withStyle(ChatFormatting.GREEN));
+        }
     }
 }

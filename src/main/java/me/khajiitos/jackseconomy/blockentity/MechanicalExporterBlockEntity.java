@@ -1,5 +1,6 @@
 package me.khajiitos.jackseconomy.blockentity;
 
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.block.TransactionMachineBlock;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
@@ -8,8 +9,8 @@ import me.khajiitos.jackseconomy.item.ExporterTicketItem;
 import me.khajiitos.jackseconomy.item.GoldenExporterTicketItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.menu.MechanicalExporterMenu;
-import me.khajiitos.jackseconomy.price.ItemDescription;
-import me.khajiitos.jackseconomy.price.ItemPriceManager;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -33,8 +34,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MechanicalExporterBlockEntity extends TransactionKineticMachineBlockEntity implements IExporterBlockEntity {
     private static final int[] slotsInput = new int[]{0, 1, 2};
@@ -62,7 +66,7 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
     protected boolean isItemRejected(ItemStack itemStack) {
         ItemStack ticketItem = this.items.get(slotTicket);
         boolean isOnTicket = (ticketItem.getItem() instanceof GoldenExporterTicketItem || (ticketItem.getItem() instanceof ExporterTicketItem && ExporterTicketItem.getItems(ticketItem).contains(ItemDescription.ofItem(itemStack))));
-        return !isOnTicket || ItemPriceManager.getExporterSellPrice(ItemDescription.ofItem(itemStack), 1) == -1;
+        return !isOnTicket || PriceManager.getExporterSellPrice(ItemDescription.ofItem(itemStack), 1) == -1;
     }
 
     protected Component getDefaultName() {
@@ -112,7 +116,7 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
         exporter.updateCoinsOutput();
 
         boolean progress = false;
-        ItemStack progressItem = null;
+        ArrayList<ItemStack> progressItems = new ArrayList<>();
 
         ItemStack ticketItem = exporter.items.get(slotTicket);
 
@@ -121,16 +125,16 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
                 for (int i = 0; i < 6; i++) {
                     ItemStack item = exporter.items.get(i);
                     ItemDescription itemDescription = ItemDescription.ofItem(item);
-                    if (!item.isEmpty() && ItemPriceManager.getExporterSellPrice(itemDescription, 1) != -1) {
+                    if (!item.isEmpty() && PriceManager.getExporterSellPrice(itemDescription, 1) != -1) {
                         if (ticketItem.getItem() instanceof GoldenExporterTicketItem || TicketItem.getItems(ticketItem).stream().anyMatch(desc -> desc.equals(itemDescription))) {
-                            progressItem = item;
+                            progressItems.add(item);
                         }
                     }
                 }
             }
         }
 
-        if (progressItem != null) {
+        if (!progressItems.isEmpty()) {
             double progressPerTick = exporter.getProgressPerTick();
             progress = progressPerTick > 0;
 
@@ -139,10 +143,14 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
             if (exporter.progress >= 1.f) {
                 exporter.progress = 0.f;
 
-                if (!exporter.sellItemFromItemstack(progressItem)) {
+                if (!exporter.sellFromItemstacks(progressItems, ticketItem)) {
                     // This should technically never happen
-                    ItemHelper.dropItem(progressItem.copy(), level, pos);
-                    progressItem.setCount(0);
+                    progressItems.forEach((progressItem -> {
+                        if (progressItem.isEmpty()) return;
+
+                        ItemHelper.dropItem(progressItem.copy(), level, pos);
+                        progressItem.setCount(0);
+                    }));
                 }
 
                 level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5f, 1.5f);
@@ -257,16 +265,28 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
         this.progress = tag.getFloat("Progress");
     }
 
-    public boolean sellItemFromItemstack(ItemStack itemStack) {
-        double sellPrice = ItemPriceManager.getExporterSellPrice(ItemDescription.ofItem(itemStack), 1);
+    public boolean sellFromItemstacks(ArrayList<ItemStack> itemStacks, ItemStack ticketItem) {
+        AtomicBoolean success = new AtomicBoolean(true);
+        AtomicInteger processCount = new AtomicInteger();
+        int maxProcesses = TicketItem.getMaxProcessCount(ticketItem);
 
-        if (sellPrice == -1.0) {
-            return false;
-        }
+        itemStacks.forEach((itemStack -> {
+            double sellPrice = PriceManager.getExporterSellPrice(ItemDescription.ofItem(itemStack), 1);
 
-        this.currency = this.currency.add(BigDecimal.valueOf(sellPrice));
-        itemStack.grow(-1);
-        return true;
+            if (sellPrice == -1.0 || !success.get()) {
+                success.set(false);
+                return;
+            }
+
+            int count = itemStack.getCount();
+            int sellCount = Math.min(maxProcesses - processCount.get(), count);
+
+            this.currency = this.currency.add(BigDecimal.valueOf(sellPrice * sellCount));
+            itemStack.shrink(sellCount);
+            processCount.addAndGet(sellCount);
+        }));
+
+        return success.get();
     }
 
     @Nullable
@@ -278,7 +298,7 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
 
     @Override
     public boolean canPlaceItemThroughFace(int pIndex, ItemStack pItemStack, @Nullable Direction pDirection) {
-        return ItemPriceManager.getExporterSellPrice(ItemDescription.ofItem(pItemStack), 1) != -1;
+        return PriceManager.getExporterSellPrice(ItemDescription.ofItem(pItemStack), 1) != -1;
     }
 
     @Override

@@ -9,7 +9,7 @@ import me.khajiitos.jackseconomy.item.ImporterTicketItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.menu.IBlockEntityContainer;
 import me.khajiitos.jackseconomy.packet.ChangeSelectedItemPacket;
-import me.khajiitos.jackseconomy.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.screen.widget.BalanceProgressWidget;
 import me.khajiitos.jackseconomy.screen.widget.RedstoneControlWidget;
 import me.khajiitos.jackseconomy.screen.widget.SideConfigWidget;
@@ -36,7 +36,7 @@ import java.util.Set;
 public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
     private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/importer.png");
     private static final ResourceLocation REDSTONE_SELECTION = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
-    protected TicketPreviewWidget ticketPreview;
+    protected TicketPreviewWidget<ItemDescription> ticketPreview;
     protected List<Component> tooltip;
     protected ItemStack ticketItemLastTick;
     protected SideConfigWidget sideConfig;
@@ -99,7 +99,7 @@ public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T e
         if (ticketItem.getItem() instanceof ImporterTicketItem) {
             List<ItemDescription> items = TicketItem.getItems(ticketItem);
             if (!items.isEmpty()) {
-                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget(this.leftPos + 39, this.topPos + 65, true, items, blockEntity.getSelectedItem(), (newItemDescription) -> {
+                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<>(this.leftPos + 39, this.topPos + 65, true, items, blockEntity.getSelectedItem(), (newItemDescription) -> {
                     blockEntity.selectItem(newItemDescription);
                     Packets.sendToServer(new ChangeSelectedItemPacket(newItemDescription));
                     this.refreshTicketPreview();

@@ -1,7 +1,8 @@
-package me.khajiitos.jackseconomy.price;
+package me.khajiitos.jackseconomy.data.price;
 
 import com.google.gson.*;
 import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.data.DataHandler;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
@@ -13,23 +14,25 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.fluids.FluidStack;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.*;
 
-public class ItemPriceManager {
+public class PriceManager {
     //private static final LinkedHashMap<ItemDescription, ItemPriceInfo> itemPriceInfos = new LinkedHashMap<>();
     private static final List<ItemPriceEntry> itemPriceInfos = new ArrayList<>();
+    private static final List<FluidPriceEntry> fluidPriceInfos = new ArrayList<>();
     private static final LinkedHashMap<Category, List<Category>> categories = new LinkedHashMap<>();
-    private static final File file = new File("config/jackseconomy_prices.json");
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final DataHandler DATA_HANDLER = new DataHandler.JSONDataHandler(
+            new File("config/jackseconomy_prices.json")
+    );
 
     static {
         itemPriceInfos.add(new ItemPriceEntry(new ItemDescription(Items.DIAMOND, null), new PricesItemPriceInfo(50.0, 45.0,100.0, null)));
         itemPriceInfos.add(new ItemPriceEntry(new ItemDescription(Items.DIAMOND, null), new AdminShopItemPriceInfo(150.0, "General:Gems", 0, null, null)));
+        fluidPriceInfos.add(new FluidPriceEntry(new FluidDescription(Fluids.LAVA, null), new PricesFluidPriceInfo(0.02, 0.05)));
 
         ArrayList<Category> categoriesInnerDefault = new ArrayList<>();
         categoriesInnerDefault.add(new Category("Gems", Items.DIAMOND));
@@ -41,16 +44,33 @@ public class ItemPriceManager {
         return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription)).findFirst().map(ItemPriceEntry::itemPriceInfo).orElse(null);
     }
 
-    public static PricesItemPriceInfo getPricesInfo(ItemDescription itemDescription) {
-        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo)).findFirst().orElse(null);
-    }
-
     public static ItemPriceInfo getInfo(ItemStack itemStack) {
         return getInfo(ItemDescription.ofItem(itemStack));
     }
 
+    public static PricesItemPriceInfo getPricesInfo(ItemDescription itemDescription) {
+        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo)).findFirst().orElse(null);
+    }
+
+    @Deprecated
+    public static FluidPriceInfo getInfo(FluidDescription fluidDescription) {
+        return fluidPriceInfos.stream().filter(fluidPriceEntry -> fluidPriceEntry.fluidDescription.equals(fluidDescription)).findFirst().map(FluidPriceEntry::fluidPriceInfo).orElse(null);
+    }
+
+    public static FluidPriceInfo getInfo(FluidStack fluidStack) {
+        return getInfo(FluidDescription.ofFluid(fluidStack));
+    }
+
+    public static PricesFluidPriceInfo getPricesInfo(FluidDescription fluidDescription) {
+        return fluidPriceInfos.stream().filter(fluidPriceEntry -> fluidPriceEntry.fluidDescription.equals(fluidDescription) && fluidPriceEntry.fluidPriceInfo instanceof PricesFluidPriceInfo).map(entry -> ((PricesFluidPriceInfo)entry.fluidPriceInfo)).findFirst().orElse(null);
+    }
+
     public static List<ItemPriceEntry> getItemPriceInfos() {
         return itemPriceInfos;
+    }
+
+    public static List<FluidPriceEntry> getFluidPriceInfos() {
+        return fluidPriceInfos;
     }
 
     public static LinkedHashMap<Category, List<Category>> getCategories() {
@@ -63,6 +83,14 @@ public class ItemPriceManager {
 
     public static double getImporterBuyPrice(ItemDescription itemDescription, int count) {
         return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo).importerBuyPrice * count).findFirst().orElse(-1.0);
+    }
+
+    public static double getFluidExporterSellPrice(FluidDescription fluidDescription, int count) {
+        return fluidPriceInfos.stream().filter(fluidPriceEntry -> fluidPriceEntry.fluidDescription.equals(fluidDescription) && fluidPriceEntry.fluidPriceInfo instanceof PricesFluidPriceInfo).map(entry -> ((PricesFluidPriceInfo)entry.fluidPriceInfo).sellPrice * count).findFirst().orElse(-1.0);
+    }
+
+    public static double getFluidImporterBuyPrice(FluidDescription fluidDescription, int count) {
+        return fluidPriceInfos.stream().filter(fluidPriceEntry -> fluidPriceEntry.fluidDescription.equals(fluidDescription) && fluidPriceEntry.fluidPriceInfo instanceof PricesFluidPriceInfo).map(entry -> ((PricesFluidPriceInfo)entry.fluidPriceInfo).importerBuyPrice * count).findFirst().orElse(-1.0);
     }
 
     public static double getAdminShopSellPrice(ItemDescription itemDescription, int count) {
@@ -83,16 +111,19 @@ public class ItemPriceManager {
     }
 
     public static void load() {
+        final File file = DATA_HANDLER.DATA_FILE;
         if (file.exists()) {
             itemPriceInfos.clear();
+            fluidPriceInfos.clear();
             categories.clear();
 
-            try (FileReader fileReader = new FileReader(file)) {
-                JsonObject pricesObj = GSON.fromJson(fileReader, JsonObject.class);
+            try {
+                JsonObject pricesObj = DATA_HANDLER.loadAsJson();
                 JsonArray itemsArray = pricesObj.getAsJsonArray("items");
+                JsonArray fluidsArray = pricesObj.getAsJsonArray("fluids");
                 JsonArray categoriesArray = pricesObj.getAsJsonArray("categories");
 
-                if (itemsArray == null || categoriesArray == null) {
+                if (itemsArray == null || fluidsArray == null || categoriesArray == null) {
                     JacksEconomy.LOGGER.error("Invalid jackseconomy_prices.json file");
                     save();
                     return;
@@ -155,7 +186,22 @@ public class ItemPriceManager {
                         JacksEconomy.LOGGER.warn("Invalid price info");
                     }
                 });
-            } catch (JsonSyntaxException | ClassCastException | IOException e) {
+
+                fluidsArray.forEach(jsonElement -> {
+                    JsonObject object = jsonElement.getAsJsonObject();
+
+                    FluidDescription fluidDescription = FluidDescription.fromJson(object);
+
+                    if (fluidDescription != null) {
+                        FluidPriceInfo[] priceInfos = FluidPriceInfo.fromJson(object);
+                        for (FluidPriceInfo priceInfo : priceInfos) {
+                            fluidPriceInfos.add(new FluidPriceEntry(fluidDescription, priceInfo));
+                        }
+                    } else {
+                        JacksEconomy.LOGGER.warn("Invalid price info");
+                    }
+                });
+            } catch (JsonSyntaxException | ClassCastException e) {
                 JacksEconomy.LOGGER.error("Failed to load item prices", e);
             }
         } else if (file.getParentFile().isDirectory() || file.getParentFile().mkdirs()) {
@@ -164,52 +210,66 @@ public class ItemPriceManager {
     }
 
     public static void save() {
-        try (FileWriter fileWriter = new FileWriter(file)) {
-            JsonObject object = new JsonObject();
-            JsonArray itemsArray = new JsonArray();
-            JsonArray categoriesArray = new JsonArray();
+        JsonObject object = new JsonObject();
+        JsonArray itemsArray = new JsonArray();
+        JsonArray fluidsArray = new JsonArray();
+        JsonArray categoriesArray = new JsonArray();
 
-            itemPriceInfos.forEach((entry) -> {
-                itemsArray.add(merge(entry.itemDescription.toJson(), entry.itemPriceInfo.toJson()));
-            });
+        itemPriceInfos.forEach((entry) -> {
+            itemsArray.add(merge(entry.itemDescription.toJson(), entry.itemPriceInfo.toJson()));
+        });
 
-            categories.forEach((category, categories) -> {
-                String itemName = ItemHelper.getItemName(category.icon);
+        fluidPriceInfos.forEach((entry) -> {
+            fluidsArray.add(merge(entry.fluidDescription.toJson(), entry.fluidPriceInfo.toJson()));
+        });
 
-                if (itemName != null) {
-                    JsonObject categoryObj = new JsonObject();
-                    categoryObj.addProperty("item", itemName);
-                    categoryObj.addProperty("name", category.name);
+        categories.forEach((category, categories) -> {
+            String itemName = ItemHelper.getItemName(category.icon);
 
-                    JsonArray innerCategories = new JsonArray();
+            if (itemName != null) {
+                JsonObject categoryObj = new JsonObject();
+                categoryObj.addProperty("item", itemName);
+                categoryObj.addProperty("name", category.name);
 
-                    categories.forEach(categoryInner -> {
-                        JsonObject categoryInnerObj = new JsonObject();
+                JsonArray innerCategories = new JsonArray();
 
-                        String itemNameInner = ItemHelper.getItemName(categoryInner.icon);
+                categories.forEach(categoryInner -> {
+                    JsonObject categoryInnerObj = new JsonObject();
 
-                        if (itemNameInner != null) {
-                            categoryInnerObj.addProperty("item", itemNameInner);
-                            categoryInnerObj.addProperty("name", categoryInner.name);
-                            innerCategories.add(categoryInnerObj);
-                        }
-                    });
+                    String itemNameInner = ItemHelper.getItemName(categoryInner.icon);
 
-                    categoryObj.add("categories", innerCategories);
-                    categoriesArray.add(categoryObj);
-                }
-            });
+                    if (itemNameInner != null) {
+                        categoryInnerObj.addProperty("item", itemNameInner);
+                        categoryInnerObj.addProperty("name", categoryInner.name);
+                        innerCategories.add(categoryInnerObj);
+                    }
+                });
 
-            object.add("items", itemsArray);
-            object.add("categories", categoriesArray);
+                categoryObj.add("categories", innerCategories);
+                categoriesArray.add(categoryObj);
+            }
+        });
 
-            fileWriter.write(GSON.toJson(object));
-        } catch (IOException e) {
-            JacksEconomy.LOGGER.error("Failed to save item prices", e);
-        }
+        object.add("items", itemsArray);
+        object.add("fluids", fluidsArray);
+        object.add("categories", categoriesArray);
+
+        DATA_HANDLER.save(object);
     }
 
-    public static ListTag toTag() {
+    public static ListTag toTag(boolean fluid) {
+        if (fluid) {
+            ListTag listTag = new ListTag();
+            fluidPriceInfos.forEach((entry) -> {
+                if (entry.fluidPriceInfo instanceof PricesFluidPriceInfo fluidPriceInfo) {
+                    CompoundTag itemTag = entry.fluidDescription.toNbt().copy();
+                    itemTag.putDouble("sellPrice", fluidPriceInfo.sellPrice);
+                    itemTag.putDouble("importerBuyPrice", fluidPriceInfo.importerBuyPrice);
+                    listTag.add(itemTag);
+                }
+            });
+            return listTag;
+        }
         ListTag listTag = new ListTag();
         itemPriceInfos.forEach((entry) -> {
             if (entry.itemPriceInfo instanceof PricesItemPriceInfo itemPriceInfo) {
@@ -347,8 +407,16 @@ public class ItemPriceManager {
         addPriceInfo(ItemDescription.ofItem(itemStack), priceInfo);
     }
 
+    public static void addPriceInfo(FluidDescription fluidDescription, FluidPriceInfo priceInfo) {
+        fluidPriceInfos.add(new FluidPriceEntry(fluidDescription, priceInfo));
+    }
+
+    public static void addPriceInfo(FluidStack fluidStack, FluidPriceInfo priceInfo) {
+        addPriceInfo(FluidDescription.ofFluid(fluidStack), priceInfo);
+    }
+
     public static void sendDataToPlayers() {
-        JacksEconomy.server.getPlayerList().getPlayers().forEach(serverPlayer -> Packets.sendToClient(serverPlayer, new PricesInfoPacket(ItemPriceManager.toTag())));
+        JacksEconomy.server.getPlayerList().getPlayers().forEach(serverPlayer -> Packets.sendToClient(serverPlayer, new PricesInfoPacket(toTag(false), toTag(true))));
     }
 
     private static JsonObject merge(JsonObject object1, JsonObject object2) {
@@ -360,4 +428,5 @@ public class ItemPriceManager {
 
     public record Category(String name, Item icon) {}
     public record ItemPriceEntry(ItemDescription itemDescription, ItemPriceInfo itemPriceInfo) {}
+    public record FluidPriceEntry(FluidDescription fluidDescription, FluidPriceInfo fluidPriceInfo) {}
 }

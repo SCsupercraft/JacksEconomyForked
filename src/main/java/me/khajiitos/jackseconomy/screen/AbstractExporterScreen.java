@@ -9,7 +9,7 @@ import me.khajiitos.jackseconomy.item.ExporterTicketItem;
 import me.khajiitos.jackseconomy.item.GoldenExporterTicketItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.menu.IBlockEntityContainer;
-import me.khajiitos.jackseconomy.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.screen.widget.BalanceProgressWidget;
 import me.khajiitos.jackseconomy.screen.widget.RedstoneControlWidget;
 import me.khajiitos.jackseconomy.screen.widget.SideConfigWidget;
@@ -34,11 +34,11 @@ import java.util.Optional;
 import java.util.Set;
 
 public abstract class AbstractExporterScreen<S extends IExporterBlockEntity, T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/exporter.png");
-    private static final ResourceLocation REDSTONE_SELECTION = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
+    protected static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/exporter.png");
+    protected static final ResourceLocation REDSTONE_SELECTION = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
     protected List<Component> tooltip;
     protected ItemStack ticketItemLastTick;
-    protected TicketPreviewWidget ticketPreview;
+    protected TicketPreviewWidget<ItemDescription> ticketPreview;
     protected SideConfigWidget sideConfig;
 
     public AbstractExporterScreen(T pMenu, Inventory pPlayerInventory, Component pTitle) {
@@ -110,7 +110,7 @@ public abstract class AbstractExporterScreen<S extends IExporterBlockEntity, T e
         if (ticketItem.getItem() instanceof ExporterTicketItem && (!(ticketItem.getItem() instanceof GoldenExporterTicketItem))) {
             List<ItemDescription> items = TicketItem.getItems(ticketItem);
             if (!items.isEmpty()) {
-                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget(this.leftPos + 39, this.topPos + 65, false, items, null, null, (tooltip) -> this.tooltip = tooltip));
+                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<>(this.leftPos + 39, this.topPos + 65, false, items, null, null, (tooltip) -> this.tooltip = tooltip));
             } else {
                 this.ticketPreview = null;
             }

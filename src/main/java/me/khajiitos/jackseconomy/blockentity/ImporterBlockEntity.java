@@ -1,13 +1,14 @@
 package me.khajiitos.jackseconomy.blockentity;
 
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.block.TransactionMachineBlock;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.menu.ImporterMenu;
-import me.khajiitos.jackseconomy.price.ItemDescription;
-import me.khajiitos.jackseconomy.price.ItemPriceManager;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.util.RedstoneToggle;
 import me.khajiitos.jackseconomy.util.SideConfig;
 import me.khajiitos.jackseconomy.util.SlottedItemStackHandler;
@@ -33,8 +34,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ImporterBlockEntity extends TransactionMachineBlockEntity implements IImporterBlockEntity {
     private static final int[] slotsInput = new int[]{0, 1, 2};
@@ -228,7 +231,7 @@ public class ImporterBlockEntity extends TransactionMachineBlockEntity implement
             }
         }
 
-        double price = importer.selectedItem == null ? -1 : ItemPriceManager.getImporterBuyPrice(importer.selectedItem, 1);
+        double price = importer.selectedItem == null ? -1 : PriceManager.getImporterBuyPrice(importer.selectedItem, 1);
 
         if (ticketItemStack.isEmpty() || !importer.canAddItem(itemStackToAdd, slotsOutput) || price < 0 || importer.currency.compareTo(new BigDecimal(price)) < 0) {
             if (importer.progress >= 0.f) {
@@ -247,8 +250,7 @@ public class ImporterBlockEntity extends TransactionMachineBlockEntity implement
                 importer.progress += progressPerTick;
 
                 if (importer.progress >= 1.f) {
-                    importer.currency = importer.currency.subtract(new BigDecimal(price));
-                    importer.addItem(itemStackToAdd, slotsOutput);
+                    importer.buyItems(itemStackToAdd, price, ticketItemStack);
                     importer.progress = 0.f;
 
                     level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5f, 1.5f);
@@ -258,6 +260,44 @@ public class ImporterBlockEntity extends TransactionMachineBlockEntity implement
         }
 
         importer.markUpdated();
+    }
+
+    public void buyItems(ItemStack itemStackToBuy, double price, ItemStack ticketItem) {
+        Supplier<Integer> availableSpaces = () -> {
+            int spaces = 0;
+
+            for (int slotNumber: slotsOutput) {
+                ItemStack slot = getItem(slotNumber);
+
+                if (slot.isEmpty()) {
+                    spaces += itemStackToBuy.getMaxStackSize();
+                } else if (slot.is(itemStackToBuy.getItem())) {
+                    spaces += slot.getMaxStackSize() - slot.getCount();
+                };
+            }
+
+            return spaces;
+        };
+
+        Supplier<BigDecimal> amountAffordable = () -> getBalance().divide(BigDecimal.valueOf(price), RoundingMode.FLOOR);
+
+        int maxProcesses = TicketItem.getMaxProcessCount(ticketItem);
+        int processCount = 0;
+
+        while (processCount < maxProcesses && availableSpaces.get() > 0 && amountAffordable.get().intValue() > 0) {
+            ItemStack stack = new ItemStack(
+                    itemStackToBuy.getItem(),
+                    amountAffordable.get()
+                            .min(BigDecimal.valueOf(Math.min(availableSpaces.get(), Math.min(maxProcesses - processCount, itemStackToBuy.getMaxStackSize())))).intValue()
+            );
+            BigDecimal totalPrice = BigDecimal.valueOf(price).multiply(BigDecimal.valueOf(stack.getCount()));
+
+            if (!canAddItem(stack, slotsOutput) || getBalance().compareTo(totalPrice) < 0) break;
+            currency = currency.subtract(totalPrice);
+            addItem(stack, slotsOutput);
+
+            processCount += stack.getCount();
+        }
     }
 
     @Override

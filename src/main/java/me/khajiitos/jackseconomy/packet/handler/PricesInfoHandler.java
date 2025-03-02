@@ -1,9 +1,11 @@
 package me.khajiitos.jackseconomy.packet.handler;
 
 import me.khajiitos.jackseconomy.JacksEconomyClient;
+import me.khajiitos.jackseconomy.data.price.FluidDescription;
+import me.khajiitos.jackseconomy.data.price.PricesFluidPriceInfo;
 import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
-import me.khajiitos.jackseconomy.price.ItemDescription;
-import me.khajiitos.jackseconomy.price.PricesItemPriceInfo;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -13,6 +15,7 @@ public class PricesInfoHandler {
 
     public static void handle(PricesInfoPacket msg, Supplier<NetworkEvent.Context> ctx) {
         JacksEconomyClient.priceInfos.clear();
+        JacksEconomyClient.fluidPriceInfos.clear();
 
         msg.data().forEach(tag -> {
             if (tag instanceof CompoundTag itemTag) {
@@ -25,6 +28,18 @@ public class PricesInfoHandler {
                     String adminShopSellStage = itemTag.contains("adminShopSellStage") ? itemTag.getString("adminShopSellStage") : null;
 
                     JacksEconomyClient.priceInfos.put(itemDescription, new PricesItemPriceInfo(sellPrice, adminShopSellPrice, importerBuyPrice, adminShopSellStage));
+                }
+            }
+        });
+        msg.secondaryData().forEach(tag -> {
+            if (tag instanceof CompoundTag fluidTag) {
+                FluidDescription fluidDescription = FluidDescription.fromNbt(fluidTag);
+
+                if (fluidDescription != null) {
+                    double sellPrice = fluidTag.getDouble("sellPrice");
+                    double importerBuyPrice = fluidTag.getDouble("importerBuyPrice");
+
+                    JacksEconomyClient.fluidPriceInfos.put(fluidDescription, new PricesFluidPriceInfo(sellPrice, importerBuyPrice));
                 }
             }
         });

@@ -23,11 +23,27 @@ public class BlockEntityReg {
                     () -> BlockEntityType.Builder.of(ImporterBlockEntity::new, ItemBlockReg.IMPORTER.get())
                             .build(null));
 
+    public static final RegistryObject<BlockEntityType<FluidExporterBlockEntity>> FLUID_EXPORTER =
+            BLOCK_ENTITY_TYPES.register("fluid_exporter",
+                    () -> BlockEntityType.Builder.of(FluidExporterBlockEntity::new, ItemBlockReg.FLUID_EXPORTER.get())
+                            .build(null));
+
+    public static final RegistryObject<BlockEntityType<FluidImporterBlockEntity>> FLUID_IMPORTER =
+            BLOCK_ENTITY_TYPES.register("fluid_importer",
+                    () -> BlockEntityType.Builder.of(FluidImporterBlockEntity::new, ItemBlockReg.FLUID_IMPORTER.get())
+                            .build(null));
+
     public static final RegistryObject<BlockEntityType<MechanicalExporterBlockEntity>> MECHANICAL_EXPORTER =
             CreateCheck.isInstalled() ? CreateBlockEntityReg.MECHANICAL_EXPORTER : null;
 
     public static final RegistryObject<BlockEntityType<MechanicalImporterBlockEntity>> MECHANICAL_IMPORTER =
             CreateCheck.isInstalled() ? CreateBlockEntityReg.MECHANICAL_IMPORTER : null;
+
+    public static final RegistryObject<BlockEntityType<MechanicalFluidExporterBlockEntity>> MECHANICAL_FLUID_EXPORTER =
+            CreateCheck.isInstalled() ? CreateBlockEntityReg.MECHANICAL_FLUID_EXPORTER : null;
+
+    public static final RegistryObject<BlockEntityType<MechanicalFluidImporterBlockEntity>> MECHANICAL_FLUID_IMPORTER =
+            CreateCheck.isInstalled() ? CreateBlockEntityReg.MECHANICAL_FLUID_IMPORTER : null;
 
     public static final RegistryObject<BlockEntityType<CurrencyConverterBlockEntity>> CURRENCY_CONVERTER =
             BLOCK_ENTITY_TYPES.register("currency_converter",

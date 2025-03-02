@@ -1,4 +1,4 @@
-package me.khajiitos.jackseconomy.price;
+package me.khajiitos.jackseconomy.data.price;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

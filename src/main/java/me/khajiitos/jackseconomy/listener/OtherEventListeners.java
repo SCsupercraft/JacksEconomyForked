@@ -3,7 +3,7 @@ package me.khajiitos.jackseconomy.listener;
 import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.menu.WalletMenu;
 import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
-import me.khajiitos.jackseconomy.price.ItemPriceManager;
+import me.khajiitos.jackseconomy.data.price.PriceManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -25,7 +25,7 @@ public class OtherEventListeners {
     @SubscribeEvent
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent e) {
         if (e.getEntity() instanceof ServerPlayer serverPlayer) {
-            Packets.sendToClient(serverPlayer, new PricesInfoPacket(ItemPriceManager.toTag()));
+            Packets.sendToClient(serverPlayer, new PricesInfoPacket(PriceManager.toTag(false), PriceManager.toTag(true)));
         }
     }
 }

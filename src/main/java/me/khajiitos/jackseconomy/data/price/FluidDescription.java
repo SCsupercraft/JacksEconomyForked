@@ -1,0 +1,104 @@
+package me.khajiitos.jackseconomy.data.price;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import me.khajiitos.jackseconomy.util.FluidHelper;
+import me.khajiitos.jackseconomy.util.ItemHelper;
+import me.khajiitos.jackseconomy.util.NBTUtil;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+
+import javax.annotation.Nullable;
+import java.util.Objects;
+
+public record FluidDescription(Fluid fluid, CompoundTag compoundTag) {
+    public FluidDescription(Fluid fluid, @Nullable CompoundTag compoundTag) {
+        this.fluid = fluid;
+
+        if (compoundTag == null) {
+            this.compoundTag = new CompoundTag();
+        } else {
+            this.compoundTag = compoundTag.copy();
+        }
+    }
+
+    public static FluidDescription ofFluid(FluidStack fluidStack) {
+        return new FluidDescription(fluidStack.getFluid(), fluidStack.getTag());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other instanceof FluidDescription fluidDescription) {
+            return fluid.equals(fluidDescription.fluid) && compoundTag.equals(fluidDescription.compoundTag);
+        }
+        return false;
+    }
+
+    public CompoundTag toNbt() {
+        CompoundTag tag = new CompoundTag();
+        String fluidName = FluidHelper.getFluidName(this.fluid);
+
+        tag.putString("fluid", fluidName != null ? fluidName : "");
+
+        if (!this.compoundTag.isEmpty()) {
+            tag.put("nbt", this.compoundTag.copy());
+        }
+
+        return tag;
+    }
+
+    public static @Nullable FluidDescription fromNbt(CompoundTag compoundTag) {
+        String fluidName = compoundTag.getString("fluid");
+
+        if (fluidName.isEmpty()) {
+            return null;
+        }
+
+        Fluid fluid = FluidHelper.getFluid(fluidName);
+
+        if (fluid == null) {
+            return null;
+        }
+
+        CompoundTag tag = compoundTag.getCompound("nbt");
+
+        return new FluidDescription(fluid, tag);
+    }
+
+    public FluidStack createFluidStack() {
+        FluidStack fluidStack = new FluidStack(this.fluid, 1);
+
+        CompoundTag tag = this.compoundTag();
+
+        if (!tag.isEmpty()) {
+            fluidStack.setTag(tag.copy());
+        }
+
+        return fluidStack;
+    }
+
+    public JsonObject toJson() {
+        JsonElement jsonElement = NBTUtil.nbtToJson(this.toNbt());
+
+        if (jsonElement instanceof JsonObject object) {
+            return object;
+        } else {
+            return new JsonObject();
+        }
+    }
+
+    public static @Nullable FluidDescription fromJson(JsonObject json) {
+        Tag tag = NBTUtil.jsonToNbt(json);
+
+        if (tag instanceof CompoundTag compoundTag) {
+            return FluidDescription.fromNbt(compoundTag);
+        } else {
+            return null;
+        }
+    }
+}

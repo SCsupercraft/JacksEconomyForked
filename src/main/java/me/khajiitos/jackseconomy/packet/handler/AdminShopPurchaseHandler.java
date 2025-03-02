@@ -2,13 +2,14 @@ package me.khajiitos.jackseconomy.packet.handler;
 
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
+import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.OIMWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.packet.AdminShopPurchasePacket;
-import me.khajiitos.jackseconomy.price.ItemDescription;
-import me.khajiitos.jackseconomy.price.ItemPriceManager;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import me.khajiitos.jackseconomy.util.ItemHelper;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,14 +30,18 @@ public class AdminShopPurchaseHandler {
             return;
         }
 
+        ArrayList<PurchaseManager.Purchase> purchases = new ArrayList<>();
         ItemStack wallet = CuriosWallet.get(sender);
 
         BigDecimal value = BigDecimal.ZERO;
         for (Map.Entry<AdminShopPurchasePacket.ShopItemDescription, Integer> entry : msg.shoppingCart().entrySet()) {
-            double price = ItemPriceManager.getAdminShopBuyPrice(entry.getKey().itemDescription(), entry.getValue(), entry.getKey().slot(), entry.getKey().category());
+            ItemDescription description = entry.getKey().itemDescription();
+            double price = PriceManager.getAdminShopBuyPrice(description, entry.getValue(), entry.getKey().slot(), entry.getKey().category());
             if (price <= 0) {
                 return;
             }
+
+            purchases.add(new PurchaseManager.Purchase(description, entry.getValue(), 0));
 
             if (Config.oneItemCurrencyMode.get()) {
                 value = value.add(BigDecimal.valueOf(Math.round(price)));
@@ -47,17 +52,19 @@ public class AdminShopPurchaseHandler {
 
         if (!Config.disableAdminShopSelling.get()) {
             for (Map.Entry<ItemDescription, Integer> entry : msg.itemsToSell().entrySet()) {
-                double price = ItemPriceManager.getAdminShopSellPrice(entry.getKey(), entry.getValue());
+                double price = PriceManager.getAdminShopSellPrice(entry.getKey(), entry.getValue());
                 if (price <= 0) {
                     return;
                 }
-                String stage = ItemPriceManager.getAdminShopSellStage(entry.getKey());
+                String stage = PriceManager.getAdminShopSellStage(entry.getKey());
 
                 if (stage != null && !GameStagesManager.hasGameStage(sender, stage)) {
                     // Player doesn't have required game stage to sell item
                     // The client shouldn't allow for that
                     return;
                 }
+
+                purchases.add(new PurchaseManager.Purchase(entry.getKey(), entry.getValue() * -1L, 0));
 
                 if (Config.oneItemCurrencyMode.get()) {
                     value = value.subtract(BigDecimal.valueOf(Math.round(price)));
@@ -226,7 +233,7 @@ public class AdminShopPurchaseHandler {
 
             while (countLeft > 0) {
                 int thisStackCount = Math.min(countLeft, stackCount);
-                double price = ItemPriceManager.getAdminShopBuyPrice(entry.getKey().itemDescription(), thisStackCount, entry.getKey().slot(), entry.getKey().category());
+                double price = PriceManager.getAdminShopBuyPrice(entry.getKey().itemDescription(), thisStackCount, entry.getKey().slot(), entry.getKey().category());
                 if (price <= 0) {
                     continue;
                 }
@@ -261,5 +268,6 @@ public class AdminShopPurchaseHandler {
                 }
             }
         }
+        PurchaseManager.processPurchases(purchases, sender);
     }
 }

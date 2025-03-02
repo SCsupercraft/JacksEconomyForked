@@ -1,8 +1,7 @@
 package me.khajiitos.jackseconomy.item;
 
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
-import me.khajiitos.jackseconomy.menu.ExporterTicketCreatorMenu;
-import me.khajiitos.jackseconomy.menu.ImporterTicketCreatorMenu;
+import me.khajiitos.jackseconomy.menu.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -36,7 +35,9 @@ public class EmptyTicketItem extends Item {
 
     public enum Type {
         IMPORTER(ItemBlockReg.IMPORTER_TICKET_ITEM.get(), ((pContainerId, pPlayerInventory, pPlayer) -> new ImporterTicketCreatorMenu(pContainerId, pPlayerInventory))),
-        EXPORTER(ItemBlockReg.EXPORTER_TICKET_ITEM.get(), ((pContainerId, pPlayerInventory, pPlayer) -> new ExporterTicketCreatorMenu(pContainerId, pPlayerInventory)));
+        EXPORTER(ItemBlockReg.EXPORTER_TICKET_ITEM.get(), ((pContainerId, pPlayerInventory, pPlayer) -> new ExporterTicketCreatorMenu(pContainerId, pPlayerInventory))),
+        FLUID_IMPORTER(ItemBlockReg.FLUID_IMPORTER_TICKET_ITEM.get(), ((pContainerId, pPlayerInventory, pPlayer) -> new FluidImporterTicketCreatorMenu(pContainerId, pPlayerInventory))),
+        FLUID_EXPORTER(ItemBlockReg.FLUID_EXPORTER_TICKET_ITEM.get(), ((pContainerId, pPlayerInventory, pPlayer) -> new FluidExporterTicketCreatorMenu(pContainerId, pPlayerInventory)));
 
         public final TicketItem ticketItem;
         public final MenuConstructor menuConstructor;

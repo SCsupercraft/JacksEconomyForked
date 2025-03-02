@@ -1,6 +1,6 @@
 package me.khajiitos.jackseconomy.screen.widget;
 
-import me.khajiitos.jackseconomy.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;

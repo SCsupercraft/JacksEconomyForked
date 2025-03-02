@@ -1,7 +1,7 @@
 package me.khajiitos.jackseconomy.gamestages;
 
-import me.khajiitos.jackseconomy.price.AdminShopItemPriceInfo;
-import me.khajiitos.jackseconomy.price.ItemPriceManager;
+import me.khajiitos.jackseconomy.data.price.AdminShopItemPriceInfo;
+import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.util.NewShopUnlocks;
 import net.darkhax.gamestages.GameStageHelper;
 import net.darkhax.gamestages.data.IStageData;
@@ -59,7 +59,7 @@ class GameStagesIntegration {
 
         if (e.getEntity() instanceof ServerPlayer serverPlayer) {
             NewShopUnlocks unlocks = new NewShopUnlocks();
-            for (ItemPriceManager.ItemPriceEntry itemPriceEntry : ItemPriceManager.getItemPriceInfos()) {
+            for (PriceManager.ItemPriceEntry itemPriceEntry : PriceManager.getItemPriceInfos()) {
                 if (itemPriceEntry.itemPriceInfo() instanceof AdminShopItemPriceInfo adminShopItemPriceInfo) {
                     if (e.getStageName().equals(adminShopItemPriceInfo.adminShopStage) && adminShopItemPriceInfo.category != null) {
                         NewShopUnlocks.Item item = new NewShopUnlocks.Item(adminShopItemPriceInfo.adminShopSlot, adminShopItemPriceInfo.category);
