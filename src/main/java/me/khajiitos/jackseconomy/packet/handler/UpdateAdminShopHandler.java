@@ -57,9 +57,9 @@ public class UpdateAdminShopHandler {
         categoriesTag.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
                 String name = compoundTag.getString("name");
-                Item item = ItemHelper.getItem(compoundTag.getString("item"));
+                ItemDescription itemDescription = ItemDescription.fromNbt(compoundTag.getCompound("item"));
 
-                PriceManager.Category category = new PriceManager.Category(name, item);
+                PriceManager.Category category = new PriceManager.Category(name, itemDescription);
                 ArrayList<PriceManager.Category> innerCategories = new ArrayList<>();
 
                 ListTag innerCategoriesTag = compoundTag.getList("categories", Tag.TAG_COMPOUND);
@@ -67,9 +67,9 @@ public class UpdateAdminShopHandler {
                 innerCategoriesTag.forEach(tag1 -> {
                     if (tag1 instanceof CompoundTag innerCategoryTag) {
                         String innerName = innerCategoryTag.getString("name");
-                        Item innerItem = ItemHelper.getItem(innerCategoryTag.getString("item"));
+                        ItemDescription innerItemDescription = ItemDescription.fromNbt(innerCategoryTag.getCompound("item"));
 
-                        PriceManager.Category innerCategory = new PriceManager.Category(innerName, innerItem);
+                        PriceManager.Category innerCategory = new PriceManager.Category(innerName, innerItemDescription);
                         innerCategories.add(innerCategory);
                     }
                 });

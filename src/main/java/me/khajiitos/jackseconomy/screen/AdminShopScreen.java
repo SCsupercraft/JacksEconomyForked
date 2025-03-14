@@ -116,9 +116,9 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
         categoriesTag.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
                 String categoryName = compoundTag.getString("name");
-                Item item = ItemHelper.getItem(compoundTag.getString("item"));
+                ItemDescription itemDescription = ItemDescription.fromNbt(compoundTag.getCompound("item"));
 
-                if (item == null) {
+                if (itemDescription == null) {
                     return;
                 }
 
@@ -126,7 +126,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
                     newShopUnlocks.unlockedCategories.add(categoryName);
                 }
 
-                Category category = new Category(categoryName, item);
+                Category category = new Category(categoryName, itemDescription);
                 LinkedHashMap<InnerCategory, List<ShopItem>> innerCategories = new LinkedHashMap<>();
                 shopItems.put(category, innerCategories);
                 ListTag categoriesInnerTag = compoundTag.getList("categories", Tag.TAG_COMPOUND);
@@ -134,9 +134,9 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
                 categoriesInnerTag.forEach(innerTag -> {
                     if (innerTag instanceof CompoundTag innerCompoundTag) {
                         String innerCategoryName = innerCompoundTag.getString("name");
-                        Item innerItem = ItemHelper.getItem(innerCompoundTag.getString("item"));
+                        ItemDescription innerItemDescription = ItemDescription.fromNbt(innerCompoundTag.getCompound("item"));
 
-                        if (innerItem == null) {
+                        if (innerItemDescription == null) {
                             return;
                         }
 
@@ -144,7 +144,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
                             newShopUnlocks.unlockedCategories.add(categoryName + ":" + innerCategoryName);
                         }
 
-                        InnerCategory innerCategory = new InnerCategory(innerCategoryName, innerItem);
+                        InnerCategory innerCategory = new InnerCategory(innerCategoryName, innerItemDescription);
                         innerCategories.put(innerCategory, new ArrayList<>());
                     }
                 });
@@ -661,7 +661,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
             if (categoryId >= 0 && categoryId < categories.size()) {
                 InnerCategory category = categories.get(categoryId);
                 String innerCategoryName = selectedBigCategory.name + ":" + category.name;
-                guiGraphics.renderItem(new ItemStack(category.item), categoryX, categoryY);
+                guiGraphics.renderItem(category.itemDescription.createItemStack(), categoryX, categoryY);
 
                 if (!isEditMode() && newShopUnlocks.unlockedCategories.contains(innerCategoryName)) {
                     renderStar(guiGraphics, categoryX + 4, categoryY + 4);
@@ -730,7 +730,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
                         this.tooltip = new ArrayList<>();
 
                         if (this.isEditMode() || !shopItem.isLocked() || Config.showNamesForLockedAdminShopItems.get()) {
-                            this.tooltip.add(shopItem.customName != null ? Component.literal(shopItem.customName) : shopItem.itemDescription.item().getDescription().copy().withStyle(shopItem.itemDescription.item().getRarity(itemStack).getStyleModifier()));
+                            this.tooltip.add(shopItem.customName != null ? Component.literal(shopItem.customName) :  itemStack.getHoverName().copy().withStyle(shopItem.itemDescription.item().getRarity(itemStack).getStyleModifier()));
 
                             Level level = Minecraft.getInstance().player == null ? null : Minecraft.getInstance().player.level();
                             itemStack.getItem().appendHoverText(itemStack, level, this.tooltip, TooltipFlag.Default.NORMAL);
@@ -1059,24 +1059,24 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
 
     public static class InnerCategory {
         protected String name;
-        protected Item item;
+        protected ItemDescription itemDescription;
 
-        public InnerCategory(String name, Item item) {
+        public InnerCategory(String name, ItemDescription description) {
             this.name = name;
-            this.item = item;
+            this.itemDescription = description;
         }
 
         public String getName() {
             return name;
         }
 
-        public Item getItem() {
-            return item;
+        public ItemDescription getItemDescription() {
+            return itemDescription;
         }
     }
 
     public static class Category extends InnerCategory {
-        public Category(String name, Item item) {
+        public Category(String name, ItemDescription item) {
             super(name, item);
         }
     }

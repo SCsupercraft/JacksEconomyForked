@@ -43,7 +43,7 @@ public class CategoryEntry extends AbstractWidget {
         }
 
         if (category != null) {
-            guiGraphics.renderItem(new ItemStack(category.getItem()), this.getX() + 2, this.getY() + 4);
+            guiGraphics.renderItem(category.getItemDescription().createItemStack(), this.getX() + 2, this.getY() + 4);
 
             if (shouldRenderStar.get()) {
                 AdminShopScreen.renderStar(guiGraphics, this.getX() + 6, this.getY() + 8);

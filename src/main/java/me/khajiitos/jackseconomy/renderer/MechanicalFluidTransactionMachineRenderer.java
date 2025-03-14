@@ -3,10 +3,10 @@ package me.khajiitos.jackseconomy.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
-import com.simibubi.create.foundation.render.CachedBufferer;
-import com.simibubi.create.foundation.render.SuperByteBuffer;
 import me.khajiitos.jackseconomy.block.KineticFluidTransactionMachineBlock;
 import me.khajiitos.jackseconomy.blockentity.FluidTransactionKineticMachineBlockEntity;
+import net.createmod.catnip.render.CachedBuffers;
+import net.createmod.catnip.render.SuperByteBuffer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -31,9 +31,8 @@ public class MechanicalFluidTransactionMachineRenderer<T extends FluidTransactio
 
     @Override
     protected SuperByteBuffer getRotatedModel(FluidTransactionKineticMachineBlockEntity be, BlockState state) {
-        return CachedBufferer.partialFacing(AllPartialModels.SHAFT_HALF, state, state
+        return CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, state, state
                 .getValue(KineticFluidTransactionMachineBlock.HORIZONTAL_FACING)
                 .getOpposite());
     }
-
 }

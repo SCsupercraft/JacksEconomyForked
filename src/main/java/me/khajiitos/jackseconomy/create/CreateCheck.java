@@ -5,7 +5,7 @@ public class CreateCheck {
 
 		static {
 			try {
-				Class.forName("com.simibubi.create.content.kinetics.BlockStressValues");
+				Class.forName("com.simibubi.create.api.stress.BlockStressValues");
 				installed = true;
 			} catch (ClassNotFoundException e) {
 				installed = false;

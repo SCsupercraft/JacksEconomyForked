@@ -66,7 +66,7 @@ public class EditAdminShopScreen extends AdminShopScreen {
             this.categoryPanel.children.add(new EditCategoryEntry(0, 0, 75, 25, category, (categoryEntry, button) -> {
                 if (button == 0) {
                     if (this.itemOnCursor != null) {
-                        category.item = this.itemOnCursor.itemDescription().item();
+                        category.itemDescription = this.itemOnCursor.itemDescription();
                         this.itemOnCursor = null;
                     } else {
                         this.selectBigCategory(category);
@@ -121,7 +121,7 @@ public class EditAdminShopScreen extends AdminShopScreen {
 
         this.categoryPanel.children.add(new EditCategoryEntry(0, 0, 75, 25, null, (categoryEntry, button) -> {
             if (button == 0 && this.itemOnCursor != null) {
-                Category category = new Category(getUnnamedCategoryName(), this.itemOnCursor.itemDescription().item());
+                Category category = new Category(getUnnamedCategoryName(), this.itemOnCursor.itemDescription());
                 this.shopItems.put(category, new LinkedHashMap<>());
                 this.initCategoryPanel();
                 this.itemOnCursor = null;
@@ -188,7 +188,7 @@ public class EditAdminShopScreen extends AdminShopScreen {
             List<InnerCategory> categories = this.getInnerCategories();
 
             if (categoryId == categories.size() && this.itemOnCursor != null && this.floatingEditBox == null) {
-                InnerCategory category = new InnerCategory(this.getUnnamedInnerCategoryName(), this.itemOnCursor.itemDescription().item());
+                InnerCategory category = new InnerCategory(this.getUnnamedInnerCategoryName(), this.itemOnCursor.itemDescription());
 
                 if (this.selectedCategory == null) {
                     this.selectedCategory = category;
@@ -356,28 +356,16 @@ public class EditAdminShopScreen extends AdminShopScreen {
         HashMap<ItemDescription, List<CompoundTag>> tagsForItems = new HashMap<>();
 
         this.shopItems.forEach((category, innerCategories) -> {
-            String itemName = ItemHelper.getItemName(category.item);
-
-            if (itemName == null) {
-                return;
-            }
-
             CompoundTag categoryTag = new CompoundTag();
             categoryTag.putString("name", category.name);
-            categoryTag.putString("item", itemName);
+            categoryTag.put("item", category.itemDescription.toNbt());
 
             ListTag innerCategoriesTag = new ListTag();
 
             for (Map.Entry<InnerCategory, List<ShopItem>> entry : innerCategories.entrySet()) {
-                String innerItemName = ItemHelper.getItemName(entry.getKey().item);
-
-                if (innerItemName == null) {
-                    return;
-                }
-
                 CompoundTag innerCategoryTag = new CompoundTag();
                 innerCategoryTag.putString("name", entry.getKey().name);
-                innerCategoryTag.putString("item", innerItemName);
+                innerCategoryTag.put("item", entry.getKey().itemDescription.toNbt());
 
                 for (ShopItem shopItem : entry.getValue()) {
                     CompoundTag itemTag = shopItem.itemDescription().toNbt();

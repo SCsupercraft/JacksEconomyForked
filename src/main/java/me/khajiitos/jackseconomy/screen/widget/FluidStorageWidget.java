@@ -1,15 +1,18 @@
 package me.khajiitos.jackseconomy.screen.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.util.AdvancedFluidTank;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
@@ -17,11 +20,9 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.IFluidTank;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -42,16 +43,21 @@ public class FluidStorageWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         RenderSystem.setShaderTexture(0, BACKGROUND);
 
         guiGraphics.blit(BACKGROUND, this.getX(), this.getY(), 0, 0, this.width, this.height);
+
+        RenderSystem.enableBlend();
 
         FluidStack fluidStack = fluidStorage.getFluid();
         if (fluidStack.isEmpty())
             return;
 
-        int fluidHeight = getFluidHeight(fluidStorage);
+        long fluidAmount = fluidStorage.getFluidAmount();
+        long capacity = fluidStorage.getCapacity();
+        long scaledAmount = (fluidAmount * (height - 2)) / capacity;
+        if (scaledAmount < 1) scaledAmount = 1;
 
         IClientFluidTypeExtensions fluidTypeExtensions = IClientFluidTypeExtensions.of(fluidStack.getFluid());
         ResourceLocation stillTexture = fluidTypeExtensions.getStillTexture(fluidStack);
@@ -62,41 +68,76 @@ public class FluidStorageWidget extends AbstractWidget {
                 this.minecraft.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(stillTexture);
         int tintColor = fluidTypeExtensions.getTintColor(fluidStack);
 
-        float alpha = ((tintColor >> 24) & 0xFF) / 255f;
-        float red = ((tintColor >> 16) & 0xFF) / 255f;
-        float green = ((tintColor >> 8) & 0xFF) / 255f;
-        float blue = (tintColor & 0xFF) / 255f;
+        drawTiledSprite(guiGraphics, width - 2, height - 2, tintColor, scaledAmount, sprite, getX() + 1, getY() + 1);
 
-        guiGraphics.setColor(red, green, blue, alpha);
+        RenderSystem.setShaderColor(1, 1, 1, 1);
+        RenderSystem.disableBlend();
+    }
 
-        int tileWidth = sprite.contents().width();
-        int tileHeight = sprite.contents().height();
+    /**
+     * Taken from <a href="https://github.com/mezz/JustEnoughItems/blob/1.20.1/Library/src/main/java/mezz/jei/library/render/FluidTankRenderer.java#L133">JEI</a>
+     */
+    private static void setGLColorFromInt(int color) {
+        float red = (color >> 16 & 0xFF) / 255.0F;
+        float green = (color >> 8 & 0xFF) / 255.0F;
+        float blue = (color & 0xFF) / 255.0F;
+        float alpha = ((color >> 24) & 0xFF) / 255F;
 
-        int tilesX = (int) Math.ceil((double)this.width / tileWidth);
-        int tilesY = (int) Math.ceil((double)fluidHeight / tileHeight);
+        RenderSystem.setShaderColor(red, green, blue, alpha);
+    }
 
-        for (int x = 0; x < tilesX; x++) {
-            for (int y = 0; y < tilesY; y++) {
-                int renderX = this.getX() + 1 + (x * tileWidth);
-                int renderY = getFluidY(fluidHeight) + (y * tileHeight);
+    /**
+     * Taken from <a href="https://github.com/mezz/JustEnoughItems/blob/1.20.1/Library/src/main/java/mezz/jei/library/render/FluidTankRenderer.java#L105">JEI</a>
+     */
+    private static void drawTiledSprite(GuiGraphics guiGraphics, final int tiledWidth, final int tiledHeight, int color, long scaledAmount, TextureAtlasSprite sprite, int posX, int posY) {
+        RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+        Matrix4f matrix = guiGraphics.pose().last().pose();
+        setGLColorFromInt(color);
 
-                int widthToDraw = Math.min(tileWidth, this.width - x * tileWidth);
-                int heightToDraw = Math.min(tileHeight, fluidHeight - y * tileHeight);
+        final int xTileCount = tiledWidth / 16;
+        final int xRemainder = tiledWidth - (xTileCount * 16);
+        final long yTileCount = scaledAmount / 16;
+        final long yRemainder = scaledAmount - (yTileCount * 16);
 
-                if (x == tilesX - 1)
-                    widthToDraw -= 2;
+        final int yStart = tiledHeight + posY;
 
-                float uOffset = sprite.getU0();
-                float vOffset = sprite.getV0();
-                int uWidth = (int)((widthToDraw / (float)tileWidth) * (sprite.getU1() - uOffset) * 256);
-                int vHeight = (int)((heightToDraw / (float)tileHeight) * (sprite.getV1() - vOffset) * 256);
+        for (int xTile = 0; xTile <= xTileCount; xTile++) {
+            for (int yTile = 0; yTile <= yTileCount; yTile++) {
+                int width = (xTile == xTileCount) ? xRemainder : 16;
+                long height = (yTile == yTileCount) ? yRemainder : 16;
+                int x = posX + (xTile * 16);
+                int y = yStart - ((yTile + 1) * 16);
+                if (width > 0 && height > 0) {
+                    long maskTop = 16 - height;
+                    int maskRight = 16 - width;
 
-                guiGraphics.blit(sprite.atlasLocation(), renderX, renderY, widthToDraw, heightToDraw,
-                        (int)(uOffset * 256), (int)(vOffset * 256), uWidth, vHeight, 256, 256);
+                    drawTextureWithMasking(matrix, x, y, sprite, maskTop, maskRight, 100);
+                }
             }
         }
+    }
 
-        guiGraphics.setColor(1, 1, 1, 1);
+    /**
+     * Taken from <a href="https://github.com/mezz/JustEnoughItems/blob/1.20.1/Library/src/main/java/mezz/jei/library/render/FluidTankRenderer.java#L142">JEI</a>
+     */
+    private static void drawTextureWithMasking(Matrix4f matrix, float xCoord, float yCoord, TextureAtlasSprite textureSprite, long maskTop, long maskRight, float zLevel) {
+        float uMin = textureSprite.getU0();
+        float uMax = textureSprite.getU1();
+        float vMin = textureSprite.getV0();
+        float vMax = textureSprite.getV1();
+        uMax = uMax - (maskRight / 16F * (uMax - uMin));
+        vMax = vMax - (maskTop / 16F * (vMax - vMin));
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tessellator.getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.vertex(matrix, xCoord, yCoord + 16, zLevel).uv(uMin, vMax).endVertex();
+        bufferBuilder.vertex(matrix, xCoord + 16 - maskRight, yCoord + 16, zLevel).uv(uMax, vMax).endVertex();
+        bufferBuilder.vertex(matrix, xCoord + 16 - maskRight, yCoord + maskTop, zLevel).uv(uMax, vMin).endVertex();
+        bufferBuilder.vertex(matrix, xCoord, yCoord + maskTop, zLevel).uv(uMin, vMin).endVertex();
+        tessellator.end();
     }
 
     public void appendTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -115,16 +156,10 @@ public class FluidStorageWidget extends AbstractWidget {
     }
 
     private int getFluidHeight(IFluidTank tank) {
-        // return (48 * (tank.getFluidAmount() / tank.getCapacity()));
-
         float fluidAmount = fluidStorage.getFluidAmount();
         float capacity = fluidStorage.getCapacity();
 
         return (int) ((fluidAmount / capacity) * (this.height - 2));
-    }
-
-    private int getFluidY(int fluidHeight) {
-        return this.getY() + this.height - 1 - fluidHeight;
     }
 
     @Override

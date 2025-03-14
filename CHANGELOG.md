@@ -8,6 +8,21 @@
 - Gui improvements
 - Bulk item/fluid pricing
 
+## 1.2.2-1.3.2
+
+### Fixed
+
+- Fixed issues with `1.3.1`
+
+## 1.2.2-1.3.1
+
+### Changed
+
+- Switched to Create 6.0
+- The admin shop will now use an item's custom name instead of its default name
+- Category icons now include NBT
+- Changed how fluid tanks are rendered in the fluid importer and exporter GUIs
+
 ## 1.2.2-1.3.0
 
 ### Added

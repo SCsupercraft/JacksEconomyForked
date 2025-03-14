@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
@@ -35,8 +36,8 @@ public class PriceManager {
         fluidPriceInfos.add(new FluidPriceEntry(new FluidDescription(Fluids.LAVA, null), new PricesFluidPriceInfo(0.02, 0.05)));
 
         ArrayList<Category> categoriesInnerDefault = new ArrayList<>();
-        categoriesInnerDefault.add(new Category("Gems", Items.DIAMOND));
-        categories.put(new Category("General", Items.DIRT), categoriesInnerDefault);
+        categoriesInnerDefault.add(new Category("Gems", new ItemDescription(Items.DIAMOND, new CompoundTag())));
+        categories.put(new Category("General", new ItemDescription(Items.DIRT, new CompoundTag())), categoriesInnerDefault);
     }
 
     @Deprecated
@@ -110,6 +111,17 @@ public class PriceManager {
         return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof AdminShopItemPriceInfo adminShopItemPriceInfo && adminShopItemPriceInfo.adminShopSlot == slot && Objects.equals(adminShopItemPriceInfo.category, category)).map(entry -> ((AdminShopItemPriceInfo)entry.itemPriceInfo).adminShopBuyPrice * count).findFirst().orElse(-1.0);
     }
 
+    private static @Nullable ItemDescription itemDescriptionFromJson(JsonElement element) {
+        try {
+            return element.isJsonObject() ? ItemDescription.fromJson(element.getAsJsonObject()) : // new json schema
+                    new ItemDescription(ItemHelper.getItem(element.getAsString()), // old json schema
+                            new CompoundTag());
+        } catch (NullPointerException e) {
+            // item was null when creating an item description from the old schema
+            return null;
+        }
+    }
+
     public static void load() {
         final File file = DATA_HANDLER.DATA_FILE;
         if (file.exists()) {
@@ -119,54 +131,34 @@ public class PriceManager {
 
             try {
                 JsonObject pricesObj = DATA_HANDLER.loadAsJson();
-                JsonArray itemsArray = pricesObj.getAsJsonArray("items");
-                JsonArray fluidsArray = pricesObj.getAsJsonArray("fluids");
-                JsonArray categoriesArray = pricesObj.getAsJsonArray("categories");
-
-                if (itemsArray == null || fluidsArray == null || categoriesArray == null) {
-                    JacksEconomy.LOGGER.error("Invalid jackseconomy_prices.json file");
-                    save();
-                    return;
-                }
+                JsonArray itemsArray = pricesObj.has("items") ? pricesObj.getAsJsonArray("items") : new JsonArray();
+                JsonArray fluidsArray = pricesObj.has("fluids") ? pricesObj.getAsJsonArray("fluids") : new JsonArray();
+                JsonArray categoriesArray = pricesObj.has("categories") ? pricesObj.getAsJsonArray("categories") : new JsonArray();
 
                 categoriesArray.forEach(jsonElement -> {
                     JsonObject object = jsonElement.getAsJsonObject();
                     String categoryName = object.get("name").getAsString();
-                    String itemName = object.get("item").getAsString();
+                    JsonElement itemDesc = object.get("item");
 
-                    if (itemName == null) {
-                        return;
-                    }
-
-                    Item item = ItemHelper.getItem(itemName);
-
-                    if (item == null) {
-                        return;
-                    }
+                    ItemDescription itemDescription = itemDescriptionFromJson(itemDesc);
+                    if (itemDescription == null) return;
 
                     JsonArray categoriesList = object.getAsJsonArray("categories");
 
                     if (categoriesList != null) {
-                        Category category = new Category(categoryName, item);
+                        Category category = new Category(categoryName, itemDescription);
                         ArrayList<Category> innerCategories = new ArrayList<>();
                         categories.put(category, innerCategories);
 
                         categoriesList.forEach(jsonElementInner -> {
                             if (jsonElementInner instanceof JsonObject categoryObject) {
                                 String categoryNameInner = categoryObject.get("name").getAsString();
-                                String itemNameInner = categoryObject.get("item").getAsString();
+                                JsonElement itemDescInner = categoryObject.get("item");
 
-                                if (itemNameInner == null) {
-                                    return;
-                                }
+                                ItemDescription innerItemDescription = itemDescriptionFromJson(itemDescInner);
+                                if (innerItemDescription == null) return;
 
-                                Item itemInner = ItemHelper.getItem(itemNameInner);
-
-                                if (itemInner == null) {
-                                    return;
-                                }
-
-                                innerCategories.add(new Category(categoryNameInner, itemInner));
+                                innerCategories.add(new Category(categoryNameInner, innerItemDescription));
                             }
                         });
                     }
@@ -224,30 +216,22 @@ public class PriceManager {
         });
 
         categories.forEach((category, categories) -> {
-            String itemName = ItemHelper.getItemName(category.icon);
+            JsonObject categoryObj = new JsonObject();
+            categoryObj.add("item", category.icon.toJson());
+            categoryObj.addProperty("name", category.name);
 
-            if (itemName != null) {
-                JsonObject categoryObj = new JsonObject();
-                categoryObj.addProperty("item", itemName);
-                categoryObj.addProperty("name", category.name);
+            JsonArray innerCategories = new JsonArray();
 
-                JsonArray innerCategories = new JsonArray();
+            categories.forEach(categoryInner -> {
+                JsonObject categoryInnerObj = new JsonObject();
 
-                categories.forEach(categoryInner -> {
-                    JsonObject categoryInnerObj = new JsonObject();
+                categoryInnerObj.add("item", categoryInner.icon.toJson());
+                categoryInnerObj.addProperty("name", categoryInner.name);
+                innerCategories.add(categoryInnerObj);
+            });
 
-                    String itemNameInner = ItemHelper.getItemName(categoryInner.icon);
-
-                    if (itemNameInner != null) {
-                        categoryInnerObj.addProperty("item", itemNameInner);
-                        categoryInnerObj.addProperty("name", categoryInner.name);
-                        innerCategories.add(categoryInnerObj);
-                    }
-                });
-
-                categoryObj.add("categories", innerCategories);
-                categoriesArray.add(categoryObj);
-            }
+            categoryObj.add("categories", innerCategories);
+            categoriesArray.add(categoryObj);
         });
 
         object.add("items", itemsArray);
@@ -354,14 +338,8 @@ public class PriceManager {
         categories.forEach((category, categories) -> {
             CompoundTag compoundTag = new CompoundTag();
 
-            String itemName = ItemHelper.getItemName(category.icon);
-
-            if (itemName == null) {
-                return;
-            }
-
             compoundTag.putString("name", category.name);
-            compoundTag.putString("item", itemName);
+            compoundTag.put("item", category.icon.toNbt());
 
             if (shopUnlocks != null && shopUnlocks.unlockedCategories.contains(category.name)) {
                 compoundTag.putBoolean("recentlyUnlocked", true);
@@ -372,14 +350,8 @@ public class PriceManager {
             categories.forEach(categoryInner -> {
                 CompoundTag compoundTagInner = new CompoundTag();
 
-                String itemNameInner = ItemHelper.getItemName(categoryInner.icon);
-
-                if (itemNameInner == null) {
-                    return;
-                }
-
                 compoundTagInner.putString("name", categoryInner.name);
-                compoundTagInner.putString("item", itemNameInner);
+                compoundTagInner.put("item", categoryInner.icon().toNbt());
 
                 if (shopUnlocks != null && shopUnlocks.unlockedCategories.contains(category.name + ":" + categoryInner.name)) {
                     compoundTagInner.putBoolean("recentlyUnlocked", true);
@@ -426,7 +398,7 @@ public class PriceManager {
         return object;
     }
 
-    public record Category(String name, Item icon) {}
+    public record Category(String name, ItemDescription icon) {}
     public record ItemPriceEntry(ItemDescription itemDescription, ItemPriceInfo itemPriceInfo) {}
     public record FluidPriceEntry(FluidDescription fluidDescription, FluidPriceInfo fluidPriceInfo) {}
 }

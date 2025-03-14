@@ -14,6 +14,7 @@ import java.util.Objects;
 
 public record ItemDescription(Item item, CompoundTag compoundTag) {
     public ItemDescription(Item item, @Nullable CompoundTag compoundTag) {
+        if (item == null) throw new NullPointerException();
         this.item = item;
 
         if (compoundTag == null) {
