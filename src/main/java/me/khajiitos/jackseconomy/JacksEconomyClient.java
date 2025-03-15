@@ -1,20 +1,17 @@
 package me.khajiitos.jackseconomy;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.simibubi.create.foundation.ponder.CreatePonderPlugin;
 import me.khajiitos.jackseconomy.create.CreateCheck;
 import me.khajiitos.jackseconomy.create.CreateClient;
 import me.khajiitos.jackseconomy.create.CreatePonder;
-import me.khajiitos.jackseconomy.create.CreateStressProvider;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.data.price.PricesFluidPriceInfo;
+import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
 import me.khajiitos.jackseconomy.init.ContainerReg;
 import me.khajiitos.jackseconomy.listener.ClientEventListeners;
 import me.khajiitos.jackseconomy.listener.ClientRenderEventListeners;
-import me.khajiitos.jackseconomy.data.price.ItemDescription;
-import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
 import me.khajiitos.jackseconomy.screen.*;
-import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.client.ConfigScreenHandler;
@@ -47,7 +44,7 @@ public class JacksEconomyClient {
 
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(ClientConfigScreen::new));
 
-        if (CreateCheck.isInstalled()) { PonderIndex.addPlugin(new CreatePonder()); }
+        if (CreateCheck.isInstalled()) { CreatePonder.init(); }
     }
 
     public static void onClientSetup(FMLClientSetupEvent e) {

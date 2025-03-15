@@ -85,7 +85,7 @@ public abstract class TicketItem extends Item {
 
         for (ItemDescription itemDescription : itemDescriptions) {
             if (itemDescription.item() != Items.AIR) {
-                pTooltipComponents.add(Component.literal("- ").append(itemDescription.item().getDescription().copy()).withStyle(ChatFormatting.AQUA));
+                pTooltipComponents.add(Component.literal("- ").append(itemDescription.createItemStack().getHoverName().copy()).withStyle(ChatFormatting.AQUA));
             }
         }
 

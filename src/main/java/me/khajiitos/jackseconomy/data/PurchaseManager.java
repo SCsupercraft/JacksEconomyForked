@@ -30,8 +30,6 @@ public class PurchaseManager {
 		if (dataHandler.DATA_FILE.exists()) {
 			data = dataHandler.loadAsNbt();
 			players = data.contains("players") ? data.getCompound("players") : new CompoundTag();
-
-			JacksEconomy.LOGGER.info("Purchase Data: {}", data.toString());
 		} else {
 			data = new CompoundTag();
 			data.put("players", new CompoundTag());

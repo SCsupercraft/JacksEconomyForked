@@ -31,10 +31,10 @@ public class ItemBlockReg {
     public static final RegistryObject<ImporterBlock> IMPORTER = BLOCKS.register("importer", ImporterBlock::new);
     public static final RegistryObject<FluidExporterBlock> FLUID_EXPORTER = BLOCKS.register("fluid_exporter", FluidExporterBlock::new);
     public static final RegistryObject<FluidImporterBlock> FLUID_IMPORTER = BLOCKS.register("fluid_importer", FluidImporterBlock::new);
-    public static final RegistryObject<MechanicalExporterBlock> MECHANICAL_EXPORTER = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_EXPORTER : null;
-    public static final RegistryObject<MechanicalImporterBlock> MECHANICAL_IMPORTER = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_IMPORTER : null;
-    public static final RegistryObject<MechanicalFluidExporterBlock> MECHANICAL_FLUID_EXPORTER = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_FLUID_EXPORTER : null;
-    public static final RegistryObject<MechanicalFluidImporterBlock> MECHANICAL_FLUID_IMPORTER = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_FLUID_IMPORTER : null;
+    public static final RegistryObject<MechanicalExporterBlock> MECHANICAL_EXPORTER = CreateCheck.isAnyInstalled() ? CreateItemBlockReg.MECHANICAL_EXPORTER : null;
+    public static final RegistryObject<MechanicalImporterBlock> MECHANICAL_IMPORTER = CreateCheck.isAnyInstalled() ? CreateItemBlockReg.MECHANICAL_IMPORTER : null;
+    public static final RegistryObject<MechanicalFluidExporterBlock> MECHANICAL_FLUID_EXPORTER = CreateCheck.isAnyInstalled() ? CreateItemBlockReg.MECHANICAL_FLUID_EXPORTER : null;
+    public static final RegistryObject<MechanicalFluidImporterBlock> MECHANICAL_FLUID_IMPORTER = CreateCheck.isAnyInstalled() ? CreateItemBlockReg.MECHANICAL_FLUID_IMPORTER : null;
     public static final RegistryObject<CurrencyConverterBlock> CURRENCY_CONVERTER = BLOCKS.register("currency_converter", CurrencyConverterBlock::new);
     public static final RegistryObject<AdminShopBlock> ADMIN_SHOP = BLOCKS.register("admin_shop", AdminShopBlock::new);
 
@@ -42,10 +42,10 @@ public class ItemBlockReg {
     public static final RegistryObject<BlockItem> IMPORTER_ITEM = ITEMS.register("importer", () -> new BlockItem(IMPORTER.get(), new Item.Properties()));
     public static final RegistryObject<BlockItem> FLUID_EXPORTER_ITEM = ITEMS.register("fluid_exporter", () -> new BlockItem(FLUID_EXPORTER.get(), new Item.Properties()));
     public static final RegistryObject<BlockItem> FLUID_IMPORTER_ITEM = ITEMS.register("fluid_importer", () -> new BlockItem(FLUID_IMPORTER.get(), new Item.Properties()));
-    public static final RegistryObject<BlockItem> MECHANICAL_EXPORTER_ITEM = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_EXPORTER_ITEM : null;
-    public static final RegistryObject<BlockItem> MECHANICAL_IMPORTER_ITEM = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_IMPORTER_ITEM : null;
-    public static final RegistryObject<BlockItem> MECHANICAL_FLUID_EXPORTER_ITEM = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_FLUID_EXPORTER_ITEM : null;
-    public static final RegistryObject<BlockItem> MECHANICAL_FLUID_IMPORTER_ITEM = CreateCheck.isInstalled() ? CreateItemBlockReg.MECHANICAL_FLUID_IMPORTER_ITEM : null;
+    public static final RegistryObject<BlockItem> MECHANICAL_EXPORTER_ITEM = CreateCheck.isAnyInstalled() ? CreateItemBlockReg.MECHANICAL_EXPORTER_ITEM : null;
+    public static final RegistryObject<BlockItem> MECHANICAL_IMPORTER_ITEM = CreateCheck.isAnyInstalled() ? CreateItemBlockReg.MECHANICAL_IMPORTER_ITEM : null;
+    public static final RegistryObject<BlockItem> MECHANICAL_FLUID_EXPORTER_ITEM = CreateCheck.isAnyInstalled() ? CreateItemBlockReg.MECHANICAL_FLUID_EXPORTER_ITEM : null;
+    public static final RegistryObject<BlockItem> MECHANICAL_FLUID_IMPORTER_ITEM = CreateCheck.isAnyInstalled() ? CreateItemBlockReg.MECHANICAL_FLUID_IMPORTER_ITEM : null;
     public static final RegistryObject<BlockItem> CURRENCY_CONVERTER_ITEM = ITEMS.register("currency_converter", () -> new BlockItem(CURRENCY_CONVERTER.get(), new Item.Properties()) {
         @Override
         public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag) {
@@ -116,7 +116,7 @@ public class ItemBlockReg {
         output.accept(ItemBlockReg.IMPORTER_ITEM.get());
         output.accept(ItemBlockReg.FLUID_EXPORTER_ITEM.get());
         output.accept(ItemBlockReg.FLUID_IMPORTER_ITEM.get());
-        if (CreateCheck.isInstalled()) {
+        if (CreateCheck.isAnyInstalled()) {
             output.accept(ItemBlockReg.MECHANICAL_EXPORTER_ITEM.get());
             output.accept(ItemBlockReg.MECHANICAL_IMPORTER_ITEM.get());
             output.accept(ItemBlockReg.MECHANICAL_FLUID_EXPORTER_ITEM.get());

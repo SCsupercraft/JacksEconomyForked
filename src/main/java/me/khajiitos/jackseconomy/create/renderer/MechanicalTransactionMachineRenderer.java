@@ -1,4 +1,4 @@
-package me.khajiitos.jackseconomy.renderer;
+package me.khajiitos.jackseconomy.create.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllPartialModels;

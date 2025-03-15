@@ -1,8 +1,8 @@
-package me.khajiitos.jackseconomy.create;
+package me.khajiitos.jackseconomy_legacy_create;
 
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.init.ContainerReg;
-import me.khajiitos.jackseconomy.create.renderer.*;
+import me.khajiitos.jackseconomy_legacy_create.renderer.*;
 import me.khajiitos.jackseconomy.screen.*;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.api.distmarker.Dist;

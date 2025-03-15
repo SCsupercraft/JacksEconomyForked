@@ -34,16 +34,16 @@ public class BlockEntityReg {
                             .build(null));
 
     public static final RegistryObject<BlockEntityType<MechanicalExporterBlockEntity>> MECHANICAL_EXPORTER =
-            CreateCheck.isInstalled() ? CreateBlockEntityReg.MECHANICAL_EXPORTER : null;
+            CreateCheck.isAnyInstalled() ? CreateBlockEntityReg.MECHANICAL_EXPORTER : null;
 
     public static final RegistryObject<BlockEntityType<MechanicalImporterBlockEntity>> MECHANICAL_IMPORTER =
-            CreateCheck.isInstalled() ? CreateBlockEntityReg.MECHANICAL_IMPORTER : null;
+            CreateCheck.isAnyInstalled() ? CreateBlockEntityReg.MECHANICAL_IMPORTER : null;
 
     public static final RegistryObject<BlockEntityType<MechanicalFluidExporterBlockEntity>> MECHANICAL_FLUID_EXPORTER =
-            CreateCheck.isInstalled() ? CreateBlockEntityReg.MECHANICAL_FLUID_EXPORTER : null;
+            CreateCheck.isAnyInstalled() ? CreateBlockEntityReg.MECHANICAL_FLUID_EXPORTER : null;
 
     public static final RegistryObject<BlockEntityType<MechanicalFluidImporterBlockEntity>> MECHANICAL_FLUID_IMPORTER =
-            CreateCheck.isInstalled() ? CreateBlockEntityReg.MECHANICAL_FLUID_IMPORTER : null;
+            CreateCheck.isAnyInstalled() ? CreateBlockEntityReg.MECHANICAL_FLUID_IMPORTER : null;
 
     public static final RegistryObject<BlockEntityType<CurrencyConverterBlockEntity>> CURRENCY_CONVERTER =
             BLOCK_ENTITY_TYPES.register("currency_converter",

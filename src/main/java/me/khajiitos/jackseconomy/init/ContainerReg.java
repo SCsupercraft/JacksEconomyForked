@@ -25,10 +25,10 @@ public class ContainerReg {
     public static final RegistryObject<MenuType<ImporterMenu>> IMPORTER_MENU = MENU_TYPES.register("importer", regBlockMenu(ImporterMenu::new));
     public static final RegistryObject<MenuType<FluidExporterMenu>> FLUID_EXPORTER_MENU = MENU_TYPES.register("fluid_exporter", regBlockMenu(FluidExporterMenu::new));
     public static final RegistryObject<MenuType<FluidImporterMenu>> FLUID_IMPORTER_MENU = MENU_TYPES.register("fluid_importer", regBlockMenu(FluidImporterMenu::new));
-    public static final RegistryObject<MenuType<MechanicalExporterMenu>> MECHANICAL_EXPORTER_MENU = CreateCheck.isInstalled() ? CreateContainerReg.MECHANICAL_EXPORTER_MENU : null;
-    public static final RegistryObject<MenuType<MechanicalImporterMenu>> MECHANICAL_IMPORTER_MENU = CreateCheck.isInstalled() ? CreateContainerReg.MECHANICAL_IMPORTER_MENU : null;
-    public static final RegistryObject<MenuType<MechanicalFluidExporterMenu>> MECHANICAL_FLUID_EXPORTER_MENU = CreateCheck.isInstalled() ? CreateContainerReg.MECHANICAL_FLUID_EXPORTER_MENU : null;
-    public static final RegistryObject<MenuType<MechanicalFluidImporterMenu>> MECHANICAL_FLUID_IMPORTER_MENU = CreateCheck.isInstalled() ? CreateContainerReg.MECHANICAL_FLUID_IMPORTER_MENU : null;
+    public static final RegistryObject<MenuType<MechanicalExporterMenu>> MECHANICAL_EXPORTER_MENU = CreateCheck.isAnyInstalled() ? CreateContainerReg.MECHANICAL_EXPORTER_MENU : null;
+    public static final RegistryObject<MenuType<MechanicalImporterMenu>> MECHANICAL_IMPORTER_MENU = CreateCheck.isAnyInstalled() ? CreateContainerReg.MECHANICAL_IMPORTER_MENU : null;
+    public static final RegistryObject<MenuType<MechanicalFluidExporterMenu>> MECHANICAL_FLUID_EXPORTER_MENU = CreateCheck.isAnyInstalled() ? CreateContainerReg.MECHANICAL_FLUID_EXPORTER_MENU : null;
+    public static final RegistryObject<MenuType<MechanicalFluidImporterMenu>> MECHANICAL_FLUID_IMPORTER_MENU = CreateCheck.isAnyInstalled() ? CreateContainerReg.MECHANICAL_FLUID_IMPORTER_MENU : null;
     public static final RegistryObject<MenuType<CurrencyConverterMenu>> CURRENCY_CONVERTER_MENU = MENU_TYPES.register("currency_converter", regBlockMenu(CurrencyConverterMenu::new));
     public static final RegistryObject<MenuType<WalletMenu>> WALLET_MENU = MENU_TYPES.register("wallet", regItemMenu(WalletMenu::new));
     public static final RegistryObject<MenuType<OIMWalletMenu>> OIM_WALLET_MENU = MENU_TYPES.register("oim_wallet", regItemMenu(OIMWalletMenu::new));

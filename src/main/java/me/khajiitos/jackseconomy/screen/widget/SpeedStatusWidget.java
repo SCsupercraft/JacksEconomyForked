@@ -1,7 +1,7 @@
 package me.khajiitos.jackseconomy.screen.widget;
 
-import com.simibubi.create.infrastructure.config.AllConfigs;
 import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.create.CreateHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -34,8 +34,10 @@ public class SpeedStatusWidget extends AbstractWidget {
     public void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         guiGraphics.blit(BACKGROUND, this.getX(), this.getY(), 0, 0, this.width, this.height);
 
+        CreateHelper.refresh();
+
         double speed = Math.abs(speedSupplier.get());
-        double maxSpeed = AllConfigs.server().kinetics.maxRotationSpeed.get();
+        double maxSpeed = CreateHelper.maxRotationSpeed;
 
         double progress = Math.min(speed / maxSpeed, 1.0);
 

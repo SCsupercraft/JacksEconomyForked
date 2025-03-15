@@ -30,7 +30,7 @@ public class ShoppingCartEntry extends AbstractWidget {
     public void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         guiGraphics.renderItem(this.shoppingCartItem.getKey().itemDescription().createItemStack(), this.getX() + 3, this.getY());
 
-        MutableComponent itemName = (this.shoppingCartItem.getKey().customName() != null ? Component.literal(this.shoppingCartItem.getKey().customName()) : this.shoppingCartItem.getKey().itemDescription().item().getDescription().copy());
+        MutableComponent itemName = (this.shoppingCartItem.getKey().customName() != null ? Component.literal(this.shoppingCartItem.getKey().customName()) : this.shoppingCartItem.getKey().itemDescription().createItemStack().getHoverName().copy());
 
         int width = Minecraft.getInstance().font.width(itemName);
 

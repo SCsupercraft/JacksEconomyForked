@@ -18,8 +18,6 @@ public class StockMarketManager {
 		if (dataHandler.DATA_FILE.exists()) {
 			data = dataHandler.loadAsJson();
 			lastUpdated = data.has("lastUpdated") ? data.get("lastUpdated").getAsLong() : 0;
-
-			JacksEconomy.LOGGER.info("Market Data: {}", data.toString());
 		} else {
 			data = new JsonObject();
 			data.addProperty("lastUpdated", 0);

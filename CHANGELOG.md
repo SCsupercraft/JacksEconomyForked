@@ -8,6 +8,13 @@
 - Gui improvements
 - Bulk item/fluid pricing
 
+## 1.2.2-1.3.3
+
+### Changed
+
+- The mod should now support both create `6.0` and `0.5`
+- Manifests and the shopping cart screen now also use an item's custom name instead of its default name
+
 ## 1.2.2-1.3.2
 
 ### Fixed
