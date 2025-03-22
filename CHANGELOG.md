@@ -6,7 +6,26 @@
 - Finish purchase handler (mainly a command to view purchases, and importer/exporter support)
   - This allows us the start working on the stock market
 - Gui improvements
-- Bulk item/fluid pricing
+
+## 1.2.2-1.4.0
+
+### Added
+
+- Admin shops can now be given names, the contents of each admin shop depends on its name
+  - You can give an admin shop a name by holding an admin shop and running `/adminshop name`
+  - If advanced tooltips is enabled, you can hover over an admin shop in your inventory to get its name
+  - Translation keys can be used as a shop's name, and will be replaced correctly
+- `/adminshop` has 3 new sub-commands, which are operator only
+  - `default` opens the default admin shop (no name)
+  - `named <admin_shop_name>` opens the admin shop with the specified name
+  - `name <admin_shop_name>` names the admin shop in your hand to the specified name (this is different to using an anvil)
+- You can now price multiple items at once with the bulk item, fluid, and admin shop GUIs
+  - These are accessed by doing `/economy price bulk <gui>`
+
+### Changed
+
+- `/adminshop` now opens the admin shop with the name specified in the config
+- Translation keys can be used as names for categories in the admin shop
 
 ## 1.2.2-1.3.3
 

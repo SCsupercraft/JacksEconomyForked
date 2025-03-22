@@ -61,6 +61,10 @@ public class JacksEconomyClient {
         MenuScreens.register(ContainerReg.FLUID_IMPORTER_TICKET_CREATOR_MENU.get(), FluidTicketCreatorScreen::new);
         MenuScreens.register(ContainerReg.FLUID_EXPORTER_TICKET_CREATOR_MENU.get(), FluidTicketCreatorScreen::new);
 
+        MenuScreens.register(ContainerReg.BULK_FLUID_MENU.get(), BulkFluidScreen::new);
+        MenuScreens.register(ContainerReg.BULK_ITEM_MENU.get(), BulkItemScreen::new);
+        MenuScreens.register(ContainerReg.BULK_ADMIN_SHOP_MENU.get(), BulkAdminShopScreen::new);
+
         if (CreateCheck.isInstalled()) { CreateClient.onClientSetup(e); }
     }
 

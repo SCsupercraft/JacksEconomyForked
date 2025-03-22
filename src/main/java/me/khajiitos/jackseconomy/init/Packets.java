@@ -40,6 +40,7 @@ public class Packets {
         INSTANCE.registerMessage(packetCount++, DepositAllPacket.class, DepositAllPacket::encode, DepositAllPacket::decode, DepositAllPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         INSTANCE.registerMessage(packetCount++, AcknowledgeUnlocksPacket.class, AcknowledgeUnlocksPacket::encode, AcknowledgeUnlocksPacket::decode, AcknowledgeUnlocksPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         INSTANCE.registerMessage(packetCount++, AdminShopSchemaPacket.class, AdminShopSchemaPacket::encode, AdminShopSchemaPacket::decode, AdminShopSchemaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        INSTANCE.registerMessage(packetCount++, RequestAdminShopSchemaPacket.class, RequestAdminShopSchemaPacket::encode, RequestAdminShopSchemaPacket::decode, RequestAdminShopSchemaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
     }
 
     public static <MSG> void sendToServer(MSG packet) {

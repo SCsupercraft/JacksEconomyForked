@@ -103,7 +103,7 @@ public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
 
             Map<AdminShopPurchasePacket.ShopItemDescription, Integer> map = new HashMap<>();
             this.parent.shoppingCart.forEach((shopItem, amount) -> map.put(new AdminShopPurchasePacket.ShopItemDescription(shopItem.itemDescription(), shopItem.slot(), shopItem.category()), amount));
-            Packets.sendToServer(new AdminShopPurchasePacket(map, this.parent.itemsToSell));
+            Packets.sendToServer(new AdminShopPurchasePacket(map, this.parent.itemsToSell, parent.adminShopName));
 
             this.parent.shoppingCart.clear();
             this.parent.itemsToSell.clear();

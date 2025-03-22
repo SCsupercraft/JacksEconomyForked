@@ -1,5 +1,7 @@
 package me.khajiitos.jackseconomy.packet;
 
+import io.netty.handler.codec.DecoderException;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.packet.handler.AdminShopPurchaseHandler;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import net.minecraft.nbt.CompoundTag;
@@ -7,12 +9,13 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public record AdminShopPurchasePacket(Map<ShopItemDescription, Integer> shoppingCart, Map<ItemDescription, Integer> itemsToSell) {
+public record AdminShopPurchasePacket(Map<ShopItemDescription, Integer> shoppingCart, Map<ItemDescription, Integer> itemsToSell, @Nullable String adminShopName) {
 
     public static void encode(AdminShopPurchasePacket msg, FriendlyByteBuf friendlyByteBuf) {
         CompoundTag compoundTag = new CompoundTag();
@@ -37,6 +40,8 @@ public record AdminShopPurchasePacket(Map<ShopItemDescription, Integer> shopping
         compoundTag.put("sellData", sellData);
 
         friendlyByteBuf.writeNbt(compoundTag);
+        friendlyByteBuf.writeBoolean(msg.adminShopName != null);
+        if (msg.adminShopName != null) friendlyByteBuf.writeUtf(msg.adminShopName);
     }
 
     public static AdminShopPurchasePacket decode(FriendlyByteBuf friendlyByteBuf) {
@@ -80,7 +85,7 @@ public record AdminShopPurchasePacket(Map<ShopItemDescription, Integer> shopping
             });
         }
 
-        return new AdminShopPurchasePacket(shoppingCartMap, itemsToSellMap);
+        return new AdminShopPurchasePacket(shoppingCartMap, itemsToSellMap, friendlyByteBuf.readBoolean() ? friendlyByteBuf.readUtf() : null);
     }
 
     public static void handle(AdminShopPurchasePacket msg, Supplier<NetworkEvent.Context> ctx) {

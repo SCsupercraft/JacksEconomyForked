@@ -28,10 +28,12 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.locale.Language;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
@@ -56,6 +58,8 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
     protected static final ResourceLocation QUESTION_MARK = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/question_mark.png");
     protected static final ResourceLocation STAR = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/star.png");
     protected static final ResourceLocation LOCK = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/lock.png");
+
+    protected @Nullable String adminShopName;
 
     protected final LinkedHashMap<Category, LinkedHashMap<InnerCategory, List<ShopItem>>> shopItems;
 
@@ -84,7 +88,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
     protected final NewShopUnlocks acknowledgedShopUnlocks;
     public final boolean oneItemCurrencyMode;
 
-    protected AdminShopScreen(AdminShopMenu pMenu, Inventory pPlayerInventory, Component pTitle, LinkedHashMap<Category, LinkedHashMap<InnerCategory, List<ShopItem>>> shopItems, HashMap<ItemDescription, ItemSellabilityInfo> sellPrices) {
+    protected AdminShopScreen(AdminShopMenu pMenu, Inventory pPlayerInventory, Component pTitle, LinkedHashMap<Category, LinkedHashMap<InnerCategory, List<ShopItem>>> shopItems, HashMap<ItemDescription, ItemSellabilityInfo> sellPrices, @Nullable String adminShopName) {
         super(pMenu, pPlayerInventory, pTitle);
 
         this.oneItemCurrencyMode = pMenu.oneItemCurrencyMode;
@@ -98,6 +102,8 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
         this.shopItems = shopItems;
         this.sellPrices = sellPrices;
 
+        this.adminShopName = adminShopName;
+
         this.selectFirstAvailableCategory();
     }
 
@@ -107,10 +113,12 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
             public LinkedHashMap<InnerCategory, List<ShopItem>> get(Object key) {
                 return this.getOrDefault(key, new LinkedHashMap<>());
             }
-        }, new HashMap<>());
+        }, new HashMap<>(), null);
     }
 
-    public void onShopData(CompoundTag data) {
+    public void onShopData(CompoundTag data, @Nullable String adminShopName) {
+        this.adminShopName = adminShopName;
+
         ListTag categoriesTag = data.getList("categories", Tag.TAG_COMPOUND);
 
         categoriesTag.forEach(tag -> {
@@ -471,8 +479,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
     }
 
     @Override
-    protected void slotClicked(Slot pSlot, int pSlotId, int pMouseButton, @NotNull ClickType pType) {
-        // pSlot CAN BE GODDAMN NULL
+    protected void slotClicked(@Nullable Slot pSlot, int pSlotId, int pMouseButton, @NotNull ClickType pType) {
         if (!Config.disableAdminShopSelling.get() && pSlot != null && (pType == ClickType.QUICK_MOVE || pType == ClickType.SWAP || pType == ClickType.PICKUP) && (pMouseButton == 0 || pMouseButton == 1)) {
             ItemDescription itemDescription = ItemDescription.ofItem(pSlot.getItem());
             ItemSellabilityInfo info = this.sellPrices.get(itemDescription);
@@ -529,7 +536,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
 
             if (player != null && player.isCreative() && player.getPermissionLevel() >= 4) {
                 this.addRenderableWidget(Button.builder(Component.translatable("jackseconomy.edit"), (b) -> {
-                    Minecraft.getInstance().screen = new EditAdminShopScreen(this.menu, this.menu.inventory, this.title, this.shopItems, this.sellPrices);
+                    Minecraft.getInstance().screen = new EditAdminShopScreen(this.menu, this.menu.inventory, this.title, this.shopItems, this.sellPrices, this.adminShopName);
                     Minecraft.getInstance().screen.init(Minecraft.getInstance(), this.width, this.height);
                 }).bounds(3, 3, 75, 20).build());
             }
@@ -617,16 +624,24 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
         shouldRenderBackground = true;
         this.renderBg(guiGraphics, pPartialTick, pMouseX, pMouseY);
 
-        if (!isEditMode()) {
-            if (this.selectedCategory != null) {
-                guiGraphics.drawCenteredString(this.font, this.selectedCategory.name, this.leftPos + (this.imageWidth / 2), this.topPos + 6, 0xFFFFFFFF);
+        if (this.selectedCategory != null) {
+            Component component = Component.translatable(this.selectedCategory.name);
+            int width = Minecraft.getInstance().font.width(component);
+
+            float scale = 1.f;
+            int space = (this.imageWidth / 2) - 4;
+            if (width > space) {
+                scale = (float) space / width;
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().scale(scale, scale, scale);
             }
-        } else {
-            if (this.selectedCategory != null) {
-                guiGraphics.drawCenteredString(this.font, this.selectedCategory.name, this.leftPos + (this.imageWidth / 2), this.topPos + 6, 0xFFFFFFFF);
-            } else {
-                guiGraphics.drawCenteredString(this.font, Component.translatable("jackseconomy.add_category").withStyle(ChatFormatting.RED), this.leftPos + (this.imageWidth / 2), this.topPos + 6, 0xFFFFFFFF);
+
+            guiGraphics.drawCenteredString(this.font, component, (int) ((this.leftPos + (this.imageWidth / 2)) / scale), (int) ((this.topPos + 6) / scale + this.font.lineHeight * (1 - scale)), 0xFFFFFFFF);
+            if (width > space) {
+                guiGraphics.pose().popPose();
             }
+        } else if (isEditMode()) {
+            guiGraphics.drawCenteredString(this.font, Component.translatable("jackseconomy.add_category").withStyle(ChatFormatting.RED), this.leftPos + (this.imageWidth / 2), this.topPos + 6, 0xFFFFFFFF);
         }
 
         if (shoppingCartButton != null && shoppingCartButton.isHovered()) {
@@ -677,9 +692,9 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
                     }*/
 
                     if (this.isEditMode()) {
-                        this.tooltip = List.of(Component.literal(category.name), Component.translatable("jackseconomy.right_click_to_rename").withStyle(ChatFormatting.GRAY), Component.translatable("jackseconomy.middle_click_to_remove_category").withStyle(ChatFormatting.RED));
+                        this.tooltip = List.of(Component.translatable(category.name), Component.translatable("jackseconomy.right_click_to_rename").withStyle(ChatFormatting.GRAY), Component.translatable("jackseconomy.middle_click_to_remove_category").withStyle(ChatFormatting.RED));
                     } else {
-                        this.tooltip = List.of(Component.literal(category.name));
+                        this.tooltip = List.of(Component.translatable(category.name));
                     }
                 }
 
@@ -1181,5 +1196,5 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
     }
 
     public record ItemSellabilityInfo(double worth, String stage) { }
-    private record UnpreparedShopItem(@NotNull ItemDescription itemDescription, double price, @Nullable String customName, @Nullable String stage) { }
+    record UnpreparedShopItem(@NotNull ItemDescription itemDescription, double price, @Nullable String customName, @Nullable String stage) { }
 }

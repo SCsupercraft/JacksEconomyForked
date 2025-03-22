@@ -3,35 +3,43 @@ package me.khajiitos.jackseconomy.init;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.data.price.*;
 import me.khajiitos.jackseconomy.item.FluidTicketItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
+import me.khajiitos.jackseconomy.screen.BulkFluidScreen;
+import me.khajiitos.jackseconomy.screen.BulkItemScreen;
+import me.khajiitos.jackseconomy.screen.BulkAdminShopScreen;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.network.NetworkHooks;
 
 public class EconomyCommand {
 	// TODO: Purchases command + reset prices
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("economy").requires(stack -> stack.hasPermission(4))
-				.then(PriceCommand.command)
-				// .then(PurchasesCommand.command)
-				.then(ManifestCommand.command)
+						.then(ManifestCommand.command)
+						.then(PriceCommand.command)
+						// .then(PurchasesCommand.command)
 
-				// .then(Commands.literal("reset_all")
-				// 		 .executes(EconomyCommand::resetAll)
-				// )
+						// .then(Commands.literal("reset_all")
+						// 		 .executes(EconomyCommand::resetAll)
+						// )
 		);
 	}
 
@@ -55,13 +63,18 @@ public class EconomyCommand {
 								.then(Commands.literal("fluid_exporter").then(Commands.argument("price_per_mB", DoubleArgumentType.doubleArg(-1.0)).executes(PriceCommand::setFluidExporterPrice).then(Commands.literal("strip_nbt").executes(PriceCommand::setFluidExporterPriceStripNbt))))
 								.then(Commands.literal("fluid_importer").then(Commands.argument("price_per_mB", DoubleArgumentType.doubleArg(-1.0)).executes(PriceCommand::setFluidImporterPrice).then(Commands.literal("strip_nbt").executes(PriceCommand::setFluidImporterPriceStripNbt))))
 						)
+						.then(Commands.literal("bulk")
+								.then(Commands.literal("adminshop").executes(PriceCommand::bulkSetAdminShopPrices))
+								.then(Commands.literal("item").executes(PriceCommand::bulkSetItemPrices))
+								.then(Commands.literal("fluid").executes(PriceCommand::bulkSetFluidPrices))
+						)
 						.then(Commands.literal("reload")
 								.executes(PriceCommand::reloadPrices)
 						);
 
 		private static int reloadPrices(CommandContext<CommandSourceStack> ctx) {
 			PriceManager.load();
-			ctx.getSource().sendSystemMessage(Component.translatable("jackseconomy.prices_reloaded").withStyle(ChatFormatting.GREEN));
+			ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.prices_reloaded").withStyle(ChatFormatting.GREEN), true);
 			return 1;
 		}
 		private static int setImporterPrice(CommandContext<CommandSourceStack> ctx) {
@@ -118,7 +131,7 @@ public class EconomyCommand {
 			if (existingInfo != null) {
 				existingInfo.importerBuyPrice = price;
 			} else {
-				PriceManager.addPriceInfo(itemInHand, new PricesItemPriceInfo(-1, -1, price, null));
+				PriceManager.addPriceInfo(itemInHand, new PricesItemPriceInfo(-1, -1, price, null, null));
 			}
 
 			if (price > 0) {
@@ -155,7 +168,7 @@ public class EconomyCommand {
 			if (existingInfo != null) {
 				existingInfo.sellPrice = price;
 			} else {
-				PriceManager.addPriceInfo(itemInHand, new PricesItemPriceInfo(price, -1, -1, null));
+				PriceManager.addPriceInfo(itemInHand, new PricesItemPriceInfo(price, -1, -1, null, null));
 			}
 
 			if (price > 0) {
@@ -257,6 +270,30 @@ public class EconomyCommand {
 
 			return 0;
 		}
+
+		private static int bulkSetAdminShopPrices(CommandContext<CommandSourceStack> ctx) {
+			ServerPlayer player = ctx.getSource().getPlayer();
+			if (player == null) return 1;
+
+			NetworkHooks.openScreen(player, new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new BulkAdminShopScreen.Menu(pContainerId, pPlayerInventory), Component.empty()));
+			return 1;
+		}
+
+		private static int bulkSetItemPrices(CommandContext<CommandSourceStack> ctx) {
+			ServerPlayer player = ctx.getSource().getPlayer();
+			if (player == null) return 1;
+
+			NetworkHooks.openScreen(player, new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new BulkItemScreen.Menu(pContainerId, pPlayerInventory), Component.empty()));
+			return 1;
+		}
+
+		private static int bulkSetFluidPrices(CommandContext<CommandSourceStack> ctx) {
+			ServerPlayer player = ctx.getSource().getPlayer();
+			if (player == null) return 1;
+
+			NetworkHooks.openScreen(player, new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new BulkFluidScreen.Menu(pContainerId, pPlayerInventory), Component.empty()));
+			return 1;
+		}
 	}
 	private static class PurchasesCommand {
 		public static LiteralArgumentBuilder<CommandSourceStack> command =
@@ -265,7 +302,7 @@ public class EconomyCommand {
 
 		private static int resetData(CommandContext<CommandSourceStack> ctx) {
 			PurchaseManager.resetData();
-			ctx.getSource().sendSystemMessage(Component.translatable("jackseconomy.reset_purchase_data").withStyle(ChatFormatting.GREEN));
+			ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.reset_purchase_data").withStyle(ChatFormatting.GREEN), true);
 			return 1;
 		}
 	}
@@ -279,7 +316,7 @@ public class EconomyCommand {
 
 		private static int getMaxProcessCount(CommandContext<CommandSourceStack> ctx) {
 			CommandSourceStack source = ctx.getSource();
-			int maxProcessCount = 1;
+			int maxProcessCount;
 			ServerPlayer player = source.getPlayer();
 
 			if (player == null) return 1;
@@ -289,9 +326,12 @@ public class EconomyCommand {
 				maxProcessCount = FluidTicketItem.getMaxProcessCount(ticketItemStack);
 			} else if (ticketItemStack.getItem() instanceof TicketItem) {
 				maxProcessCount = TicketItem.getMaxProcessCount(ticketItemStack);
+			} else {
+				source.sendSystemMessage(Component.translatable("jackseconomy.hold_a_manifest").withStyle(ChatFormatting.RED));
+				return 1;
 			}
 
-			source.sendSystemMessage(Component.translatable("jackseconomy.get_ticket_process_count", maxProcessCount).withStyle(ChatFormatting.GREEN));
+			source.sendSuccess(() -> Component.translatable("jackseconomy.get_ticket_process_count", maxProcessCount).withStyle(ChatFormatting.GREEN), false);
 			return 1;
 		}
 		private static int setMaxProcessCount(CommandContext<CommandSourceStack> ctx) {
@@ -306,9 +346,12 @@ public class EconomyCommand {
 				FluidTicketItem.setMaxProcessCount(ticketItemStack, maxProcessCount);
 			} else if (ticketItemStack.getItem() instanceof TicketItem) {
 				TicketItem.setMaxProcessCount(ticketItemStack, maxProcessCount);
+			} else {
+				source.sendFailure(Component.translatable("jackseconomy.hold_a_manifest").withStyle(ChatFormatting.RED));
+				return 1;
 			}
 
-			source.sendSystemMessage(Component.translatable("jackseconomy.set_ticket_process_count", maxProcessCount).withStyle(ChatFormatting.GREEN));
+			source.sendSuccess(() -> Component.translatable("jackseconomy.set_ticket_process_count", maxProcessCount).withStyle(ChatFormatting.GREEN), false);
 			return 1;
 		}
 	}

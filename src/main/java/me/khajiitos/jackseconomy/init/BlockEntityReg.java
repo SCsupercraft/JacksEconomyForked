@@ -50,6 +50,11 @@ public class BlockEntityReg {
                     () -> BlockEntityType.Builder.of(CurrencyConverterBlockEntity::new, ItemBlockReg.CURRENCY_CONVERTER.get())
                             .build(null));
 
+    public static final RegistryObject<BlockEntityType<AdminShopBlockEntity>> ADMIN_SHOP =
+            BLOCK_ENTITY_TYPES.register("admin_shop",
+                    () -> BlockEntityType.Builder.of(AdminShopBlockEntity::new, ItemBlockReg.ADMIN_SHOP.get())
+                            .build(null));
+
     public static void init(IEventBus eventBus) {
         BLOCK_ENTITY_TYPES.register(eventBus);
     }

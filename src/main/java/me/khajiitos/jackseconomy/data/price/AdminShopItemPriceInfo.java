@@ -11,13 +11,15 @@ public class AdminShopItemPriceInfo extends ItemPriceInfo {
     public int adminShopSlot;
     public String customAdminShopName;
     public String adminShopStage;
+    public @Nullable String adminShopName;
 
-    public AdminShopItemPriceInfo(double adminShopBuyPrice, String category, int adminShopSlot, String customAdminShopName, String adminShopStage) {
+    public AdminShopItemPriceInfo(double adminShopBuyPrice, String category, int adminShopSlot, String customAdminShopName, String adminShopStage, @Nullable String adminShopName) {
         this.adminShopBuyPrice = adminShopBuyPrice;
         this.category = category;
         this.adminShopSlot = adminShopSlot;
         this.customAdminShopName = customAdminShopName;
         this.adminShopStage = adminShopStage;
+        this.adminShopName = adminShopName;
     }
 
     protected static @Nullable ItemPriceInfo fromJsonOrNull(JsonObject jsonObject) {
@@ -28,8 +30,10 @@ public class AdminShopItemPriceInfo extends ItemPriceInfo {
                 int adminShopSlot = jsonObject.has("adminShopSlot") ? jsonObject.get("adminShopSlot").getAsInt() : -1;
                 String customAdminShopName = jsonObject.has("customAdminShopName") ? jsonObject.get("customAdminShopName").getAsString() : null;
                 String adminShopStage = jsonObject.has("adminShopStage") ? jsonObject.get("adminShopStage").getAsString() : null;
+                String adminShopName = jsonObject.has("adminShopName") ? jsonObject.get("adminShopName").getAsString() : null;
+                if (adminShopName != null && adminShopName.length() > 32) return null;
 
-                return new AdminShopItemPriceInfo(adminShopBuyPrice, category, adminShopSlot, customAdminShopName, adminShopStage);
+                return new AdminShopItemPriceInfo(adminShopBuyPrice, category, adminShopSlot, customAdminShopName, adminShopStage, adminShopName);
             }
 
         } catch (NullPointerException | ClassCastException ignored) {}
@@ -59,6 +63,10 @@ public class AdminShopItemPriceInfo extends ItemPriceInfo {
 
         if (this.adminShopStage != null) {
             jsonObject.addProperty("adminShopStage", this.adminShopStage);
+        }
+
+        if (this.adminShopName != null) {
+            jsonObject.addProperty("adminShopName", this.adminShopName);
         }
 
         return jsonObject;

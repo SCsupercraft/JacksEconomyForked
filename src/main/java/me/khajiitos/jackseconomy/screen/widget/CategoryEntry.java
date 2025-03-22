@@ -14,12 +14,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public class CategoryEntry extends AbstractWidget {
-    private final AdminShopScreen.Category category;
+    private final AdminShopScreen.InnerCategory category;
     private final BiConsumer<CategoryEntry, Integer> onClick;
     private final Supplier<Boolean> isSelectedSupplier;
     private final Supplier<Boolean> shouldRenderStar;
 
-    public CategoryEntry(int pX, int pY, int pWidth, int pHeight, @Nullable AdminShopScreen.Category category, BiConsumer<CategoryEntry, Integer> onClick, Supplier<Boolean> isSelectedSupplier, Supplier<Boolean> shouldRenderStar) {
+    public CategoryEntry(int pX, int pY, int pWidth, int pHeight, @Nullable AdminShopScreen.InnerCategory category, BiConsumer<CategoryEntry, Integer> onClick, Supplier<Boolean> isSelectedSupplier, Supplier<Boolean> shouldRenderStar) {
         super(pX, pY, pWidth, pHeight, Component.empty());
         this.category = category;
         this.onClick = onClick;
@@ -27,7 +27,7 @@ public class CategoryEntry extends AbstractWidget {
         this.shouldRenderStar = shouldRenderStar;
     }
 
-    public AdminShopScreen.Category getCategory() {
+    public AdminShopScreen.InnerCategory getCategory() {
         return category;
     }
 
@@ -50,7 +50,7 @@ public class CategoryEntry extends AbstractWidget {
             }
         }
 
-        MutableComponent name = Component.literal(category == null ? "..." : category.getName());
+        MutableComponent name = category == null ? Component.literal("...") : Component.translatable(category.getName());
 
         int width = Minecraft.getInstance().font.width(name);
 
@@ -62,7 +62,7 @@ public class CategoryEntry extends AbstractWidget {
             guiGraphics.pose().scale(scale, scale, scale);
         }
 
-        guiGraphics.drawString(Minecraft.getInstance().font, name, (int) ((this.getX() + 22) / scale), (int) ((this.getY() + 9) / scale), 0xFFFFFFFF);
+        guiGraphics.drawString(Minecraft.getInstance().font, name, (int) ((this.getX() + 22) / scale), (int) ((this.getY() + 9) / scale + Minecraft.getInstance().font.lineHeight * (1 - scale)), 0xFFFFFFFF);
 
         if (width > space) {
             guiGraphics.pose().popPose();

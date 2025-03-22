@@ -1,23 +1,22 @@
 package me.khajiitos.jackseconomy.packet.handler;
 
-import me.khajiitos.jackseconomy.packet.UpdateAdminShopPacket;
 import me.khajiitos.jackseconomy.data.price.AdminShopItemPriceInfo;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
-import me.khajiitos.jackseconomy.util.ItemHelper;
+import me.khajiitos.jackseconomy.packet.UpdateAdminShopPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class UpdateAdminShopHandler {
@@ -37,10 +36,14 @@ public class UpdateAdminShopHandler {
         ListTag categoriesTag = data.getList("categories", Tag.TAG_COMPOUND);
         ListTag itemsTag = data.getList("items", Tag.TAG_COMPOUND);
 
-        List<AdminShopItemPriceInfo> itemPriceInfos = PriceManager.getItemPriceInfos().stream().filter(itemPriceEntry -> itemPriceEntry.itemPriceInfo() instanceof AdminShopItemPriceInfo).map(itemPriceEntry -> (AdminShopItemPriceInfo)itemPriceEntry.itemPriceInfo()).toList();
+        // <AdminShopItemPriceInfo> itemPriceInfos = PriceManager.getItemPriceInfos().stream().filter(itemPriceEntry -> itemPriceEntry.itemPriceInfo() instanceof AdminShopItemPriceInfo).map(itemPriceEntry -> (AdminShopItemPriceInfo)itemPriceEntry.itemPriceInfo()).toList();
         LinkedHashMap<PriceManager.Category, List<PriceManager.Category>> categories = PriceManager.getCategories();
+        List<PriceManager.Category> toRemove = new ArrayList<>();
 
-        categories.clear();
+        categories.forEach((category, unused) -> {
+            if (Objects.equals(category.adminShopName(), msg.adminShopName())) toRemove.add(category);
+        });
+        toRemove.forEach(categories::remove);
 
         /*
         // Remove all properties related to the shop
@@ -52,14 +55,14 @@ public class UpdateAdminShopHandler {
             entry.adminShopStage = null;
         }*/
         // Whatever, let's just remove them all... what's the worst that could happen?
-        PriceManager.getItemPriceInfos().removeIf(itemPriceEntry -> itemPriceEntry.itemPriceInfo() instanceof AdminShopItemPriceInfo);
+        PriceManager.getItemPriceInfos().removeIf(itemPriceEntry -> itemPriceEntry.itemPriceInfo() instanceof AdminShopItemPriceInfo info && Objects.equals(info.adminShopName, msg.adminShopName()));
 
         categoriesTag.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
                 String name = compoundTag.getString("name");
                 ItemDescription itemDescription = ItemDescription.fromNbt(compoundTag.getCompound("item"));
 
-                PriceManager.Category category = new PriceManager.Category(name, itemDescription);
+                PriceManager.Category category = new PriceManager.Category(name, itemDescription, msg.adminShopName());
                 ArrayList<PriceManager.Category> innerCategories = new ArrayList<>();
 
                 ListTag innerCategoriesTag = compoundTag.getList("categories", Tag.TAG_COMPOUND);
@@ -69,7 +72,7 @@ public class UpdateAdminShopHandler {
                         String innerName = innerCategoryTag.getString("name");
                         ItemDescription innerItemDescription = ItemDescription.fromNbt(innerCategoryTag.getCompound("item"));
 
-                        PriceManager.Category innerCategory = new PriceManager.Category(innerName, innerItemDescription);
+                        PriceManager.Category innerCategory = new PriceManager.Category(innerName, innerItemDescription, null);
                         innerCategories.add(innerCategory);
                     }
                 });
@@ -79,7 +82,7 @@ public class UpdateAdminShopHandler {
         });
 
         PriceManager.getItemPriceInfos().forEach(itemPriceEntry -> {
-            if (itemPriceEntry.itemPriceInfo() instanceof PricesItemPriceInfo priceInfo) {
+            if (itemPriceEntry.itemPriceInfo() instanceof PricesItemPriceInfo priceInfo && Objects.equals(priceInfo.adminShopName, msg.adminShopName())) {
                 // Will be brought back later if not removed
                 priceInfo.adminShopSellPrice = -1.0;
                 priceInfo.adminShopSellStage = null;
@@ -98,13 +101,13 @@ public class UpdateAdminShopHandler {
                 String sellStage = compoundTag.contains("adminShopSellStage") ? compoundTag.getString("adminShopSellStage") : null;
 
                 if (sellPrice > 0) {
-                    PricesItemPriceInfo pricesItemPriceInfo = PriceManager.getPricesInfo(itemDescription);
+                    PricesItemPriceInfo pricesItemPriceInfo = PriceManager.getPricesInfo(itemDescription, msg.adminShopName());
 
                     if (pricesItemPriceInfo != null) {
                         pricesItemPriceInfo.adminShopSellPrice = sellPrice;
                         pricesItemPriceInfo.adminShopSellStage = sellStage;
                     } else {
-                        PriceManager.addPriceInfo(itemDescription, new PricesItemPriceInfo(-1, sellPrice, -1, sellStage));
+                        PriceManager.addPriceInfo(itemDescription, new PricesItemPriceInfo(-1, sellPrice, -1, sellStage, msg.adminShopName()));
                     }
 
                     // Sell price/stage entries and admin shop entries are separate
@@ -117,7 +120,7 @@ public class UpdateAdminShopHandler {
                 String customName = compoundTag.contains("customAdminShopName") ? compoundTag.getString("customAdminShopName") : null;
                 String stage = compoundTag.contains("adminShopStage") ? compoundTag.getString("adminShopStage") : null;
 
-                PriceManager.addPriceInfo(itemDescription, new AdminShopItemPriceInfo(buyPrice, category, slot, customName, stage));
+                PriceManager.addPriceInfo(itemDescription, new AdminShopItemPriceInfo(buyPrice, category, slot, customName, stage, msg.adminShopName()));
             }
         });
 

@@ -10,7 +10,9 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -24,6 +26,11 @@ public record FluidDescription(Fluid fluid, CompoundTag compoundTag) {
         } else {
             this.compoundTag = compoundTag.copy();
         }
+    }
+
+    public static FluidDescription ofItem(ItemStack itemStack) {
+        IFluidHandlerItem cap = itemStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElseThrow(IllegalArgumentException::new);
+        return ofFluid(cap.getFluidInTank(0));
     }
 
     public static FluidDescription ofFluid(FluidStack fluidStack) {

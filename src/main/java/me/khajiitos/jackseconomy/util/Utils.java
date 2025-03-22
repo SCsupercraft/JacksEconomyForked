@@ -21,4 +21,15 @@ public class Utils {
 
         return value;
     }
+
+    public static int hexToMinecraftColor(String hexColor) {
+        int color = Integer.parseInt(hexColor.substring(1), 16);
+
+        if (hexColor.length() == 7) {
+            color |= 0xFF000000;
+        }
+
+        return color;
+    }
+
 }

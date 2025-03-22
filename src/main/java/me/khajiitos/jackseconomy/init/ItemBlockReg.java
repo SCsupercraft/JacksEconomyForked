@@ -54,7 +54,7 @@ public class ItemBlockReg {
             }
         }
     });
-    public static final RegistryObject<BlockItem> ADMIN_SHOP_ITEM = ITEMS.register("admin_shop", () -> new BlockItem(ADMIN_SHOP.get(), new Item.Properties()));
+    public static final RegistryObject<BlockItem> ADMIN_SHOP_ITEM = ITEMS.register("admin_shop", () -> new NameableBlockItem(ADMIN_SHOP.get(), new Item.Properties()));
 
     public static final RegistryObject<CurrencyItem> PENNY_ITEM = ITEMS.register("penny", () -> new CurrencyItem(new BigDecimal("0.01"), false));
     public static final RegistryObject<CurrencyItem> NICKEL_ITEM = ITEMS.register("nickel", () -> new CurrencyItem(new BigDecimal("0.05"), false));

@@ -36,7 +36,7 @@ public class AdminShopPurchaseHandler {
         BigDecimal value = BigDecimal.ZERO;
         for (Map.Entry<AdminShopPurchasePacket.ShopItemDescription, Integer> entry : msg.shoppingCart().entrySet()) {
             ItemDescription description = entry.getKey().itemDescription();
-            double price = PriceManager.getAdminShopBuyPrice(description, entry.getValue(), entry.getKey().slot(), entry.getKey().category());
+            double price = PriceManager.getAdminShopBuyPrice(description, entry.getValue(), entry.getKey().slot(), entry.getKey().category(), msg.adminShopName());
             if (price <= 0) {
                 return;
             }
@@ -52,11 +52,11 @@ public class AdminShopPurchaseHandler {
 
         if (!Config.disableAdminShopSelling.get()) {
             for (Map.Entry<ItemDescription, Integer> entry : msg.itemsToSell().entrySet()) {
-                double price = PriceManager.getAdminShopSellPrice(entry.getKey(), entry.getValue());
+                double price = PriceManager.getAdminShopSellPrice(entry.getKey(), entry.getValue(), msg.adminShopName());
                 if (price <= 0) {
                     return;
                 }
-                String stage = PriceManager.getAdminShopSellStage(entry.getKey());
+                String stage = PriceManager.getAdminShopSellStage(entry.getKey(), msg.adminShopName());
 
                 if (stage != null && !GameStagesManager.hasGameStage(sender, stage)) {
                     // Player doesn't have required game stage to sell item
@@ -233,7 +233,7 @@ public class AdminShopPurchaseHandler {
 
             while (countLeft > 0) {
                 int thisStackCount = Math.min(countLeft, stackCount);
-                double price = PriceManager.getAdminShopBuyPrice(entry.getKey().itemDescription(), thisStackCount, entry.getKey().slot(), entry.getKey().category());
+                double price = PriceManager.getAdminShopBuyPrice(entry.getKey().itemDescription(), thisStackCount, entry.getKey().slot(), entry.getKey().category(), msg.adminShopName());
                 if (price <= 0) {
                     continue;
                 }

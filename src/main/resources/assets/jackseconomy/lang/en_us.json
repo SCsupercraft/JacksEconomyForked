@@ -60,150 +60,245 @@
 
   "curios.identifier.wallet": "Wallet",
 
-  "key.jackseconomy.open_wallet": "Open Wallet",
   "key.categories.jackseconomy": "Jack's Economy (Forked)",
+  "key.jackseconomy.open_wallet": "Open Wallet",
 
   "jackseconomy.ponder.exporting.header": "Exporting Items",
   "jackseconomy.ponder.exporting.text_1": "Exporters can be used to automate the process of selling items.",
   "jackseconomy.ponder.exporting.text_2": "Exporters need manifests to function, without them they are useless.",
   "jackseconomy.ponder.exporting.text_3": "Exporters take a while to sell items, so make sure you have enough of them to avoid overflows.",
+
   "jackseconomy.ponder.importing.header": "Importing Items",
   "jackseconomy.ponder.importing.text_1": "Importers can be used to automate the process of buying items.",
   "jackseconomy.ponder.importing.text_2": "Importers need manifests to function, without them they are useless.",
   "jackseconomy.ponder.importing.text_3": "Importers take a while to buy items, so make sure you have enough of them to sustain your needs.",
+
   "jackseconomy.ponder.fluid_exporting.header": "Exporting Fluids",
   "jackseconomy.ponder.fluid_exporting.text_1": "Fluid exporters can be used to automate the process of selling fluids.",
   "jackseconomy.ponder.fluid_exporting.text_2": "Fluid exporters need manifests to function, without them they are useless.",
   "jackseconomy.ponder.fluid_exporting.text_3": "Fluid exporters take a while to sell fluids, so make sure you have enough of them to avoid overflows.",
+
   "jackseconomy.ponder.fluid_importing.header": "Importing Fluids",
   "jackseconomy.ponder.fluid_importing.text_1": "Fluid importers can be used to automate the process of buying fluids.",
   "jackseconomy.ponder.fluid_importing.text_2": "Fluid importers need manifests to function, without them they are useless.",
   "jackseconomy.ponder.fluid_importing.text_3": "Fluid importers take a while to buy fluids, so make sure you have enough of them to sustain your needs.",
+
   "jackseconomy.ponder.converting_currency.header": "Converting Currency",
   "jackseconomy.ponder.converting_currency.text_1": "Currency converters can be used to convert money into other forms, such as dollar bills to ten dollar bills.",
   "jackseconomy.ponder.converting_currency.text_2": "Currency converters don't use power, unlike other machines.",
   "jackseconomy.ponder.converting_currency.text_3": "They convert currencies instantly, so no need to wait.",
 
   "jackseconomy.click_to_select": "Click to select!",
+  "jackseconomy.none_selected": "None selected",
   "jackseconomy.selected": "Selected",
+
   "jackseconomy.search": "Search...",
+
   "jackseconomy.sell_price": "Sell price (%s): %s",
   "jackseconomy.buy_price": "Buy price (%s): %s",
+
   "jackseconomy.importer_price": "Importer price: %s each",
   "jackseconomy.exporter_price": "Exporter price: %s each",
+
   "jackseconomy.fluid_sell_price": "Fluid sell price (%s): %s",
   "jackseconomy.fluid_buy_price": "Fluid buy price (%s): %s",
+
   "jackseconomy.fluid_importer_price": "Fluid importer price: %s per mB",
   "jackseconomy.fluid_exporter_price": "Fluid exporter price: %s per mB",
+
   "jackseconomy.ticket_process_count" : "Allows processing up to %s item(s)",
   "jackseconomy.fluid_ticket_process_count": "Allows processing up to %smB of fluid",
+
   "jackseconomy.set_ticket_process_count": "Set max process count to %s",
   "jackseconomy.get_ticket_process_count": "The max process count for this manifest is %s",
+
+  "jackseconomy.reset_admin_shop_name": "Reset admin shop name",
+  "jackseconomy.set_admin_shop_name": "Set admin shop name to %s",
+
   "jackseconomy.lalt": "[L-ALT]",
+
   "jackseconomy.view_prices": "%s View Prices",
+
   "jackseconomy.redstone_ignored": "Redstone: Ignored",
   "jackseconomy.redstone_signal_on": "Redstone: Signal On",
   "jackseconomy.redstone_signal_off": "Redstone: Signal Off",
+
   "jackseconomy.currency": "Currency: %.1f",
   "jackseconomy.wallet": "Wallet",
+
   "jackseconomy.turn_into_check": "Click to turn the specified balance into a check!",
+
   "jackseconomy.click_to_withdraw": "Click to withdraw!",
+
   "jackseconomy.shift_coins": "Shift Click: 64 items",
   "jackseconomy.ctrl_coins": "Ctrl Click: 10 items",
   "jackseconomy.normal_coins": "Normal Click: 1 item",
+
   "jackseconomy.balance": "Balance: %s",
   "jackseconomy.value": "Value: %s",
   "jackseconomy.wallet_balance": "Wallet: %s",
   "jackseconomy.balance_out_of": "Balance: %s/%s",
+
   "jackseconomy.fe_per_tick": "Usage: %s FE/tick",
   "jackseconomy.progress_per_tick": "Speed: %s progress/tick",
+
   "jackseconomy.subtitle.coin": "Coin sounds",
   "jackseconomy.subtitle.cash": "Cash sounds",
   "jackseconomy.subtitle.checkout": "Checkout sounds",
+
   "jackseconomy.items": "Items: %s",
+
   "jackseconomy.in_cart": "In cart: %s",
   "jackseconomy.to_sell": "To sell: %s",
+
   "jackseconomy.no_wallet": "No wallet!",
+
   "jackseconomy.purchase": "Purchase",
+
   "jackseconomy.cant_afford": "Can't afford!",
   "jackseconomy.shopping_cart_empty": "Shopping cart is empty!",
+
   "jackseconomy.sold_items": "Sold items: %s",
   "jackseconomy.bought_items": "Bought items: %s",
   "jackseconomy.total": "Total: %s",
+
   "jackseconomy.hold_an_item": "You need to be holding an item!",
   "jackseconomy.hold_an_item_with_fluid_content": "You need to be holding an item that contains a fluid!",
+  "jackseconomy.hold_a_manifest": "You need to be holding a manifest!",
+  "jackseconomy.hold_an_admin_shop": "You need to be holding an admin shop!",
+
   "jackseconomy.importer_price_set": "Importer buy price for %s set to %s!",
   "jackseconomy.exporter_price_set": "Exporter sell price for %s set to %s!",
+
   "jackseconomy.fluid_importer_price_set": "Fluid importer buy price for %s set to %s!",
   "jackseconomy.fluid_exporter_price_set": "Fluid exporter sell price for %s set to %s!",
+
   "jackseconomy.importer_price_removed": "Importer buy price for %s removed!",
   "jackseconomy.exporter_price_removed": "Exporter sell price for %s removed!",
+
   "jackseconomy.fluid_importer_price_removed": "Fluid importer buy price for %s removed!",
   "jackseconomy.fluid_exporter_price_removed": "Fluid exporter sell price for %s removed!",
+
   "jackseconomy.generate_this_ticket": "You can generate this manifest with the following command:",
+
   "jackseconomy.copy": "[COPY]",
   "jackseconomy.click_to_copy": "Click here to copy the command!",
+
   "jackseconomy.config.hide_price_tooltips": "Hide price tooltips: %s",
   "jackseconomy.config.alternative_tooltip_format": "Alternative tooltip format: %s",
+
   "jackseconomy.config.wallet_hud_position_right": "Wallet HUD position on the right: %s",
   "jackseconomy.config.wallet_hud_position_y_offset": "Wallet HUD position Y offset: %s",
+
   "jackseconomy.true": "true",
   "jackseconomy.false": "false",
+
   "jackseconomy.golden_exporter_manifest_description": "Allows selling any sellable item in the exporter",
   "jackseconomy.golden_fluid_exporter_manifest_description": "Allows selling any sellable fluid in the fluid exporter",
+
   "jackseconomy.edit": "Edit",
+
+  "jackseconomy.right_click_to_change": "Right-click to change",
   "jackseconomy.right_click_to_edit_price": "Right-click to edit price",
   "jackseconomy.middle_click_to_remove": "Middle-click to remove item",
+  "jackseconomy.middle_click_to_reset": "Middle-click to reset",
+  "jackseconomy.middle_click_to_cancel": "Middle-click to cancel",
+
   "jackseconomy.no_price": "No price set",
+
   "jackseconomy.right_click_to_rename": "Right-click to rename",
   "jackseconomy.middle_click_to_remove_category": "Middle-click to remove category",
+
   "jackseconomy.click_to_open_admin_shop": "Click to open the Admin Shop!",
+
   "jackseconomy.shift_right_click_to_rename": "L-Shift + Right-click to rename",
+
   "jackseconomy.manifest_required": "Manifest required for transactions",
+
   "jackseconomy.leave": "Leave",
   "jackseconomy.stay": "Stay",
+
   "jackseconomy.admin_shop_exit_prompt": "Are you sure you want to exit the shop? Your current cart will be lost.",
+
   "jackseconomy.configuration": "Configuration",
+
   "jackseconomy.direction.north": "North (Face)",
   "jackseconomy.direction.south": "South (Back)",
   "jackseconomy.direction.east": "East (Left)",
   "jackseconomy.direction.west": "West (Right)",
   "jackseconomy.direction.up": "Up",
   "jackseconomy.direction.down": "Down",
+
   "jackseconomy.sidevalue.input": "Input",
   "jackseconomy.sidevalue.output": "Output",
   "jackseconomy.sidevalue.rejection_output": "Rejection Output",
   "jackseconomy.sidevalue.none": "None",
+
   "jackseconomy.max_storage": "Max storage: %s (%s used)",
+
   "jackseconomy.speed": "Speed: %s RPM",
+
   "jackseconomy.category_list": "Shop Categories",
   "jackseconomy.drop_item_to_create_category": "Drop an item to create a category!",
   "jackseconomy.add_category": "Add category!",
+
   "jackseconomy.max_capacity_reached": "Maximum capacity reached",
+  "jackseconomy.capacity_overflow_reached": "Capacity Overflow Reached",
+
   "jackseconomy.write_check": "Write Check",
   "jackseconomy.write": "Write",
+
   "jackseconomy.deposit_all": "Deposit All",
+
   "jackseconomy.shop": "Shop",
+
   "jackseconomy.item_owner": "%s's %s",
+
   "jackseconomy.thanks_for_using": "Thank you for using Jack's Economy (Forked)!",
-  "jackseconomy.capacity_overflow_reached": "Capacity Overflow Reached",
+
   "jackseconomy.no_sell_price": "No sell price",
   "jackseconomy.middle_click_to_remove_sell_price": "Middle-click to remove sell price",
+
   "jackseconomy.locked": "Locked",
   "jackseconomy.required_game_stage": "Required game stage: %s",
-  "jackseconomy.lctrl_right_click_to_change_stage": "L-CTRL + Right-click to change unlock stage",
   "jackseconomy.locked_behind_stage": "Locked behind game-stage: %s",
+
+  "jackseconomy.lctrl_right_click_to_change_stage": "L-CTRL + Right-click to change unlock stage",
+
   "jackseconomy.selling": "Selling",
   "jackseconomy.buying": "Buying",
+
   "jackseconomy.sell": "Sell",
   "jackseconomy.purchase_and_sell": "Purchase & Sell",
+
   "jackseconomy.selling_locked": "Selling locked",
   "jackseconomy.selling_locked_behind_gamestage": "Selling locked behind game-stage: %s",
+
   "jackseconomy.shift_right_click_to_edit_stage": "L-Shift + Right-click to edit required stage",
   "jackseconomy.shift_middle_click_to_remove_stage": "L-Shift + Middle-click to remove required stage",
+
   "jackseconomy.item_disabled": "Disabled",
+
+  "jackseconomy.admin_shop_name": "Shop name: %s",
+
   "jackseconomy.admin_shop_saved": "Admin shop saved!",
   "jackseconomy.prices_reloaded": "Reloaded prices from file!",
   "jackseconomy.reset_all_data": "Reset all data!",
-  "jackseconomy.reset_purchase_data": "Reset purchase data!"
+  "jackseconomy.reset_purchase_data": "Reset purchase data!",
+
+  "jackseconomy.default": "Default",
+
+  "jackseconomy.bulk_deselect": "Left-click to deselect",
+  "jackseconomy.bulk_select": "Left-click to select",
+  "jackseconomy.bulk_add_to_selection": "Right-click to add to selection",
+  "jackseconomy.bulk_reset_selection": "Middle-click to reset selection",
+
+  "jackseconomy.bulk_set_buy_price": "L-CTRL + Right-click to edit buy price",
+  "jackseconomy.bulk_set_buy_stage": "L-CTRL + L-Shift + Right-click to edit buy stage",
+  "jackseconomy.bulk_set_sell_price": "Right-click to edit sell price",
+  "jackseconomy.bulk_set_sell_stage": "L-Shift + Right-click to edit sell stage",
+  "jackseconomy.bulk_remove_buy_price": "L-CTRL + Middle-click to remove buy price",
+  "jackseconomy.bulk_remove_buy_stage": "L-CTRL + L-Shift + Middle-click to remove buy stage",
+  "jackseconomy.bulk_remove_sell_price": "Middle-click to remove sell price",
+  "jackseconomy.bulk_remove_sell_stage": "L-Shift + Middle-click to remove sell stage"
 }

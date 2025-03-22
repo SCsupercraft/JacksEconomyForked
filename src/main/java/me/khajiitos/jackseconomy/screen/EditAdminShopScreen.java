@@ -31,8 +31,8 @@ public class EditAdminShopScreen extends AdminShopScreen {
     protected ShopItem itemOnCursor;
     protected FloatingEditBoxWidget floatingEditBox;
 
-    public EditAdminShopScreen(AdminShopMenu pMenu, Inventory pPlayerInventory, Component pTitle, LinkedHashMap<Category, LinkedHashMap<InnerCategory, List<ShopItem>>> shopItems, HashMap<ItemDescription, ItemSellabilityInfo> sellPrices) {
-        super(pMenu, pPlayerInventory, pTitle, shopItems, sellPrices);
+    public EditAdminShopScreen(AdminShopMenu pMenu, Inventory pPlayerInventory, Component pTitle, LinkedHashMap<Category, LinkedHashMap<InnerCategory, List<ShopItem>>> shopItems, HashMap<ItemDescription, ItemSellabilityInfo> sellPrices, @Nullable String adminShopName) {
+        super(pMenu, pPlayerInventory, pTitle, shopItems, sellPrices, adminShopName);
 
         pMenu.setSlotsLocked(true);
     }
@@ -414,7 +414,7 @@ public class EditAdminShopScreen extends AdminShopScreen {
     }
 
     private void sendChanges() {
-        Packets.sendToServer(new UpdateAdminShopPacket(this.toAdminShopUpdateCompound()));
+        Packets.sendToServer(new UpdateAdminShopPacket(this.toAdminShopUpdateCompound(), this.adminShopName));
     }
 
     @Override

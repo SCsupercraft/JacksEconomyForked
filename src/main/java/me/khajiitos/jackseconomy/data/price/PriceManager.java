@@ -31,13 +31,13 @@ public class PriceManager {
     );
 
     static {
-        itemPriceInfos.add(new ItemPriceEntry(new ItemDescription(Items.DIAMOND, null), new PricesItemPriceInfo(50.0, 45.0,100.0, null)));
-        itemPriceInfos.add(new ItemPriceEntry(new ItemDescription(Items.DIAMOND, null), new AdminShopItemPriceInfo(150.0, "General:Gems", 0, null, null)));
+        itemPriceInfos.add(new ItemPriceEntry(new ItemDescription(Items.DIAMOND, null), new PricesItemPriceInfo(50.0, 45.0,100.0, null, null)));
+        itemPriceInfos.add(new ItemPriceEntry(new ItemDescription(Items.DIAMOND, null), new AdminShopItemPriceInfo(150.0, "General:Gems", 0, null, null, null)));
         fluidPriceInfos.add(new FluidPriceEntry(new FluidDescription(Fluids.LAVA, null), new PricesFluidPriceInfo(0.02, 0.05)));
 
         ArrayList<Category> categoriesInnerDefault = new ArrayList<>();
-        categoriesInnerDefault.add(new Category("Gems", new ItemDescription(Items.DIAMOND, new CompoundTag())));
-        categories.put(new Category("General", new ItemDescription(Items.DIRT, new CompoundTag())), categoriesInnerDefault);
+        categoriesInnerDefault.add(new Category("Gems", new ItemDescription(Items.DIAMOND, new CompoundTag()), null));
+        categories.put(new Category("General", new ItemDescription(Items.DIRT, new CompoundTag()), null), categoriesInnerDefault);
     }
 
     @Deprecated
@@ -50,7 +50,11 @@ public class PriceManager {
     }
 
     public static PricesItemPriceInfo getPricesInfo(ItemDescription itemDescription) {
-        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo)).findFirst().orElse(null);
+        return getPricesInfo(itemDescription, null);
+    }
+
+    public static PricesItemPriceInfo getPricesInfo(ItemDescription itemDescription, @Nullable String adminShopName) {
+        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo info && Objects.equals(info.adminShopName, adminShopName)).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo)).findFirst().orElse(null);
     }
 
     @Deprecated
@@ -79,11 +83,11 @@ public class PriceManager {
     }
 
     public static double getExporterSellPrice(ItemDescription itemDescription, int count) {
-        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo).sellPrice * count).findFirst().orElse(-1.0);
+        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo info && info.adminShopName == null).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo).sellPrice * count).findFirst().orElse(-1.0);
     }
 
     public static double getImporterBuyPrice(ItemDescription itemDescription, int count) {
-        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo).importerBuyPrice * count).findFirst().orElse(-1.0);
+        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo info && info.adminShopName == null).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo).importerBuyPrice * count).findFirst().orElse(-1.0);
     }
 
     public static double getFluidExporterSellPrice(FluidDescription fluidDescription, int count) {
@@ -94,21 +98,21 @@ public class PriceManager {
         return fluidPriceInfos.stream().filter(fluidPriceEntry -> fluidPriceEntry.fluidDescription.equals(fluidDescription) && fluidPriceEntry.fluidPriceInfo instanceof PricesFluidPriceInfo).map(entry -> ((PricesFluidPriceInfo)entry.fluidPriceInfo).importerBuyPrice * count).findFirst().orElse(-1.0);
     }
 
-    public static double getAdminShopSellPrice(ItemDescription itemDescription, int count) {
-        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo).adminShopSellPrice * count).findFirst().orElse(-1.0);
+    public static double getAdminShopSellPrice(ItemDescription itemDescription, int count, @Nullable String adminShopName) {
+        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo info && Objects.equals(info.adminShopName, adminShopName)).map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo).adminShopSellPrice * count).findFirst().orElse(-1.0);
     }
 
-    public static String getAdminShopSellStage(ItemDescription itemDescription) {
+    public static String getAdminShopSellStage(ItemDescription itemDescription, @Nullable String adminShopName) {
         return itemPriceInfos.stream()
-                .filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo)
+                .filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof PricesItemPriceInfo info && Objects.equals(info.adminShopName, adminShopName))
                 .map(entry -> ((PricesItemPriceInfo)entry.itemPriceInfo).adminShopSellStage)
                 .map(Optional::ofNullable)
                 .findFirst()
                 .orElse(Optional.empty()).orElse(null);
     }
 
-    public static double getAdminShopBuyPrice(ItemDescription itemDescription, int count, int slot, String category) {
-        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof AdminShopItemPriceInfo adminShopItemPriceInfo && adminShopItemPriceInfo.adminShopSlot == slot && Objects.equals(adminShopItemPriceInfo.category, category)).map(entry -> ((AdminShopItemPriceInfo)entry.itemPriceInfo).adminShopBuyPrice * count).findFirst().orElse(-1.0);
+    public static double getAdminShopBuyPrice(ItemDescription itemDescription, int count, int slot, String category, @Nullable String adminShopName) {
+        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof AdminShopItemPriceInfo info && Objects.equals(info.adminShopName, adminShopName) && info.adminShopSlot == slot && Objects.equals(info.category, category)).map(entry -> ((AdminShopItemPriceInfo)entry.itemPriceInfo).adminShopBuyPrice * count).findFirst().orElse(-1.0);
     }
 
     private static @Nullable ItemDescription itemDescriptionFromJson(JsonElement element) {
@@ -140,13 +144,16 @@ public class PriceManager {
                     String categoryName = object.get("name").getAsString();
                     JsonElement itemDesc = object.get("item");
 
+                    String adminShopName = object.has("adminShopName") ? object.get("adminShopName").getAsString() : null;
+                    if (adminShopName != null && adminShopName.length() > 32) return;
+
                     ItemDescription itemDescription = itemDescriptionFromJson(itemDesc);
                     if (itemDescription == null) return;
 
                     JsonArray categoriesList = object.getAsJsonArray("categories");
 
                     if (categoriesList != null) {
-                        Category category = new Category(categoryName, itemDescription);
+                        Category category = new Category(categoryName, itemDescription, adminShopName);
                         ArrayList<Category> innerCategories = new ArrayList<>();
                         categories.put(category, innerCategories);
 
@@ -158,7 +165,7 @@ public class PriceManager {
                                 ItemDescription innerItemDescription = itemDescriptionFromJson(itemDescInner);
                                 if (innerItemDescription == null) return;
 
-                                innerCategories.add(new Category(categoryNameInner, innerItemDescription));
+                                innerCategories.add(new Category(categoryNameInner, innerItemDescription, null));
                             }
                         });
                     }
@@ -219,6 +226,8 @@ public class PriceManager {
             JsonObject categoryObj = new JsonObject();
             categoryObj.add("item", category.icon.toJson());
             categoryObj.addProperty("name", category.name);
+
+            if (category.adminShopName != null) categoryObj.addProperty("adminShopName", category.adminShopName);
 
             JsonArray innerCategories = new JsonArray();
 
@@ -286,7 +295,7 @@ public class PriceManager {
         return maxPage;
     }
 
-    public static CompoundTag toAdminShopSchemaCompound(Player player) {
+    public static CompoundTag toAdminShopSchemaCompound(Player player, @Nullable String name) {
         CompoundTag tag = new CompoundTag();
 
         ListTag itemsTag = new ListTag();
@@ -296,7 +305,7 @@ public class PriceManager {
 
         itemPriceInfos.forEach((entry) -> {
             if (entry.itemPriceInfo instanceof AdminShopItemPriceInfo itemPriceInfo) {
-                if (itemPriceInfo.adminShopBuyPrice <= 0) {
+                if (itemPriceInfo.adminShopBuyPrice <= 0 || !Objects.equals(itemPriceInfo.adminShopName, name)) {
                     return;
                 }
 
@@ -319,7 +328,7 @@ public class PriceManager {
 
                 itemsTag.add(itemTag);
             } else if (entry.itemPriceInfo instanceof PricesItemPriceInfo itemPriceInfo) {
-                if (itemPriceInfo.adminShopSellPrice <= 0) {
+                if (itemPriceInfo.adminShopSellPrice <= 0 || !Objects.equals(itemPriceInfo.adminShopName, name)) {
                     return;
                 }
 
@@ -336,6 +345,8 @@ public class PriceManager {
         });
 
         categories.forEach((category, categories) -> {
+            if (!Objects.equals(category.adminShopName, name)) return;
+
             CompoundTag compoundTag = new CompoundTag();
 
             compoundTag.putString("name", category.name);
@@ -398,7 +409,7 @@ public class PriceManager {
         return object;
     }
 
-    public record Category(String name, ItemDescription icon) {}
+    public record Category(String name, ItemDescription icon, @Nullable String adminShopName) {}
     public record ItemPriceEntry(ItemDescription itemDescription, ItemPriceInfo itemPriceInfo) {}
     public record FluidPriceEntry(FluidDescription fluidDescription, FluidPriceInfo fluidPriceInfo) {}
 }

@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 public class EditCategoryEntry extends CategoryEntry {
     private final Runnable onHovered;
 
-    public EditCategoryEntry(int pX, int pY, int pWidth, int pHeight, AdminShopScreen.Category category, BiConsumer<CategoryEntry, Integer> onClick, Supplier<Boolean> isSelectedSupplier, Runnable onHovered) {
+    public EditCategoryEntry(int pX, int pY, int pWidth, int pHeight, AdminShopScreen.InnerCategory category, BiConsumer<CategoryEntry, Integer> onClick, Supplier<Boolean> isSelectedSupplier, Runnable onHovered) {
         super(pX, pY, pWidth, pHeight, category, onClick, isSelectedSupplier, () -> false);
         this.onHovered = onHovered;
     }

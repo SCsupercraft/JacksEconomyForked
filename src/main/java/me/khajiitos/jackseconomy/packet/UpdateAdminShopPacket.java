@@ -1,13 +1,16 @@
 package me.khajiitos.jackseconomy.packet;
 
+import io.netty.handler.codec.DecoderException;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.packet.handler.UpdateAdminShopHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
-public record UpdateAdminShopPacket(CompoundTag data) {
+public record UpdateAdminShopPacket(CompoundTag data, @Nullable String adminShopName) {
     public static void encode(UpdateAdminShopPacket msg, FriendlyByteBuf friendlyByteBuf) {
         // Debug code used for testing earlier
         /*
@@ -39,10 +42,19 @@ public record UpdateAdminShopPacket(CompoundTag data) {
         }*/
 
         friendlyByteBuf.writeNbt(msg.data);
+        friendlyByteBuf.writeBoolean(msg.adminShopName != null);
+        if (msg.adminShopName != null) friendlyByteBuf.writeUtf(msg.adminShopName, 32);
     }
 
     public static UpdateAdminShopPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new UpdateAdminShopPacket(friendlyByteBuf.readAnySizeNbt());
+        CompoundTag data = friendlyByteBuf.readAnySizeNbt();
+        String name = null;
+        try {
+            name = friendlyByteBuf.readBoolean() ? friendlyByteBuf.readUtf(32) : null;
+        } catch (DecoderException e) {
+            JacksEconomy.LOGGER.warn("Error decoding update admin shop packet", e);
+        }
+        return new UpdateAdminShopPacket(data, name);
     }
 
     public static void handle(UpdateAdminShopPacket msg, Supplier<NetworkEvent.Context> ctx) {

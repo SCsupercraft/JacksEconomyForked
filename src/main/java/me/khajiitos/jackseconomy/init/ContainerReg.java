@@ -4,6 +4,9 @@ import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.create.CreateCheck;
 import me.khajiitos.jackseconomy.create.CreateContainerReg;
 import me.khajiitos.jackseconomy.menu.*;
+import me.khajiitos.jackseconomy.screen.BulkFluidScreen;
+import me.khajiitos.jackseconomy.screen.BulkItemScreen;
+import me.khajiitos.jackseconomy.screen.BulkAdminShopScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -37,6 +40,10 @@ public class ContainerReg {
     public static final RegistryObject<MenuType<ImporterTicketCreatorMenu>> IMPORTER_TICKET_CREATOR_MENU = MENU_TYPES.register("importer_ticket_creator", () -> new MenuType<>(ImporterTicketCreatorMenu::new, FeatureFlagSet.of()));
     public static final RegistryObject<MenuType<FluidExporterTicketCreatorMenu>> FLUID_EXPORTER_TICKET_CREATOR_MENU = MENU_TYPES.register("fluid_exporter_ticket_creator", () -> new MenuType<>(FluidExporterTicketCreatorMenu::new, FeatureFlagSet.of()));
     public static final RegistryObject<MenuType<FluidImporterTicketCreatorMenu>> FLUID_IMPORTER_TICKET_CREATOR_MENU = MENU_TYPES.register("fluid_importer_ticket_creator", () -> new MenuType<>(FluidImporterTicketCreatorMenu::new, FeatureFlagSet.of()));
+
+    public static final RegistryObject<MenuType<BulkFluidScreen.Menu>> BULK_FLUID_MENU = MENU_TYPES.register("bulk_fluid_menu", () -> new MenuType<>(BulkFluidScreen.Menu::new, FeatureFlagSet.of()));
+    public static final RegistryObject<MenuType<BulkItemScreen.Menu>> BULK_ITEM_MENU = MENU_TYPES.register("bulk_item_menu", () -> new MenuType<>(BulkItemScreen.Menu::new, FeatureFlagSet.of()));
+    public static final RegistryObject<MenuType<BulkAdminShopScreen.Menu>> BULK_ADMIN_SHOP_MENU = MENU_TYPES.register("bulk_admin_shop_menu", () -> new MenuType<>(BulkAdminShopScreen.Menu::new, FeatureFlagSet.of()));
 
     public static void init(IEventBus eventBus) {
         MENU_TYPES.register(eventBus);

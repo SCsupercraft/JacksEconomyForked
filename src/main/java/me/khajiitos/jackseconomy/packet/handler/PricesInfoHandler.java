@@ -26,8 +26,9 @@ public class PricesInfoHandler {
                     double adminShopSellPrice = itemTag.getDouble("adminShopSellPrice");
                     double importerBuyPrice = itemTag.getDouble("importerBuyPrice");
                     String adminShopSellStage = itemTag.contains("adminShopSellStage") ? itemTag.getString("adminShopSellStage") : null;
+                    String adminShopName = itemTag.contains("adminShopName") ? itemTag.getString("adminShopName") : null;
 
-                    JacksEconomyClient.priceInfos.put(itemDescription, new PricesItemPriceInfo(sellPrice, adminShopSellPrice, importerBuyPrice, adminShopSellStage));
+                    JacksEconomyClient.priceInfos.put(itemDescription, new PricesItemPriceInfo(sellPrice, adminShopSellPrice, importerBuyPrice, adminShopSellStage, adminShopName));
                 }
             }
         });
