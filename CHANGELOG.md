@@ -7,6 +7,17 @@
   - This allows us the start working on the stock market
 - Gui improvements
 
+## 1.2.2-1.4.1
+
+### Changed
+
+- `/adminshop named` and `name` both give suggestions if a named admin shop already exists
+- Changed how fluid tanks are rendered in the fluid importer and exporter GUIs for the final time
+
+### Fixed
+
+- The game no longer crashes when selecting a fluid in the fluid importer GUI
+
 ## 1.2.2-1.4.0
 
 ### Added
@@ -26,6 +37,7 @@
 
 - `/adminshop` now opens the admin shop with the name specified in the config
 - Translation keys can be used as names for categories in the admin shop
+- Improved scaling and positioning of text in the admin shop GUI
 
 ## 1.2.2-1.3.3
 
@@ -84,10 +96,10 @@
 
 ## 1.2.2-1.0.0
 
+### Added
+
+- There is now an infinite wallet
+
 ### Changed
 
 - The [Create Mod](https://www.curseforge.com/minecraft/mc-mods/create) is now an optional dependency
-
-### Added
-
-- Added an infinite wallet

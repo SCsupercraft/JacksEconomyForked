@@ -1,9 +1,7 @@
 package me.khajiitos.jackseconomy.packet;
 
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
-import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.packet.handler.ChangeSelectedFluidHandler;
-import me.khajiitos.jackseconomy.packet.handler.ChangeSelectedItemHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;

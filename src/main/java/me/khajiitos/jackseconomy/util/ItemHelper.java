@@ -13,7 +13,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nullable;
 
 public class ItemHelper {
-
     public static void dropItem(ItemStack itemStack, Level pLevel, BlockPos pPos) {
         ItemEntity dropItem = new ItemEntity(pLevel, pPos.getX() + 0.5, pPos.getY() + 1.0, pPos.getZ() + 0.5, itemStack);
         pLevel.addFreshEntity(dropItem);

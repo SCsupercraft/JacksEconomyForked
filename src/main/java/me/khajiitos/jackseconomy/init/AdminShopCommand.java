@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import me.khajiitos.jackseconomy.arguments.AdminShopArgument;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.menu.AdminShopMenu;
 import me.khajiitos.jackseconomy.packet.AdminShopSchemaPacket;
@@ -42,13 +43,13 @@ public class AdminShopCommand {
                 )
                 .then(Commands.literal("named")
                         .requires(stack -> stack.hasPermission(4))
-                        .then(Commands.argument("admin_shop_name", StringArgumentType.greedyString())
+                        .then(Commands.argument("admin_shop_name", AdminShopArgument.greedyString())
                                 .executes(AdminShopCommand::openNamed)
                         )
                 )
                 .then(Commands.literal("name")
                         .requires(stack -> stack.hasPermission(4))
-                        .then(Commands.argument("admin_shop_name", StringArgumentType.greedyString())
+                        .then(Commands.argument("admin_shop_name", AdminShopArgument.greedyString())
                                 .executes(AdminShopCommand::setName)
                         )
                         .executes(AdminShopCommand::resetName)
@@ -87,7 +88,7 @@ public class AdminShopCommand {
         ServerPlayer player = ctx.getSource().getPlayer();
 
         if (player != null) {
-            String name = StringArgumentType.getString(ctx, "admin_shop_name");
+            String name = AdminShopArgument.getName(ctx, "admin_shop_name");
 
             CompoundTag compoundTag = PriceManager.toAdminShopSchemaCompound(player, name);
             NetworkHooks.openScreen(player, new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new AdminShopMenu(pContainerId, pPlayerInventory), Component.empty()));
@@ -111,7 +112,7 @@ public class AdminShopCommand {
             return 1;
         }
 
-        String name = StringArgumentType.getString(ctx, "admin_shop_name");
+        String name = AdminShopArgument.getName(ctx, "admin_shop_name");
 
         CompoundTag tag = BlockItem.getBlockEntityData(itemInHand);
         if (tag != null && tag.contains("adminShopName") && tag.getString("adminShopName").equals(name)) return 1;

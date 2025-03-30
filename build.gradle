@@ -125,10 +125,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    jarJar(group: mod_group_id, name: "legacy-create", version: "[${mod_version}]") // Legacy create support (0.5.f and above, and below 6.0.0)
-
-    // Only to test energy
-    compileOnly fg.deobf("curse.maven:mekanism-268560:4776410")
+    jarJar(group: mod_group_id, name: "legacy-create", version: "[${mod_version}]") // Legacy create support (0.5.1f and above, and below 6.0.0)
 
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.3.5+1.20.1")
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.3.5+1.20.1:api")

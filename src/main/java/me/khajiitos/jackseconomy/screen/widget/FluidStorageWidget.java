@@ -88,6 +88,7 @@ public class FluidStorageWidget extends AbstractWidget {
 
     /**
      * Taken from <a href="https://github.com/mezz/JustEnoughItems/blob/1.20.1/Library/src/main/java/mezz/jei/library/render/FluidTankRenderer.java#L105">JEI</a>
+     * Slightly modified by SCsupercraft
      */
     private static void drawTiledSprite(GuiGraphics guiGraphics, final int tiledWidth, final int tiledHeight, int color, long scaledAmount, TextureAtlasSprite sprite, int posX, int posY) {
         RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
@@ -104,9 +105,9 @@ public class FluidStorageWidget extends AbstractWidget {
         for (int xTile = 0; xTile <= xTileCount; xTile++) {
             for (int yTile = 0; yTile <= yTileCount; yTile++) {
                 int width = (xTile == xTileCount) ? xRemainder : 16;
-                long height = (yTile == yTileCount) ? yRemainder : 16;
+                long height = (yTile == 0) ? yRemainder : 16;
                 int x = posX + (xTile * 16);
-                int y = yStart - ((yTile + 1) * 16);
+                int y = (int) (yStart - ((yTile) * 16) - (yTile == 0 ? 16 : yRemainder));
                 if (width > 0 && height > 0) {
                     long maskTop = 16 - height;
                     int maskRight = 16 - width;
@@ -153,13 +154,6 @@ public class FluidStorageWidget extends AbstractWidget {
         if (!fluidType.isAir()) components.add(type);
 
         guiGraphics.renderComponentTooltip(Minecraft.getInstance().font, components, mouseX, mouseY);
-    }
-
-    private int getFluidHeight(IFluidTank tank) {
-        float fluidAmount = fluidStorage.getFluidAmount();
-        float capacity = fluidStorage.getCapacity();
-
-        return (int) ((fluidAmount / capacity) * (this.height - 2));
     }
 
     @Override

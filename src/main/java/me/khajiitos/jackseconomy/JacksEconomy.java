@@ -45,6 +45,7 @@ public class JacksEconomy {
 
         ItemBlockReg.init(eventBus);
 
+        ArgumentReg.register(eventBus);
         BlockEntityReg.init(eventBus);
         ContainerReg.init(eventBus);
         Sounds.init(eventBus);
