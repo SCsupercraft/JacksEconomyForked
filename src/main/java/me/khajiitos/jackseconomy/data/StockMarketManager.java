@@ -9,7 +9,7 @@ public class StockMarketManager {
 	private static JsonObject data;
 	private static long lastUpdated;
 
-	public static void init() {
+	public static void load() {
 		dataHandler = new DataHandler.NBTDataHandler(
 				JacksEconomy.server.getWorldPath(LevelResource.ROOT)
 						.resolve("data/jackseconomy/stock-market.dat")
@@ -28,7 +28,7 @@ public class StockMarketManager {
 		}
 		JacksEconomy.server.addTickable(StockMarketManager::tick);
 	}
-	public static void stop() {
+	public static void save() {
 		data.addProperty("lastUpdated", lastUpdated);
 
 		dataHandler.save(data);

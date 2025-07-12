@@ -2,15 +2,12 @@ package me.khajiitos.jackseconomy.screen;
 
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.blockentity.FluidImporterBlockEntity;
-import me.khajiitos.jackseconomy.blockentity.ImporterBlockEntity;
 import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.menu.FluidImporterMenu;
-import me.khajiitos.jackseconomy.menu.ImporterMenu;
 import me.khajiitos.jackseconomy.packet.ChangeSpeedPacket;
 import me.khajiitos.jackseconomy.screen.widget.EnergyStatusWidget;
 import me.khajiitos.jackseconomy.screen.widget.FluidStorageWidget;
 import me.khajiitos.jackseconomy.screen.widget.SpeedVerticalSlider;
-import me.khajiitos.jackseconomy.util.AdvancedFluidTank;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

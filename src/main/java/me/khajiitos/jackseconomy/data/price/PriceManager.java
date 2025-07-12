@@ -1,17 +1,17 @@
 package me.khajiitos.jackseconomy.data.price;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.DataHandler;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
-import me.khajiitos.jackseconomy.util.ItemHelper;
 import me.khajiitos.jackseconomy.util.NewShopUnlocks;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
@@ -22,7 +22,6 @@ import java.io.File;
 import java.util.*;
 
 public class PriceManager {
-    //private static final LinkedHashMap<ItemDescription, ItemPriceInfo> itemPriceInfos = new LinkedHashMap<>();
     private static final List<ItemPriceEntry> itemPriceInfos = new ArrayList<>();
     private static final List<FluidPriceEntry> fluidPriceInfos = new ArrayList<>();
     private static final LinkedHashMap<Category, List<Category>> categories = new LinkedHashMap<>();
@@ -115,13 +114,11 @@ public class PriceManager {
         return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof AdminShopItemPriceInfo info && Objects.equals(info.adminShopName, adminShopName) && info.adminShopSlot == slot && Objects.equals(info.category, category)).map(entry -> ((AdminShopItemPriceInfo)entry.itemPriceInfo).adminShopBuyPrice * count).findFirst().orElse(-1.0);
     }
 
-    private static @Nullable ItemDescription itemDescriptionFromJson(JsonElement element) {
+    private static @Nullable ItemDescription itemDescriptionFromJson(JsonObject element) {
         try {
-            return element.isJsonObject() ? ItemDescription.fromJson(element.getAsJsonObject()) : // new json schema
-                    new ItemDescription(ItemHelper.getItem(element.getAsString()), // old json schema
-                            new CompoundTag());
+            return element.get("item").isJsonObject() ? ItemDescription.fromJson(element.get("item").getAsJsonObject()) :
+                    ItemDescription.fromJson(element);
         } catch (NullPointerException e) {
-            // item was null when creating an item description from the old schema
             return null;
         }
     }
@@ -142,12 +139,11 @@ public class PriceManager {
                 categoriesArray.forEach(jsonElement -> {
                     JsonObject object = jsonElement.getAsJsonObject();
                     String categoryName = object.get("name").getAsString();
-                    JsonElement itemDesc = object.get("item");
 
                     String adminShopName = object.has("adminShopName") ? object.get("adminShopName").getAsString() : null;
                     if (adminShopName != null && adminShopName.length() > 32) return;
 
-                    ItemDescription itemDescription = itemDescriptionFromJson(itemDesc);
+                    ItemDescription itemDescription = itemDescriptionFromJson(object);
                     if (itemDescription == null) return;
 
                     JsonArray categoriesList = object.getAsJsonArray("categories");
@@ -160,9 +156,8 @@ public class PriceManager {
                         categoriesList.forEach(jsonElementInner -> {
                             if (jsonElementInner instanceof JsonObject categoryObject) {
                                 String categoryNameInner = categoryObject.get("name").getAsString();
-                                JsonElement itemDescInner = categoryObject.get("item");
 
-                                ItemDescription innerItemDescription = itemDescriptionFromJson(itemDescInner);
+                                ItemDescription innerItemDescription = itemDescriptionFromJson(categoryObject);
                                 if (innerItemDescription == null) return;
 
                                 innerCategories.add(new Category(categoryNameInner, innerItemDescription, null));
@@ -175,33 +170,27 @@ public class PriceManager {
                     JsonObject object = jsonElement.getAsJsonObject();
 
                     ItemDescription itemDescription = ItemDescription.fromJson(object);
+                    ItemPriceInfo priceInfo = ItemPriceInfo.fromJson(object);
 
-                    if (itemDescription != null) {
-                        ItemPriceInfo[] priceInfos = ItemPriceInfo.fromJson(object);
-                        for (ItemPriceInfo priceInfo : priceInfos) {
-                            itemPriceInfos.add(new ItemPriceEntry(itemDescription, priceInfo));
-                        }
-                    } else {
-                        JacksEconomy.LOGGER.warn("Invalid price info");
-                    }
+                    if (itemDescription != null && priceInfo != null)
+                        itemPriceInfos.add(new ItemPriceEntry(itemDescription, priceInfo));
+                    else
+                        JacksEconomy.LOGGER.warn("Invalid item price info!");
                 });
 
                 fluidsArray.forEach(jsonElement -> {
                     JsonObject object = jsonElement.getAsJsonObject();
 
                     FluidDescription fluidDescription = FluidDescription.fromJson(object);
+                    FluidPriceInfo priceInfo = FluidPriceInfo.fromJson(object);
 
-                    if (fluidDescription != null) {
-                        FluidPriceInfo[] priceInfos = FluidPriceInfo.fromJson(object);
-                        for (FluidPriceInfo priceInfo : priceInfos) {
-                            fluidPriceInfos.add(new FluidPriceEntry(fluidDescription, priceInfo));
-                        }
-                    } else {
-                        JacksEconomy.LOGGER.warn("Invalid price info");
-                    }
+                    if (fluidDescription != null && priceInfo != null)
+                        fluidPriceInfos.add(new FluidPriceEntry(fluidDescription, priceInfo));
+                    else
+                        JacksEconomy.LOGGER.warn("Invalid fluid price info!");
                 });
             } catch (JsonSyntaxException | ClassCastException e) {
-                JacksEconomy.LOGGER.error("Failed to load item prices", e);
+                JacksEconomy.LOGGER.error("Failed to load prices", e);
             }
         } else if (file.getParentFile().isDirectory() || file.getParentFile().mkdirs()) {
             save();
@@ -223,8 +212,7 @@ public class PriceManager {
         });
 
         categories.forEach((category, categories) -> {
-            JsonObject categoryObj = new JsonObject();
-            categoryObj.add("item", category.icon.toJson());
+            JsonObject categoryObj = category.icon.toJson();
             categoryObj.addProperty("name", category.name);
 
             if (category.adminShopName != null) categoryObj.addProperty("adminShopName", category.adminShopName);
@@ -232,9 +220,8 @@ public class PriceManager {
             JsonArray innerCategories = new JsonArray();
 
             categories.forEach(categoryInner -> {
-                JsonObject categoryInnerObj = new JsonObject();
+                JsonObject categoryInnerObj = categoryInner.icon().toJson();
 
-                categoryInnerObj.add("item", categoryInner.icon.toJson());
                 categoryInnerObj.addProperty("name", categoryInner.name);
                 innerCategories.add(categoryInnerObj);
             });

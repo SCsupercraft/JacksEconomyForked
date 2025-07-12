@@ -1,5 +1,6 @@
 package me.khajiitos.jackseconomy.listener;
 
+import me.khajiitos.jackseconomy.data.AdminShopColorManager;
 import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.menu.WalletMenu;
 import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
@@ -26,6 +27,7 @@ public class OtherEventListeners {
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent e) {
         if (e.getEntity() instanceof ServerPlayer serverPlayer) {
             Packets.sendToClient(serverPlayer, new PricesInfoPacket(PriceManager.toTag(false), PriceManager.toTag(true)));
+            AdminShopColorManager.updatePlayer(serverPlayer);
         }
     }
 }

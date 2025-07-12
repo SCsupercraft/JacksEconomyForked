@@ -55,29 +55,6 @@ public abstract class FluidTicketItem extends TicketItem {
         itemStack.getOrCreateTag().put("Fluids", tag);
     }
 
-    public static int getMaxProcessCount(ItemStack itemStack) {
-        if (!(itemStack.getItem() instanceof FluidTicketItem)) {
-            return 0;
-        }
-
-        CompoundTag nbtTag = itemStack.getTag();
-
-        if (nbtTag == null || !nbtTag.contains("MaxProcessCount", Tag.TAG_INT)) {
-            return 1000;
-        }
-
-        return nbtTag.getInt("MaxProcessCount");
-    }
-
-    public static void setMaxProcessCount(ItemStack itemStack, int processCount) {
-        if (!(itemStack.getItem() instanceof FluidTicketItem)) {
-            return;
-        }
-
-        CompoundTag nbtTag = itemStack.getOrCreateTag();
-        nbtTag.putInt("MaxProcessCount", processCount);
-    }
-
     @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         List<FluidDescription> fluidDescriptions = getFluids(pStack);
@@ -89,9 +66,17 @@ public abstract class FluidTicketItem extends TicketItem {
         }
 
         int processCount = getMaxProcessCount(pStack);
-        if (processCount > 0) {
-            pTooltipComponents.add(Component.empty());
+        boolean showProcessCount = processCount > 0;
+        boolean showMaxUsage = hasMaxUsage(pStack);
+
+        if (!showProcessCount && !showMaxUsage) return;
+
+        pTooltipComponents.add(Component.empty());
+        if (showProcessCount) {
             pTooltipComponents.add(Component.translatable("jackseconomy.fluid_ticket_process_count", processCount).withStyle(ChatFormatting.GREEN));
+        }
+        if (showMaxUsage) {
+            pTooltipComponents.add(Component.translatable("jackseconomy.ticket_uses_left", formatUsesLeft(pStack)).withStyle(ChatFormatting.GREEN));
         }
     }
 }

@@ -108,9 +108,19 @@
 
   "jackseconomy.ticket_process_count" : "Allows processing up to %s item(s)",
   "jackseconomy.fluid_ticket_process_count": "Allows processing up to %smB of fluid",
+  "jackseconomy.ticket_uses_left" : "%s use(s) left!",
 
   "jackseconomy.set_ticket_process_count": "Set max process count to %s",
   "jackseconomy.get_ticket_process_count": "The max process count for this manifest is %s",
+  "jackseconomy.remove_ticket_max_usage": "This manifest can now be used infinitely",
+  "jackseconomy.set_ticket_max_usage": "This manifest can now be used a total of %s times",
+  "jackseconomy.get_ticket_max_usage": "This manifest can be used a total of %s times",
+
+  "jackseconomy.reset_admin_shop_color": "Reset the color of admin shops with the name %s",
+  "jackseconomy.set_admin_shop_color": "Set the color of admin shops with the name %s to %s",
+  "jackseconomy.reset_default_admin_shop_color": "Reset the default color of admin shops",
+  "jackseconomy.set_default_admin_shop_color": "Set the default color of admin shops to %s",
+  "jackseconomy.failed_to_parse_color": "Failed to parse color!",
 
   "jackseconomy.reset_admin_shop_name": "Reset admin shop name",
   "jackseconomy.set_admin_shop_name": "Set admin shop name to %s",

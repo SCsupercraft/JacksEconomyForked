@@ -3,7 +3,6 @@ package me.khajiitos.jackseconomy.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Pair;
 import me.khajiitos.jackseconomy.JacksEconomy;
-import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.screen.widget.FloatingEditBoxWidget;
 import me.khajiitos.jackseconomy.util.Utils;

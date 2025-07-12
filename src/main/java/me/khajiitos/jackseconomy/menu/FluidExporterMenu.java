@@ -1,12 +1,9 @@
 package me.khajiitos.jackseconomy.menu;
 
 import me.khajiitos.jackseconomy.JacksEconomy;
-import me.khajiitos.jackseconomy.blockentity.ExporterBlockEntity;
 import me.khajiitos.jackseconomy.blockentity.FluidExporterBlockEntity;
 import me.khajiitos.jackseconomy.blockentity.FluidTransactionMachineBlockEntity;
-import me.khajiitos.jackseconomy.blockentity.TransactionMachineBlockEntity;
 import me.khajiitos.jackseconomy.init.ContainerReg;
-import me.khajiitos.jackseconomy.item.ExporterTicketItem;
 import me.khajiitos.jackseconomy.item.FluidExporterTicketItem;
 import me.khajiitos.jackseconomy.util.FilteredSlot;
 import me.khajiitos.jackseconomy.util.OutputSlot;

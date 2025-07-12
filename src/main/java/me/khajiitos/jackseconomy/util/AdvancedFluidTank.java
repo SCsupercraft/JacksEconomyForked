@@ -1,6 +1,5 @@
 package me.khajiitos.jackseconomy.util;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
@@ -66,7 +65,7 @@ public class AdvancedFluidTank extends FluidTank {
     }
 
     /**
-     * @return FluidStack representing the fluid in the tank, null if the tank is empty.
+     * @return FluidStack representing the fluid in the tank.
      */
     @Override
     public @NotNull FluidStack getFluid() {

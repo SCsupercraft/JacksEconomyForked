@@ -2,7 +2,6 @@ package me.khajiitos.jackseconomy.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.khajiitos.jackseconomy.JacksEconomy;
-import me.khajiitos.jackseconomy.blockentity.FluidExporterBlockEntity;
 import me.khajiitos.jackseconomy.blockentity.IFluidExporterBlockEntity;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;

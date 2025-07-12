@@ -1,25 +1,21 @@
 package me.khajiitos.jackseconomy.data.price;
 
 import com.google.gson.JsonObject;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class FluidPriceInfo {
 
-    public static @NotNull FluidPriceInfo[] fromJson(JsonObject jsonObject) {
+    public static @Nullable FluidPriceInfo fromJson(JsonObject jsonObject) {
         try {
-            ArrayList<FluidPriceInfo> list = new ArrayList<>();
+            FluidPriceInfo info = null;
 
-            FluidPriceInfo prices = PricesFluidPriceInfo.fromJsonOrNull(jsonObject);
-
-            if (prices != null) {
-                list.add(prices);
+            if (jsonObject.get("type").getAsString().equals("prices")) {
+                info = PricesFluidPriceInfo.fromJsonOrNull(jsonObject);
             }
 
-            return list.toArray(new FluidPriceInfo[0]);
-        } catch (NullPointerException | ClassCastException e) {
-            return new FluidPriceInfo[0];
+            return info;
+        } catch (NullPointerException e) {
+            return null;
         }
     }
 

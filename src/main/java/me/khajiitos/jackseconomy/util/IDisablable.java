@@ -10,5 +10,5 @@ public interface IDisablable {
 
     default List<Component> getDisabledTooltip() {
         return List.of(Component.translatable("jackseconomy.item_disabled").withStyle(ChatFormatting.RED));
-    };
+    }
 }

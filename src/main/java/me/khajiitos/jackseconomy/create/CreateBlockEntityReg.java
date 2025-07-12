@@ -7,8 +7,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.Optional;
-
 public class CreateBlockEntityReg {
 	public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = BlockEntityReg.BLOCK_ENTITY_TYPES;
 

@@ -259,7 +259,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
                     spaces += itemStackToBuy.getMaxStackSize();
                 } else if (slot.is(itemStackToBuy.getItem())) {
                     spaces += slot.getMaxStackSize() - slot.getCount();
-                };
+                }
             }
 
             return spaces;
@@ -284,6 +284,8 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
 
             processCount += stack.getCount();
         }
+
+        TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
     }
 
     @Override

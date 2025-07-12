@@ -21,7 +21,7 @@ public class PurchaseManager {
 	private static CompoundTag data;
 	private static CompoundTag players;
 
-	public static void init() {
+	public static void load() {
 		dataHandler = new DataHandler.NBTDataHandler(
 				JacksEconomy.server.getWorldPath(LevelResource.ROOT)
 						.resolve("data/jackseconomy/purchases.dat")
@@ -40,7 +40,7 @@ public class PurchaseManager {
 		}
 		JacksEconomy.server.addTickable(StockMarketManager::tick);
 	}
-	public static void stop() {
+	public static void save() {
 		data.put("players", players);
 
 		dataHandler.save(data);

@@ -3,13 +3,10 @@ package me.khajiitos.jackseconomy.init;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.data.price.*;
-import me.khajiitos.jackseconomy.item.FluidTicketItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.screen.BulkFluidScreen;
 import me.khajiitos.jackseconomy.screen.BulkItemScreen;
@@ -18,11 +15,9 @@ import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
@@ -308,28 +303,35 @@ public class EconomyCommand {
 	}
 	private static class ManifestCommand {
 		public static LiteralArgumentBuilder<CommandSourceStack> command =
-				Commands.literal("manifest").then(
-						Commands.literal("max_process_count").executes(ManifestCommand::getMaxProcessCount).then(
-								Commands.argument("count", IntegerArgumentType.integer(1, 100000)).executes(ManifestCommand::setMaxProcessCount)
+				Commands.literal("manifest")
+						.then(
+								Commands.literal("max_process_count").executes(ManifestCommand::getMaxProcessCount).then(
+										Commands.argument("count", IntegerArgumentType.integer(1, 100000)).executes(ManifestCommand::setMaxProcessCount)
+								)
 						)
-				);
+						.then(
+								Commands.literal("max_uses").executes(ManifestCommand::getMaxUsage)
+										.then(
+												Commands.literal("set").then(Commands.argument("count", IntegerArgumentType.integer(1, 1000000)).executes(ManifestCommand::setMaxUsage))
+										)
+										.then(
+												Commands.literal("remove").executes(ManifestCommand::removeMaxUsage)
+										)
+						);
 
 		private static int getMaxProcessCount(CommandContext<CommandSourceStack> ctx) {
 			CommandSourceStack source = ctx.getSource();
-			int maxProcessCount;
 			ServerPlayer player = source.getPlayer();
 
 			if (player == null) return 1;
 
 			ItemStack ticketItemStack = player.getMainHandItem();
-			if (ticketItemStack.getItem() instanceof FluidTicketItem) {
-				maxProcessCount = FluidTicketItem.getMaxProcessCount(ticketItemStack);
-			} else if (ticketItemStack.getItem() instanceof TicketItem) {
-				maxProcessCount = TicketItem.getMaxProcessCount(ticketItemStack);
-			} else {
+			if (!(ticketItemStack.getItem() instanceof TicketItem)) {
 				source.sendSystemMessage(Component.translatable("jackseconomy.hold_a_manifest").withStyle(ChatFormatting.RED));
 				return 1;
 			}
+
+			int maxProcessCount = TicketItem.getMaxProcessCount(ticketItemStack);
 
 			source.sendSuccess(() -> Component.translatable("jackseconomy.get_ticket_process_count", maxProcessCount).withStyle(ChatFormatting.GREEN), false);
 			return 1;
@@ -342,9 +344,7 @@ public class EconomyCommand {
 			if (player == null) return 1;
 
 			ItemStack ticketItemStack = player.getMainHandItem();
-			if (ticketItemStack.getItem() instanceof FluidTicketItem) {
-				FluidTicketItem.setMaxProcessCount(ticketItemStack, maxProcessCount);
-			} else if (ticketItemStack.getItem() instanceof TicketItem) {
+			if (ticketItemStack.getItem() instanceof TicketItem) {
 				TicketItem.setMaxProcessCount(ticketItemStack, maxProcessCount);
 			} else {
 				source.sendFailure(Component.translatable("jackseconomy.hold_a_manifest").withStyle(ChatFormatting.RED));
@@ -352,6 +352,60 @@ public class EconomyCommand {
 			}
 
 			source.sendSuccess(() -> Component.translatable("jackseconomy.set_ticket_process_count", maxProcessCount).withStyle(ChatFormatting.GREEN), false);
+			return 1;
+		}
+
+		private static int getMaxUsage(CommandContext<CommandSourceStack> ctx) {
+			CommandSourceStack source = ctx.getSource();
+			ServerPlayer player = source.getPlayer();
+
+			if (player == null) return 1;
+
+			ItemStack ticketItemStack = player.getMainHandItem();
+
+			if (!(ticketItemStack.getItem() instanceof TicketItem)) {
+				source.sendSystemMessage(Component.translatable("jackseconomy.hold_a_manifest").withStyle(ChatFormatting.RED));
+				return 1;
+			}
+
+			int maxUsage = TicketItem.getMaxUsage(ticketItemStack);
+
+			source.sendSuccess(() -> Component.translatable("jackseconomy.get_ticket_max_usage", maxUsage).withStyle(ChatFormatting.GREEN), false);
+			return 1;
+		}
+		private static int setMaxUsage(CommandContext<CommandSourceStack> ctx) {
+			int maxUsage = IntegerArgumentType.getInteger(ctx, "count");
+			CommandSourceStack source = ctx.getSource();
+			ServerPlayer player = source.getPlayer();
+
+			if (player == null) return 1;
+
+			ItemStack ticketItemStack = player.getMainHandItem();
+			if (ticketItemStack.getItem() instanceof TicketItem) {
+				TicketItem.setMaxUsage(ticketItemStack, maxUsage);
+			} else {
+				source.sendFailure(Component.translatable("jackseconomy.hold_a_manifest").withStyle(ChatFormatting.RED));
+				return 1;
+			}
+
+			source.sendSuccess(() -> Component.translatable("jackseconomy.set_ticket_max_usage", maxUsage).withStyle(ChatFormatting.GREEN), false);
+			return 1;
+		}
+		private static int removeMaxUsage(CommandContext<CommandSourceStack> ctx) {
+			CommandSourceStack source = ctx.getSource();
+			ServerPlayer player = source.getPlayer();
+
+			if (player == null) return 1;
+
+			ItemStack ticketItemStack = player.getMainHandItem();
+			if (ticketItemStack.getItem() instanceof TicketItem) {
+				TicketItem.removeMaxUsage(ticketItemStack);
+			} else {
+				source.sendFailure(Component.translatable("jackseconomy.hold_a_manifest").withStyle(ChatFormatting.RED));
+				return 1;
+			}
+
+			source.sendSuccess(() -> Component.translatable("jackseconomy.remove_ticket_max_usage").withStyle(ChatFormatting.GREEN), false);
 			return 1;
 		}
 	}

@@ -2,10 +2,8 @@ package me.khajiitos.jackseconomy.menu;
 
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
-import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.item.EmptyTicketItem;
 import me.khajiitos.jackseconomy.item.FluidTicketItem;
-import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.util.ItemHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;

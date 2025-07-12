@@ -1,18 +1,33 @@
 {
   "variants": {
-    "facing=east": {
+    "facing=east,colored=false": {
       "model": "jackseconomy:block/admin_shop",
       "y": 90
     },
-    "facing=north": {
+    "facing=north,colored=false": {
       "model": "jackseconomy:block/admin_shop"
     },
-    "facing=south": {
+    "facing=south,colored=false": {
       "model": "jackseconomy:block/admin_shop",
       "y": 180
     },
-    "facing=west": {
+    "facing=west,colored=false": {
       "model": "jackseconomy:block/admin_shop",
+      "y": 270
+    },
+    "facing=east,colored=true": {
+      "model": "jackseconomy:block/colored_admin_shop",
+      "y": 90
+    },
+    "facing=north,colored=true": {
+      "model": "jackseconomy:block/colored_admin_shop"
+    },
+    "facing=south,colored=true": {
+      "model": "jackseconomy:block/colored_admin_shop",
+      "y": 180
+    },
+    "facing=west,colored=true": {
+      "model": "jackseconomy:block/colored_admin_shop",
       "y": 270
     }
   }

@@ -1,6 +1,5 @@
 package me.khajiitos.jackseconomy.blockentity;
 
-import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.block.TransactionMachineBlock;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
@@ -272,7 +271,6 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
 
         itemStacks.forEach((itemStack -> {
             double sellPrice = PriceManager.getExporterSellPrice(ItemDescription.ofItem(itemStack), 1);
-
             if (sellPrice == -1.0 || !success.get()) {
                 success.set(false);
                 return;
@@ -285,6 +283,8 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
             itemStack.shrink(sellCount);
             processCount.addAndGet(sellCount);
         }));
+
+        if (success.get()) TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
 
         return success.get();
     }

@@ -3,7 +3,6 @@ package me.khajiitos.jackseconomy.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.menu.FluidTicketCreatorMenu;
-import me.khajiitos.jackseconomy.menu.TicketCreatorMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;

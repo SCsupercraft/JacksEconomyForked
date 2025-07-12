@@ -21,9 +21,17 @@ public class GoldenFluidExporterTicketItem extends FluidExporterTicketItem {
         pTooltipComponents.add(Component.translatable("jackseconomy.golden_fluid_exporter_manifest_description").withStyle(ChatFormatting.GOLD));
 
         int processCount = getMaxProcessCount(pStack);
-        if (processCount > 0) {
-            pTooltipComponents.add(Component.empty());
+        boolean showProcessCount = processCount > 0;
+        boolean showMaxUsage = hasMaxUsage(pStack);
+
+        if (!showProcessCount && !showMaxUsage) return;
+
+        pTooltipComponents.add(Component.empty());
+        if (showProcessCount) {
             pTooltipComponents.add(Component.translatable("jackseconomy.fluid_ticket_process_count", processCount).withStyle(ChatFormatting.GREEN));
+        }
+        if (showMaxUsage) {
+            pTooltipComponents.add(Component.translatable("jackseconomy.ticket_uses_left", formatUsesLeft(pStack)).withStyle(ChatFormatting.GREEN));
         }
     }
 }

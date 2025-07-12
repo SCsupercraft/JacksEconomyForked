@@ -1,6 +1,7 @@
 package me.khajiitos.jackseconomy.block;
 
 import me.khajiitos.jackseconomy.blockentity.AdminShopBlockEntity;
+import me.khajiitos.jackseconomy.data.AdminShopColorManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
 import me.khajiitos.jackseconomy.item.NameableBlockItem;
@@ -27,9 +28,12 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -43,10 +47,11 @@ import java.util.List;
 
 public class AdminShopBlock extends BaseEntityBlock implements NameableBlockItem.NameableBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final BooleanProperty COLORED = BooleanProperty.create("colored");
 
     public AdminShopBlock() {
         super(BlockBehaviour.Properties.of().sound(SoundType.METAL).strength(1.5F, 6.0F));
-        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(COLORED, false));
     }
 
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
@@ -55,12 +60,17 @@ public class AdminShopBlock extends BaseEntityBlock implements NameableBlockItem
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite());
+        CompoundTag tag = BlockItem.getBlockEntityData(pContext.getItemInHand());
+        String name = tag != null && tag.contains("adminShopName") ? tag.getString("adminShopName") : null;
+        boolean isColored = AdminShopColorManager.getColor(name) != -1;
+
+        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite()).setValue(COLORED, isColored);
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         pBuilder.add(FACING);
+        pBuilder.add(COLORED);
     }
 
     @Override
@@ -113,5 +123,11 @@ public class AdminShopBlock extends BaseEntityBlock implements NameableBlockItem
         CompoundTag tag = BlockItem.getBlockEntityData(stack);
         if (tag == null || !tag.contains("adminShopName")) return getName();
         return Component.translatable(tag.getString("adminShopName"));
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
+        return createTickerHelper(pBlockEntityType, BlockEntityReg.ADMIN_SHOP.get(), AdminShopBlockEntity::tick);
     }
 }

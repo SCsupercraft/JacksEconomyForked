@@ -241,8 +241,13 @@ public class FluidExporterBlockEntity extends FluidTransactionMachineBlockEntity
             return false;
         }
 
-        int amountSold = fluidStorage.drain(FluidTicketItem.getMaxProcessCount(getItem(slotTicket)), AdvancedFluidTank.FluidAction.EXECUTE).getAmount();
+        ItemStack ticketItem = getItem(slotTicket);
+
+        int amountSold = fluidStorage.drain(TicketItem.getMaxProcessCount(ticketItem), AdvancedFluidTank.FluidAction.EXECUTE).getAmount();
         this.currency = this.currency.add(BigDecimal.valueOf(sellPrice * amountSold));
+
+        TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
+
         return true;
     }
 

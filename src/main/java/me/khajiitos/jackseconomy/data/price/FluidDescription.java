@@ -3,11 +3,9 @@ package me.khajiitos.jackseconomy.data.price;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.khajiitos.jackseconomy.util.FluidHelper;
-import me.khajiitos.jackseconomy.util.ItemHelper;
 import me.khajiitos.jackseconomy.util.NBTUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -15,7 +13,6 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public record FluidDescription(Fluid fluid, CompoundTag compoundTag) {
     public FluidDescription(Fluid fluid, @Nullable CompoundTag compoundTag) {

@@ -1,7 +1,5 @@
 package me.khajiitos.jackseconomy.packet;
 
-import io.netty.handler.codec.DecoderException;
-import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.packet.handler.AdminShopPurchaseHandler;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import net.minecraft.nbt.CompoundTag;

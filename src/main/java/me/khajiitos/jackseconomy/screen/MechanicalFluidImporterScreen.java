@@ -1,15 +1,10 @@
 package me.khajiitos.jackseconomy.screen;
 
 import me.khajiitos.jackseconomy.JacksEconomy;
-import me.khajiitos.jackseconomy.blockentity.FluidImporterBlockEntity;
 import me.khajiitos.jackseconomy.blockentity.MechanicalFluidImporterBlockEntity;
-import me.khajiitos.jackseconomy.blockentity.MechanicalImporterBlockEntity;
 import me.khajiitos.jackseconomy.menu.MechanicalFluidImporterMenu;
-import me.khajiitos.jackseconomy.menu.MechanicalImporterMenu;
 import me.khajiitos.jackseconomy.screen.widget.FluidStorageWidget;
 import me.khajiitos.jackseconomy.screen.widget.SpeedStatusWidget;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -17,10 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.energy.IEnergyStorage;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)

@@ -7,6 +7,13 @@
   - This allows us the start working on the stock market
 - Gui improvements
 
+## 1.2.2-1.5.0
+
+### Added
+
+- Manifests can now be given a maximum amount of uses using `/economy manifest max_uses`
+- Admin shops can be colored, to help differentiate shops. This is because a shops inventory is dependent on its name.
+
 ## 1.2.2-1.4.1
 
 ### Changed

@@ -7,6 +7,7 @@ import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.FluidTicketItem;
+import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.menu.MechanicalFluidImporterMenu;
 import me.khajiitos.jackseconomy.util.RedstoneToggle;
 import me.khajiitos.jackseconomy.util.SideConfig;
@@ -260,6 +261,8 @@ public class MechanicalFluidImporterBlockEntity extends FluidTransactionKineticM
         if ((!fluidStorage.getFluid().isFluidEqual(stack) && !fluidStorage.isEmpty()) || getBalance().compareTo(totalPrice) < 0) return;
         currency = currency.subtract(totalPrice);
         fluidStorage.fill(stack, IFluidHandler.FluidAction.EXECUTE);
+
+        TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
     }
 
     @Override

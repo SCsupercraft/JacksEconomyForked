@@ -7,6 +7,7 @@ import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.FluidTicketItem;
+import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.menu.FluidImporterMenu;
 import me.khajiitos.jackseconomy.util.RedstoneToggle;
 import me.khajiitos.jackseconomy.util.SideConfig;
@@ -261,7 +262,7 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
     public void buyFluid(Fluid fluidToBuy, double price, ItemStack ticketItem) {
         BigDecimal amountAffordable = getBalance().divide(BigDecimal.valueOf(price), RoundingMode.FLOOR);
 
-        int maxProcesses = FluidTicketItem.getMaxProcessCount(ticketItem);
+        int maxProcesses = TicketItem.getMaxProcessCount(ticketItem);
 
         FluidStack stack = new FluidStack(
                 fluidToBuy,
@@ -273,6 +274,8 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
         if ((!fluidStorage.getFluid().isFluidEqual(stack) && !fluidStorage.isEmpty()) || getBalance().compareTo(totalPrice) < 0) return;
         currency = currency.subtract(totalPrice);
         fluidStorage.fill(stack, IFluidHandler.FluidAction.EXECUTE);
+
+        TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
     }
 
     @Override

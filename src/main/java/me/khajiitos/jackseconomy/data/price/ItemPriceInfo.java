@@ -1,30 +1,22 @@
 package me.khajiitos.jackseconomy.data.price;
 
 import com.google.gson.JsonObject;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class ItemPriceInfo {
 
-    public static @NotNull ItemPriceInfo[] fromJson(JsonObject jsonObject) {
+    public static @Nullable ItemPriceInfo fromJson(JsonObject jsonObject) {
         try {
-            ArrayList<ItemPriceInfo> list = new ArrayList<>();
+            ItemPriceInfo info = null;
 
-            ItemPriceInfo admin = AdminShopItemPriceInfo.fromJsonOrNull(jsonObject);
-            ItemPriceInfo prices = PricesItemPriceInfo.fromJsonOrNull(jsonObject);
-
-            if (admin != null) {
-                list.add(admin);
+            switch (jsonObject.get("type").getAsString()) {
+                case "adminshop" -> info = AdminShopItemPriceInfo.fromJsonOrNull(jsonObject);
+                case "prices" -> info = PricesItemPriceInfo.fromJsonOrNull(jsonObject);
             }
 
-            if (prices != null) {
-                list.add(prices);
-            }
-
-            return list.toArray(new ItemPriceInfo[0]);
-        } catch (NullPointerException | ClassCastException e) {
-            return new ItemPriceInfo[0];
+            return info;
+        } catch (NullPointerException e) {
+            return null;
         }
     }
 

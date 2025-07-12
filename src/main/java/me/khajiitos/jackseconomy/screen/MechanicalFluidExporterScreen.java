@@ -4,15 +4,12 @@ import me.khajiitos.jackseconomy.blockentity.MechanicalFluidExporterBlockEntity;
 import me.khajiitos.jackseconomy.menu.MechanicalFluidExporterMenu;
 import me.khajiitos.jackseconomy.screen.widget.FluidStorageWidget;
 import me.khajiitos.jackseconomy.screen.widget.SpeedStatusWidget;
-import me.khajiitos.jackseconomy.util.AdvancedFluidTank;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fluids.IFluidTank;
 
 import java.util.Set;
 

@@ -1,7 +1,6 @@
 package me.khajiitos.jackseconomy.block;
 
 import me.khajiitos.jackseconomy.blockentity.MechanicalFluidImporterBlockEntity;
-import me.khajiitos.jackseconomy.blockentity.MechanicalImporterBlockEntity;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

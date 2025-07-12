@@ -1,6 +1,5 @@
 package me.khajiitos.jackseconomy.blockentity;
 
-import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.block.TransactionMachineBlock;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
@@ -273,7 +272,7 @@ public class ImporterBlockEntity extends TransactionMachineBlockEntity implement
                     spaces += itemStackToBuy.getMaxStackSize();
                 } else if (slot.is(itemStackToBuy.getItem())) {
                     spaces += slot.getMaxStackSize() - slot.getCount();
-                };
+                }
             }
 
             return spaces;
@@ -298,6 +297,8 @@ public class ImporterBlockEntity extends TransactionMachineBlockEntity implement
 
             processCount += stack.getCount();
         }
+
+        TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
     }
 
     @Override

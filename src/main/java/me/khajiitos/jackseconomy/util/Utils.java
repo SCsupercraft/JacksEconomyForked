@@ -23,13 +23,15 @@ public class Utils {
     }
 
     public static int hexToMinecraftColor(String hexColor) {
-        int color = Integer.parseInt(hexColor.substring(1), 16);
+        boolean includesHash = hexColor.charAt(0) == '#';
+        if (includesHash) hexColor = hexColor.substring(1);
 
-        if (hexColor.length() == 7) {
+        int color = Integer.parseInt(hexColor, 16);
+
+        if (hexColor.length() == 6) {
             color |= 0xFF000000;
         }
 
         return color;
     }
-
 }

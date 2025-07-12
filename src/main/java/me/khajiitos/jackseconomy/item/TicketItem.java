@@ -2,10 +2,13 @@ package me.khajiitos.jackseconomy.item;
 
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -64,7 +67,7 @@ public abstract class TicketItem extends Item {
         CompoundTag nbtTag = itemStack.getTag();
 
         if (nbtTag == null || !nbtTag.contains("MaxProcessCount", Tag.TAG_INT)) {
-            return 1;
+            return itemStack.getItem() instanceof FluidTicketItem ? 1000 : 1;
         }
 
         return nbtTag.getInt("MaxProcessCount");
@@ -79,6 +82,90 @@ public abstract class TicketItem extends Item {
         nbtTag.putInt("MaxProcessCount", processCount);
     }
 
+    public static void setMaxUsage(ItemStack itemStack, int useCount) {
+        if (!(itemStack.getItem() instanceof TicketItem)) {
+            return;
+        }
+
+        itemStack.setDamageValue(0);
+
+        CompoundTag nbtTag = itemStack.getOrCreateTag();
+        nbtTag.putInt("MaxUsage", useCount);
+    }
+
+    public static int getMaxUsage(ItemStack itemStack) {
+        if (!(itemStack.getItem() instanceof TicketItem)) {
+            return 0;
+        }
+
+        CompoundTag nbtTag = itemStack.getTag();
+
+        if (nbtTag == null || !nbtTag.contains("MaxUsage", Tag.TAG_INT)) {
+            return 1;
+        }
+
+        return nbtTag.getInt("MaxUsage");
+    }
+
+    public static void removeMaxUsage(ItemStack itemStack) {
+        if (!(itemStack.getItem() instanceof TicketItem)) {
+            return;
+        }
+
+        itemStack.setDamageValue(0);
+
+        CompoundTag nbtTag = itemStack.getOrCreateTag();
+        nbtTag.remove("MaxUsage");
+    }
+
+    public static boolean hasMaxUsage(ItemStack itemStack) {
+        CompoundTag nbtTag = itemStack.getTag();
+        return nbtTag != null && nbtTag.contains("MaxUsage", Tag.TAG_INT);
+    }
+
+    public static int getUsesLeft(ItemStack itemStack) {
+        if (!(itemStack.getItem() instanceof TicketItem)) {
+            return 0;
+        }
+
+        if (!hasMaxUsage(itemStack)) return Integer.MAX_VALUE;
+
+        CompoundTag nbtTag = itemStack.getTag();
+        int maxUsage = getMaxUsage(itemStack);
+
+        if (nbtTag == null || !nbtTag.contains("Damage", Tag.TAG_INT)) return maxUsage;
+        return maxUsage - nbtTag.getInt("Damage");
+    }
+
+    public static boolean handleDamage(ItemStack stack, int damage) {
+        if (!hasMaxUsage(stack) || !(stack.getItem() instanceof TicketItem)) return false;
+
+        damage = stack.getDamageValue() + damage;
+        stack.setDamageValue(damage);
+
+        if (damage >= stack.getMaxDamage()) {
+            stack.shrink(1);
+            stack.setDamageValue(0);
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean handleDamageWithSound(ItemStack stack, int damage, Level level, BlockPos blockPos) {
+        boolean hasBroke = handleDamage(stack, damage);
+        if (hasBroke && !level.isClientSide) {
+            level.playSound(
+                    null, // Player - null means all nearby players hear it
+                    blockPos,  // Position of the block entity
+                    SoundEvents.ITEM_BREAK, // The sound event
+                    SoundSource.BLOCKS,     // Sound category
+                    1.0F,                   // Volume
+                    1.0F                    // Pitch
+            );
+        }
+        return hasBroke;
+    }
+
     @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         List<ItemDescription> itemDescriptions = getItems(pStack);
@@ -90,9 +177,38 @@ public abstract class TicketItem extends Item {
         }
 
         int processCount = getMaxProcessCount(pStack);
-        if (processCount > 0) {
-            pTooltipComponents.add(Component.empty());
+        boolean showProcessCount = processCount > 0;
+        boolean showMaxUsage = hasMaxUsage(pStack);
+
+        if (!showProcessCount && !showMaxUsage) return;
+
+        pTooltipComponents.add(Component.empty());
+        if (showProcessCount) {
             pTooltipComponents.add(Component.translatable("jackseconomy.ticket_process_count", processCount).withStyle(ChatFormatting.GREEN));
         }
+        if (showMaxUsage) {
+            pTooltipComponents.add(Component.translatable("jackseconomy.ticket_uses_left", formatUsesLeft(pStack)).withStyle(ChatFormatting.GREEN));
+        }
+    }
+
+    public String formatUsesLeft(ItemStack stack) {
+        int uses = getUsesLeft(stack);
+
+        if (uses >= 1000000) {
+            return uses / 1000000 + "M";
+        } else if (uses >= 1000) {
+            return uses / 1000 + "K";
+        }
+        return Integer.toString(uses);
+    }
+
+    @Override
+    public int getMaxDamage(ItemStack stack) {
+        return TicketItem.getMaxUsage(stack);
+    }
+
+    @Override
+    public boolean isDamageable(ItemStack stack) {
+        return hasMaxUsage(stack);
     }
 }
