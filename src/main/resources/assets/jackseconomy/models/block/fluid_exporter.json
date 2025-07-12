@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "down": "jackseconomy:block/fluid_machine",
+    "up": "jackseconomy:block/fluid_machine",
+    "front": "jackseconomy:block/fluid_exporter",
+    "east": "jackseconomy:block/fluid_machine",
+    "south": "jackseconomy:block/fluid_machine",
+    "west": "jackseconomy:block/fluid_machine"
+  }
+}

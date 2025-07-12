@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "jackseconomy:block/mechanical_fluid_exporter",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "jackseconomy:block/mechanical_fluid_exporter"
+    },
+    "facing=south": {
+      "model": "jackseconomy:block/mechanical_fluid_exporter",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jackseconomy:block/mechanical_fluid_exporter",
+      "y": 270
+    }
+  }
+}

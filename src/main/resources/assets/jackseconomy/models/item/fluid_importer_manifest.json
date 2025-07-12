@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jackseconomy:item/fluid_importer_manifest"
+  }
+}
