@@ -11,8 +11,8 @@
 
 ### Added
 
-- Manifests can now be given a maximum amount of uses using `/economy manifest max_uses`
-- Admin shops can be colored, to help differentiate shops. This is because a shops inventory is dependent on its name.
+- **Manifest Usage Limits**: You can now define a maximum number of uses for manifests via `/economy manifest max_uses`.
+- **Admin Shop Coloring**: Admin shops can be color-coded using `/adminshop color` to help differentiate them. This is especially useful since each shop's inventory is linked to its name.
 
 ## 1.2.2-1.4.1
 
