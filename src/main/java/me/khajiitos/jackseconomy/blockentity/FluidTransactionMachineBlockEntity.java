@@ -1,13 +1,10 @@
 package me.khajiitos.jackseconomy.blockentity;
 
-import me.khajiitos.jackseconomy.block.TransactionMachineBlock;
 import me.khajiitos.jackseconomy.config.Config;
-import me.khajiitos.jackseconomy.util.AdvancedFluidTank;
-import me.khajiitos.jackseconomy.util.JacksEnergyStorage;
-import me.khajiitos.jackseconomy.util.RedstoneToggle;
-import me.khajiitos.jackseconomy.util.SideConfig;
+import me.khajiitos.jackseconomy.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -22,17 +19,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 
-public abstract class FluidTransactionMachineBlockEntity extends BlockEntity implements WorldlyContainer, Container, MenuProvider, Nameable {
+public abstract class FluidTransactionMachineBlockEntity extends BlockEntity implements WorldlyContainer, Container, MenuProvider, Nameable, IItemCapable, IFluidCapable, IEnergyCapable {
 
     protected JacksEnergyStorage energyStorage = new JacksEnergyStorage(
             this instanceof FluidExporterBlockEntity ? Config.maxExporterEnergy.get() : Config.maxImporterEnergy.get(),
@@ -49,9 +41,6 @@ public abstract class FluidTransactionMachineBlockEntity extends BlockEntity imp
     };
     protected AdvancedFluidTank.SuppliedFluidTank inputFluidStorage = new AdvancedFluidTank.SuppliedFluidTank(this::getFluidStorage, true, false);
     protected AdvancedFluidTank.SuppliedFluidTank outputFluidStorage = new AdvancedFluidTank.SuppliedFluidTank(this::getFluidStorage, false, true);
-    private final LazyOptional<IEnergyStorage> lazyEnergyStorage = LazyOptional.of(() -> energyStorage);
-    protected final LazyOptional<IFluidHandler> lazyInputFluidStorage = LazyOptional.of(() -> inputFluidStorage);
-    protected final LazyOptional<IFluidHandler> lazyOutputFluidStorage = LazyOptional.of(() -> outputFluidStorage);
 
     protected BigDecimal currency = BigDecimal.ZERO;
     protected float speed;
@@ -122,57 +111,40 @@ public abstract class FluidTransactionMachineBlockEntity extends BlockEntity imp
         this.items.clear();
     }
 
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        ContainerHelper.saveAllItems(tag, this.items);
-        this.saveMachineData(tag);
-    }
-
-    @NotNull
-    @Override
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
-        Direction facing = this.getBlockState().getValue(TransactionMachineBlock.FACING);
-
-        if (cap == ForgeCapabilities.ENERGY/* && side == facing || side == facing.getOpposite()*/) {
-            return lazyEnergyStorage.cast();
-        }
-
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        lazyEnergyStorage.invalidate();
-        lazyInputFluidStorage.invalidate();
-        lazyOutputFluidStorage.invalidate();
-        //lazyItemHandler.invalidate();
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveAdditional(tag, provider);
+        this.saveMachineData(tag, provider);
     }
 
     public int getEnergyStored() {
         return this.energyStorage.getEnergyStored();
     }
-
     public IEnergyStorage getEnergyStorage() {
         return this.energyStorage;
     }
-    public AdvancedFluidTank getFluidStorage() {
-        return this.fluidStorage;
+
+    @Override
+    public IEnergyStorage getEnergyStorage(Direction direction) {
+        return this.energyStorage;
     }
 
-    public void saveMachineData(CompoundTag tag) {
+    public AdvancedFluidTank getFluidStorage() {
+        return fluidStorage;
+    }
+
+    public void saveMachineData(CompoundTag tag, HolderLookup.Provider provider) {
         tag.putInt("Energy", this.energyStorage.getEnergyStored());
-        tag.put("Fluid", this.fluidStorage.writeToNBT(new CompoundTag()));
+        tag.put("Fluid", this.fluidStorage.writeToNBT(provider, new CompoundTag()));
         tag.putFloat("Speed", this.speed);
         tag.putString("Currency", this.currency.toString());
         tag.putInt("RedstoneToggle", this.redstoneToggle.ordinal());
         tag.put("SideConfig", this.sideConfig.toNbt());
-        ContainerHelper.saveAllItems(tag, this.items);
+        ContainerHelper.saveAllItems(tag, this.items, provider);
     }
 
-    public void loadMachineData(CompoundTag tag) {
+    public void loadMachineData(CompoundTag tag, HolderLookup.Provider provider) {
         this.energyStorage.setEnergy(tag.getInt("Energy"));
-        this.fluidStorage.readFromNBT(tag.getCompound("Fluid"));
+        this.fluidStorage.readFromNBT(provider, tag.getCompound("Fluid"));
         this.speed = tag.getFloat("Speed");
         try {
             this.currency = new BigDecimal(tag.getString("Currency"));
@@ -188,16 +160,15 @@ public abstract class FluidTransactionMachineBlockEntity extends BlockEntity imp
 
         this.sideConfig = SideConfig.fromIntArray(tag.getIntArray("SideConfig"));
 
-        ContainerHelper.loadAllItems(tag, this.items);
+        ContainerHelper.loadAllItems(tag, this.items, provider);
     }
 
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.loadAdditional(tag, provider);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        //ContainerHelper.loadAllItems(tag, this.items);
-        this.loadMachineData(tag);
+        this.loadMachineData(tag, provider);
     }
 
     public RedstoneToggle getRedstoneToggle() {
@@ -229,7 +200,7 @@ public abstract class FluidTransactionMachineBlockEntity extends BlockEntity imp
                 int stackSize = Math.min(remainingItems.getCount(), itemStack.getMaxStackSize());
                 ItemStack stackToAdd = remainingItems.split(stackSize);
                 items.set(i, stackToAdd);
-            } else if (ItemStack.isSameItemSameTags(slotStack, remainingItems)) {
+            } else if (ItemStack.isSameItemSameComponents(slotStack, remainingItems)) {
                 int spaceAvailable = itemStack.getMaxStackSize() - slotStack.getCount();
                 int stackSize = Math.min(remainingItems.getCount(), spaceAvailable);
                 slotStack.grow(stackSize);
@@ -252,7 +223,7 @@ public abstract class FluidTransactionMachineBlockEntity extends BlockEntity imp
                 return true;
             }
 
-            if (ItemStack.isSameItemSameTags(itemStack, stackInSlot)) {
+            if (ItemStack.isSameItemSameComponents(itemStack, stackInSlot)) {
                 if (stackInSlot.getCount() + itemStack.getCount() <= stackInSlot.getMaxStackSize()) {
                     return true;
                 }
@@ -267,17 +238,17 @@ public abstract class FluidTransactionMachineBlockEntity extends BlockEntity imp
             this.setChanged();
             this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
         }
-
     }
 
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        if (pkt.getTag() != null) {
-            this.load(pkt.getTag());
-        }
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider provider) {
+        pkt.getTag();
+        this.loadAdditional(pkt.getTag(), provider);
     }
 
-    public void handleUpdateTag(CompoundTag tag) {
-        this.load(tag);
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
+        this.loadAdditional(tag, provider);
     }
 
     @Nullable
@@ -286,9 +257,10 @@ public abstract class FluidTransactionMachineBlockEntity extends BlockEntity imp
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    public CompoundTag getUpdateTag() {
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        this.saveAdditional(tag);
+        this.saveAdditional(tag, provider);
         return tag;
     }
 }

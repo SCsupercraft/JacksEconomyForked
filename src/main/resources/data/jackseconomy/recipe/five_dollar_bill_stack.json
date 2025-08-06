@@ -1,0 +1,17 @@
+
+{
+    "type": "minecraft:crafting_shaped",
+    "key": {
+      "#": {
+        "item": "jackseconomy:five_dollar_bill"
+      }
+    },
+    "pattern": [
+      "###",
+      "###",
+      "###"
+    ],
+    "result": {
+      "id": "jackseconomy:five_dollar_bill_stack"
+    }
+  }

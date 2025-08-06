@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 public class TicketCreatorScreen extends AbstractContainerScreen<TicketCreatorMenu> {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/ticket_creator.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/ticket_creator.png");
 
     public TicketCreatorScreen(TicketCreatorMenu pMenu, Inventory pPlayerInventory, Component title) {
         super(pMenu, pPlayerInventory, Component.empty());
@@ -21,7 +21,6 @@ public class TicketCreatorScreen extends AbstractContainerScreen<TicketCreatorMe
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
-        this.renderBackground(guiGraphics);
         RenderSystem.setShaderTexture(0, BACKGROUND);
         int i = this.leftPos;
         int j = (this.height - this.imageHeight) / 2;

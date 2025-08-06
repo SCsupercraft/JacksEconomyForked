@@ -6,12 +6,10 @@ import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.menu.CurrencyConverterMenu;
-import me.khajiitos.jackseconomy.util.CurrencyType;
-import me.khajiitos.jackseconomy.util.IDisablable;
-import me.khajiitos.jackseconomy.util.SideConfig;
-import me.khajiitos.jackseconomy.util.SlottedItemStackHandler;
+import me.khajiitos.jackseconomy.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -31,30 +29,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class CurrencyConverterBlockEntity extends BlockEntity implements WorldlyContainer, Container, MenuProvider, ISideConfigurable, IDisablable {
+public class CurrencyConverterBlockEntity extends BlockEntity implements WorldlyContainer, Container, MenuProvider, ISideConfigurable, IDisablable, IItemCapable {
     public NonNullList<ItemStack> items;
     public CurrencyType selectedCurrencyType = CurrencyType.PENNY;
     protected BigDecimal currency = BigDecimal.ZERO;
-
     private static final int[] slotsInput = new int[]{0, 1, 2};
     private static final int[] slotsOutput = new int[]{3, 4, 5, 6, 7, 8, 9, 10, 11};
-
     protected SlottedItemStackHandler itemHandlerInput;
     protected SlottedItemStackHandler itemHandlerOutput;
     protected SlottedItemStackHandler itemHandlerRejectionOutput;
-    protected LazyOptional<IItemHandler> itemHandlerInputLazy = LazyOptional.of(() -> itemHandlerInput);
-    protected LazyOptional<IItemHandler> itemHandlerOutputLazy = LazyOptional.of(() -> itemHandlerOutput);
-    protected LazyOptional<IItemHandler> itemHandlerRejectionOutputLazy = LazyOptional.of(() -> itemHandlerRejectionOutput);
     protected SideConfig sideConfig = new SideConfig();
 
     public CurrencyConverterBlockEntity(BlockPos pPos, BlockState pBlockState) {
@@ -188,7 +177,7 @@ public class CurrencyConverterBlockEntity extends BlockEntity implements Worldly
             }
         }
 
-        int toAdd = Math.min(blockEntity.selectedCurrencyType.item.getMaxStackSize(), (blockEntity.currency.divide(blockEntity.selectedCurrencyType.worth, RoundingMode.DOWN).intValue()));
+        int toAdd = Math.min(blockEntity.selectedCurrencyType.item.getDefaultMaxStackSize(), (blockEntity.currency.divide(blockEntity.selectedCurrencyType.worth, RoundingMode.DOWN).intValue()));
 
         if (toAdd > 0) {
             ItemStack stack = new ItemStack(blockEntity.selectedCurrencyType.item, toAdd);
@@ -216,29 +205,29 @@ public class CurrencyConverterBlockEntity extends BlockEntity implements Worldly
             this.setChanged();
             this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
         }
-
-    }
-
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        if (pkt.getTag() != null) {
-            this.load(pkt.getTag());
-        }
-    }
-
-    public void handleUpdateTag(CompoundTag tag) {
-        this.loadAdditional(tag);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag pTag) {
-        super.saveAdditional(pTag);
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider provider) {
+        this.loadAdditional(pkt.getTag(), provider);
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
+        this.loadAdditional(tag, provider);
+    }
+
+    @Override
+    protected void saveAdditional(CompoundTag pTag, HolderLookup.Provider provider) {
+        super.saveAdditional(pTag, provider);
         pTag.putString("Currency", this.currency.toString());
         pTag.putDouble("CurrencyType", this.selectedCurrencyType.ordinal());
         pTag.put("SideConfig", this.sideConfig.toNbt());
-        ContainerHelper.saveAllItems(pTag, this.items);
+        ContainerHelper.saveAllItems(pTag, this.items, provider);
     }
 
-    public void loadAdditional(CompoundTag pTag) {
+    @Override
+    public void loadAdditional(CompoundTag pTag, HolderLookup.Provider provider) {
         try {
             this.currency = new BigDecimal(pTag.getString("Currency"));
         } catch (NumberFormatException e) {
@@ -253,7 +242,7 @@ public class CurrencyConverterBlockEntity extends BlockEntity implements Worldly
         }
 
         this.sideConfig = SideConfig.fromIntArray(pTag.getIntArray("SideConfig"));
-
+        ContainerHelper.loadAllItems(pTag, this.items, provider);
     }
 
     @Nullable
@@ -262,17 +251,11 @@ public class CurrencyConverterBlockEntity extends BlockEntity implements Worldly
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = new CompoundTag();
-        this.saveAdditional(tag);
-        return tag;
-    }
-
     @Override
-    public void load(CompoundTag pTag) {
-        super.load(pTag);
-        ContainerHelper.loadAllItems(pTag, this.items);
-        this.loadAdditional(pTag);
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        CompoundTag tag = new CompoundTag();
+        this.saveAdditional(tag, provider);
+        return tag;
     }
 
     public @Nullable ItemStack addItem(ItemStack itemStack, int[] slots) {
@@ -284,7 +267,7 @@ public class CurrencyConverterBlockEntity extends BlockEntity implements Worldly
                 int stackSize = Math.min(remainingItems.getCount(), itemStack.getMaxStackSize());
                 ItemStack stackToAdd = remainingItems.split(stackSize);
                 items.set(i, stackToAdd);
-            } else if (ItemStack.isSameItemSameTags(slotStack, remainingItems)) {
+            } else if (ItemStack.isSameItemSameComponents(slotStack, remainingItems)) {
                 int spaceAvailable = itemStack.getMaxStackSize() - slotStack.getCount();
                 int stackSize = Math.min(remainingItems.getCount(), spaceAvailable);
                 slotStack.grow(stackSize);
@@ -314,35 +297,23 @@ public class CurrencyConverterBlockEntity extends BlockEntity implements Worldly
     }
 
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
+    public IItemHandler getItemCapability(Direction direction) {
         Direction facing = this.getBlockState().getValue(CurrencyConverterBlock.FACING);
-
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            if (side == null) {
-                return itemHandlerOutputLazy.cast();
+        if (direction == null) {
+            return itemHandlerOutput;
+        }
+        switch (sideConfig.getValue(SideConfig.directionRelative(facing, direction))) {
+            case INPUT -> {
+                return itemHandlerInput;
             }
-            switch (sideConfig.getValue(SideConfig.directionRelative(facing, side))) {
-                case INPUT -> {
-                    return itemHandlerInputLazy.cast();
-                }
-                case OUTPUT -> {
-                    return itemHandlerOutputLazy.cast();
-                }
-                case REJECTION_OUTPUT -> {
-                    return itemHandlerRejectionOutputLazy.cast();
-                }
+            case OUTPUT -> {
+                return itemHandlerOutput;
+            }
+            case REJECTION_OUTPUT -> {
+                return itemHandlerRejectionOutput;
             }
         }
-
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        itemHandlerInputLazy.invalidate();
-        itemHandlerOutputLazy.invalidate();
-        itemHandlerRejectionOutputLazy.invalidate();
+        return null;
     }
 
     @Override

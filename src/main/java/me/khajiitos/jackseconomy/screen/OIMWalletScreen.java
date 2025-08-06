@@ -31,8 +31,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class OIMWalletScreen extends AbstractContainerScreen<OIMWalletMenu> {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/oim_wallet.png");
-    private static final ResourceLocation ID_CARD = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/id_card.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/oim_wallet.png");
+    private static final ResourceLocation ID_CARD = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/id_card.png");
 
     private List<Component> tooltip;
     private boolean tooltipShift = false;
@@ -64,7 +64,6 @@ public class OIMWalletScreen extends AbstractContainerScreen<OIMWalletMenu> {
     protected void renderBg(GuiGraphics guiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
         tooltip = null;
         tooltipShift = false;
-        this.renderBackground(guiGraphics);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, BACKGROUND);
@@ -76,7 +75,7 @@ public class OIMWalletScreen extends AbstractContainerScreen<OIMWalletMenu> {
 
     private static void drawCenteredStringNoShadow(GuiGraphics guiGraphics, Font pFont, Component pText, int pX, int pY, int pColor) {
         FormattedCharSequence formattedcharsequence = pText.getVisualOrderText();
-        guiGraphics.drawString(pFont, formattedcharsequence, (int)(pX - pFont.width(formattedcharsequence) / 2), (int)pY, pColor, false);
+        guiGraphics.drawString(pFont, formattedcharsequence, pX - pFont.width(formattedcharsequence) / 2, pY, pColor, false);
     }
 
     @Override
@@ -86,8 +85,8 @@ public class OIMWalletScreen extends AbstractContainerScreen<OIMWalletMenu> {
         guiGraphics.blit(ID_CARD, this.leftPos + 75, this.topPos + 40, 0/*this.getBlitOffset()*/, 0, 0, 91, 44, 91, 44);
 
         if (Minecraft.getInstance().player != null) {
-            RenderSystem.setShaderTexture(0, Minecraft.getInstance().player.getSkinTextureLocation());
-            PlayerFaceRenderer.draw(guiGraphics, Minecraft.getInstance().player.getSkinTextureLocation(), this.leftPos + 75 + 4, this.topPos + 40 + 15, 25);
+            RenderSystem.setShaderTexture(0, Minecraft.getInstance().player.getSkin().texture());
+            PlayerFaceRenderer.draw(guiGraphics, Minecraft.getInstance().player.getSkin().texture(), this.leftPos + 75 + 4, this.topPos + 40 + 15, 25);
         }
 
         Component header = Component.translatable("jackseconomy.item_owner", Component.literal(Minecraft.getInstance().player.getScoreboardName()), this.itemStack.getItem().getDescription());

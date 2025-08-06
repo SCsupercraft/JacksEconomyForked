@@ -3,12 +3,13 @@ package me.khajiitos.jackseconomy.util;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 
@@ -20,8 +21,8 @@ public class ItemHelper {
 
     public static @Nullable Item getItem(String name) {
         try {
-            ResourceLocation resourceLocation = new ResourceLocation(name);
-            Item item = ForgeRegistries.ITEMS.getValue(resourceLocation);
+            ResourceLocation resourceLocation = ResourceLocation.tryParse(name);
+            Item item = JacksEconomy.server.registryAccess().registryOrThrow(Registries.ITEM).get(resourceLocation);
 
             if (item == null) {
                 JacksEconomy.LOGGER.info("Invalid item: " + name);
@@ -35,13 +36,16 @@ public class ItemHelper {
         return null;
     }
 
+    public static @Nullable ResourceLocation getItemResourceLocation(Item item) {
+        return JacksEconomy.server.registryAccess().registryOrThrow(Registries.ITEM).getKey(item);
+    }
+
     public static String getItemName(Item item) {
-        ResourceLocation resourceLocation = ForgeRegistries.ITEMS.getKey(item);
+        ResourceLocation resourceLocation = getItemResourceLocation(item);
+        return resourceLocation != null ? resourceLocation.toString() : null;
+    }
 
-        if (resourceLocation != null) {
-            return resourceLocation.toString();
-        }
-
-        return null;
+    public static Holder<Item> getHolder(Item item) {
+        return JacksEconomy.server.registryAccess().registryOrThrow(Registries.ITEM).getHolder(getItemResourceLocation(item)).orElseThrow();
     }
 }

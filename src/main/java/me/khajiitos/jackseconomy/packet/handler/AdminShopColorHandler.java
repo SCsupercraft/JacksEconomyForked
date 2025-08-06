@@ -3,13 +3,11 @@ package me.khajiitos.jackseconomy.packet.handler;
 import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.packet.AdminShopColorPacket;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class AdminShopColorHandler {
 
-    public static void handle(AdminShopColorPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(AdminShopColorPacket msg, final IPayloadContext context) {
         JacksEconomyClient.adminShopColors.clear();
         JacksEconomyClient.defaultAdminShopColor = msg.defaultColor();
 

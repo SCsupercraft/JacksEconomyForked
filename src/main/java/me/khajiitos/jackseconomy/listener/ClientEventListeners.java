@@ -6,60 +6,51 @@ import me.khajiitos.jackseconomy.config.ClientConfig;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
-import me.khajiitos.jackseconomy.data.price.PricesFluidPriceInfo;
-import me.khajiitos.jackseconomy.init.Packets;
-import me.khajiitos.jackseconomy.packet.OpenCuriosWalletPacket;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.PricesFluidPriceInfo;
 import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
+import me.khajiitos.jackseconomy.packet.OpenCuriosWalletPacket;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientEventListeners {
-
     @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent e) {
-        if (e.phase != TickEvent.Phase.END) {
-            return;
-        }
-
+    public void onTick(ClientTickEvent.Post e) {
         while (JacksEconomyClient.OPEN_WALLET.consumeClick()) {
             ItemStack curiosWallet = CuriosWallet.get(Minecraft.getInstance().player);
 
             if (!curiosWallet.isEmpty()) {
-                Packets.sendToServer(new OpenCuriosWalletPacket());
+                PacketDistributor.sendToServer(new OpenCuriosWalletPacket());
             }
         }
     }
 
     @SubscribeEvent
     public void onTooltip(ItemTooltipEvent e) {
-
         if (ClientConfig.hidePriceTooltips.get()) {
             return;
         }
 
         PricesItemPriceInfo priceInfo = JacksEconomyClient.priceInfos.get(ItemDescription.ofItem(e.getItemStack()));
 
-        LazyOptional<IFluidHandlerItem> capability = e.getItemStack().getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
-        IFluidHandlerItem fluidHandlerItem = null;
+        IFluidHandlerItem fluidHandlerItem = e.getItemStack().getCapability(Capabilities.FluidHandler.ITEM);
         PricesFluidPriceInfo fluidPriceInfo = null;
-        if (capability.isPresent()) {
-            fluidHandlerItem = capability.orElseThrow(RuntimeException::new);
+        if (fluidHandlerItem != null) {
             fluidPriceInfo = JacksEconomyClient.fluidPriceInfos.get(FluidDescription.ofFluid(fluidHandlerItem.getFluidInTank(0)));
         }
 

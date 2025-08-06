@@ -9,8 +9,12 @@ import me.khajiitos.jackseconomy.util.Utils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.SessionSearchTrees;
 import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -29,9 +33,11 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.client.CreativeModeTabSearchRegistry;
+import net.neoforged.neoforge.client.gui.CreativeTabsScreenPage;
+import net.neoforged.neoforge.common.CreativeModeTabRegistry;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
@@ -43,6 +49,10 @@ import java.util.stream.Stream;
  * @see net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
  */
 public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPickerMenu> extends AbstractContainerScreen<T> {
+	protected static final ResourceLocation[] UNSELECTED_TOP_TABS = new ResourceLocation[]{ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_1"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_2"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_3"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_4"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_5"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_6"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_7")};
+	protected static final ResourceLocation[] SELECTED_TOP_TABS = new ResourceLocation[]{ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_1"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_2"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_3"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_4"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_5"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_6"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_7")};
+	protected static final ResourceLocation[] UNSELECTED_BOTTOM_TABS = new ResourceLocation[]{ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_1"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_2"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_3"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_4"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_5"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_6"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_7")};
+	protected static final ResourceLocation[] SELECTED_BOTTOM_TABS = new ResourceLocation[]{ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_1"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_2"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_3"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_4"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_5"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_6"), ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_7")};
 	protected static final int selectedItemColor = Utils.hexToMinecraftColor("#4DFFDE59");
 	/** Currently selected creative inventory tab index. */
 	protected static CreativeModeTab selectedTab = CreativeModeTabs.getDefaultTab();
@@ -55,8 +65,8 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 	protected boolean hasClickedOutside;
 	protected final Set<TagKey<Fluid>> visibleTags = new HashSet<>();
 	protected final boolean displayOperatorCreativeTab;
-	protected final List<net.minecraftforge.client.gui.CreativeTabsScreenPage> pages = new ArrayList<>();
-	protected net.minecraftforge.client.gui.CreativeTabsScreenPage currentPage = new net.minecraftforge.client.gui.CreativeTabsScreenPage(new ArrayList<>());
+	protected final List<CreativeTabsScreenPage> pages = new ArrayList<>();
+	protected CreativeTabsScreenPage currentPage = new CreativeTabsScreenPage(new ArrayList<>());
 	protected List<ItemStack> selectedItems = new ArrayList<>();
 	protected FloatingEditBoxWidget floatingEditBox;
 	protected boolean canEditSelection = true;
@@ -73,11 +83,9 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 
 	protected List<ItemStack> onlyFluidContainers(Stream<ItemStack> stacks) {
 		return stacks.filter(stack -> {
-			LazyOptional<IFluidHandlerItem> lazyCap = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
-			if (!lazyCap.isPresent()) return false;
-
-			IFluidHandlerItem handlerItem = lazyCap.orElseThrow(IllegalStateException::new);
-			return !handlerItem.getFluidInTank(0).isEmpty();
+			IFluidHandlerItem fluidHandlerItem = stack.getCapability(Capabilities.FluidHandler.ITEM);
+			if (fluidHandlerItem == null) return false;
+			return !fluidHandlerItem.getFluidInTank(0).isEmpty();
 		}).toList();
 	}
 
@@ -177,9 +185,7 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 				this.tryRefreshInvalidatedTabs(this.minecraft.player.connection.enabledFeatures(), this.hasPermissions(this.minecraft.player), this.minecraft.player.level().registryAccess());
 			}
 
-			this.searchBox.tick();
 			if (this.floatingEditBox != null) {
-				this.floatingEditBox.tick();
 				if (!this.floatingEditBox.isFocused()) setFocused(this.floatingEditBox);
 			}
 		}
@@ -225,31 +231,31 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 		int tabIndex = 0;
 		List<CreativeModeTab> currentPage = new ArrayList<>();
 
-		for (CreativeModeTab sortedCreativeModeTab : net.minecraftforge.common.CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
-			if (sortedCreativeModeTab.getType() == CreativeModeTab.Type.HOTBAR || sortedCreativeModeTab.getType() == CreativeModeTab.Type.INVENTORY || sortedCreativeModeTab.getDisplayItems().stream().noneMatch((stack) -> stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent())) continue;
+		for (CreativeModeTab sortedCreativeModeTab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
+			if (sortedCreativeModeTab.getType() == CreativeModeTab.Type.HOTBAR || sortedCreativeModeTab.getType() == CreativeModeTab.Type.INVENTORY || sortedCreativeModeTab.getDisplayItems().stream().noneMatch((stack) -> stack.getCapability(Capabilities.FluidHandler.ITEM) != null)) continue;
 
 			currentPage.add(sortedCreativeModeTab);
 			tabIndex++;
 			if (tabIndex == 10) {
-				this.pages.add(new net.minecraftforge.client.gui.CreativeTabsScreenPage(currentPage));
+				this.pages.add(new CreativeTabsScreenPage(currentPage));
 				currentPage = new ArrayList<>();
 				tabIndex = 0;
 			}
 		}
 
 		if (tabIndex != 0) {
-			this.pages.add(new net.minecraftforge.client.gui.CreativeTabsScreenPage(currentPage));
+			this.pages.add(new CreativeTabsScreenPage(currentPage));
 		}
 
 		if (this.pages.isEmpty()) {
-			this.currentPage = new net.minecraftforge.client.gui.CreativeTabsScreenPage(new ArrayList<>());
+			this.currentPage = new CreativeTabsScreenPage(new ArrayList<>());
 		} else {
 			this.currentPage = this.pages.get(0);
 		}
 
 		if (this.pages.size() > 1) {
-			addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.literal("<"), b -> setCurrentPage(this.pages.get(Math.max(this.pages.indexOf(this.currentPage) - 1, 0)))).pos(leftPos,  topPos - 50).size(20, 20).build());
-			addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.literal(">"), b -> setCurrentPage(this.pages.get(Math.min(this.pages.indexOf(this.currentPage) + 1, this.pages.size() - 1)))).pos(leftPos + imageWidth - 20, topPos - 50).size(20, 20).build());
+			addRenderableWidget(Button.builder(Component.literal("<"), b -> setCurrentPage(this.pages.get(Math.max(this.pages.indexOf(this.currentPage) - 1, 0)))).pos(leftPos,  topPos - 50).size(20, 20).build());
+			addRenderableWidget(Button.builder(Component.literal(">"), b -> setCurrentPage(this.pages.get(Math.min(this.pages.indexOf(this.currentPage) + 1, this.pages.size() - 1)))).pos(leftPos + imageWidth - 20, topPos - 50).size(20, 20).build());
 		}
 
 		this.currentPage = this.pages.stream().filter(page -> page.getVisibleTabs().contains(selectedTab)).findFirst().orElse(this.currentPage);
@@ -378,16 +384,20 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 		if (s.isEmpty()) {
 			this.menu.items.addAll(onlyFluidContainers(selectedTab.getDisplayItems().stream()));
 		} else {
-			SearchTree<ItemStack> searchtree;
-			if (s.startsWith("#")) {
-				s = s.substring(1);
-				searchtree = this.minecraft.getSearchTree(net.minecraftforge.client.CreativeModeTabSearchRegistry.getTagSearchKey(selectedTab));
-				this.updateVisibleTags(s);
-			} else {
-				searchtree = this.minecraft.getSearchTree(net.minecraftforge.client.CreativeModeTabSearchRegistry.getNameSearchKey(selectedTab));
-			}
+			ClientPacketListener clientpacketlistener = this.minecraft.getConnection();
+			if (clientpacketlistener != null) {
+				SessionSearchTrees sessionsearchtrees = clientpacketlistener.searchTrees();
+				SearchTree<ItemStack> searchtree;
+				if (s.startsWith("#")) {
+					s = s.substring(1);
+					searchtree = sessionsearchtrees.creativeTagSearch(CreativeModeTabSearchRegistry.getTagSearchKey(selectedTab));
+					this.updateVisibleTags(s);
+				} else {
+					searchtree = sessionsearchtrees.creativeNameSearch(CreativeModeTabSearchRegistry.getNameSearchKey(selectedTab));
+				}
 
-			this.menu.items.addAll(onlyFluidContainers(searchtree.search(s.toLowerCase(Locale.ROOT)).stream()));
+				this.menu.items.addAll(onlyFluidContainers(searchtree.search(s.toLowerCase(Locale.ROOT)).stream()));
+			}
 		}
 
 		this.scrollOffs = 0.0F;
@@ -521,13 +531,15 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 	 * @return {@code true} if the event is consumed, {@code false} otherwise.
 	 * @param pMouseX the X coordinate of the mouse.
 	 * @param pMouseY the Y coordinate of the mouse.
-	 * @param pDelta the scrolling delta.
+	 * @param pScrollX the amount scrolled on the x-axis.
+	 * @param pScrollY the amount scrolled on the y-axis.
 	 */
-	public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
+	@Override
+	public boolean mouseScrolled(double pMouseX, double pMouseY, double pScrollX, double pScrollY) {
 		if (!this.canScroll()) {
 			return false;
 		} else {
-			this.scrollOffs = this.menu.subtractInputFromScroll(this.scrollOffs, pDelta);
+			this.scrollOffs = this.menu.subtractInputFromScroll(this.scrollOffs, pScrollY);
 			this.menu.scrollTo(this.scrollOffs);
 			return true;
 		}
@@ -580,7 +592,6 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 	 * @param pPartialTick the partial tick time.
 	 */
 	public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-		this.renderBackground(pGuiGraphics);
 		super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 
 		for(CreativeModeTab creativemodetab : currentPage.getVisibleTabs()) {
@@ -605,14 +616,24 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 	}
 
 	@Override
+	protected void clearWidgets() {
+		super.clearWidgets();
+		if (this.pages.size() > 1) {
+			addRenderableWidget(Button.builder(Component.literal("<"), b -> setCurrentPage(this.pages.get(Math.max(this.pages.indexOf(this.currentPage) - 1, 0)))).pos(leftPos,  topPos - 50).size(20, 20).build());
+			addRenderableWidget(Button.builder(Component.literal(">"), b -> setCurrentPage(this.pages.get(Math.min(this.pages.indexOf(this.currentPage) + 1, this.pages.size() - 1)))).pos(leftPos + imageWidth - 20, topPos - 50).size(20, 20).build());
+		}
+		addWidget(this.searchBox);
+	}
+
+	@Override
 	public List<Component> getTooltipFromContainerItem(ItemStack pStack) {
 		if (this.floatingEditBox != null || this.hoveredSlot == null || !(this.hoveredSlot instanceof FluidSelectionScreen.CustomCreativeSlot)) return new ArrayList<>();
 		boolean selected = isSelected(pStack);
 
 		TooltipFlag.Default flag = this.minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
-		List<Component> list = new ArrayList<>(pStack.getTooltipLines(this.minecraft.player, flag.asCreative()));
+		List<Component> list = new ArrayList<>(pStack.getTooltipLines(Item.TooltipContext.EMPTY, this.minecraft.player, flag.asCreative()));
 
-		IFluidHandlerItem handlerItem = pStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElseThrow(RuntimeException::new);
+		IFluidHandlerItem handlerItem = pStack.getCapability(Capabilities.FluidHandler.ITEM);
 		list.set(0, handlerItem.getFluidInTank(0).getFluid().getFluidType().getDescription());
 		list.add(Component.empty());
 
@@ -629,13 +650,14 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 			}
 		}
 
-		pGuiGraphics.blit(selectedTab.getBackgroundLocation(), this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+		pGuiGraphics.blit(selectedTab.getBackgroundTexture(), this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 		this.searchBox.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 		int j = this.leftPos + 175;
 		int k = this.topPos + 18;
 		int i = k + 112;
 		if (selectedTab.canScroll()) {
-			pGuiGraphics.blit(selectedTab.getTabsImage(), j, k + (int)((float)(i - k - 17) * this.scrollOffs), 232 + (this.canScroll() ? 0 : 12), 0, 12, 15);
+			ResourceLocation resourcelocation = selectedTab.getScrollerSprite();
+			pGuiGraphics.blitSprite(resourcelocation, j, k + (int)((float)(i - k - 17) * this.scrollOffs), 12, 15);
 		}
 
 		if (currentPage.getVisibleTabs().contains(selectedTab)) //Forge: only display tab selection when the selected tab is on the current page
@@ -683,7 +705,31 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 		}
 	}
 
-	protected void renderTabButton(GuiGraphics pGuiGraphics, CreativeModeTab pCreativeModeTab) {
+	protected void renderTabButton(GuiGraphics guiGraphics, CreativeModeTab creativeModeTab) {
+		boolean flag = creativeModeTab == selectedTab;
+		boolean flag1 = this.currentPage.isTop(creativeModeTab);
+		int i = this.currentPage.getColumn(creativeModeTab);
+		int j = this.leftPos + this.getTabX(creativeModeTab);
+		int k = this.topPos - (flag1 ? 28 : -(this.imageHeight - 4));
+		ResourceLocation[] aresourcelocation;
+		if (flag1) {
+			aresourcelocation = flag ? SELECTED_TOP_TABS : UNSELECTED_TOP_TABS;
+		} else {
+			aresourcelocation = flag ? SELECTED_BOTTOM_TABS : UNSELECTED_BOTTOM_TABS;
+		}
+
+		guiGraphics.blitSprite(aresourcelocation[Mth.clamp(i, 0, aresourcelocation.length)], j, k, 26, 32);
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
+		j += 5;
+		k += 8 + (flag1 ? 1 : -1);
+		ItemStack itemstack = creativeModeTab.getIconItem();
+		guiGraphics.renderItem(itemstack, j, k);
+		guiGraphics.renderItemDecorations(this.font, itemstack, j, k);
+		guiGraphics.pose().popPose();
+	}
+
+	/*protected void renderTabButton(GuiGraphics pGuiGraphics, CreativeModeTab pCreativeModeTab) {
 		boolean flag = pCreativeModeTab == selectedTab;
 		boolean flag1 = currentPage.isTop(pCreativeModeTab);
 		int i = currentPage.getColumn(pCreativeModeTab);
@@ -713,7 +759,7 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 		pGuiGraphics.renderItem(itemstack, l, i1);
 		pGuiGraphics.renderItemDecorations(this.font, itemstack, l, i1);
 		pGuiGraphics.pose().popPose();
-	}
+	}*/
 
 	protected void renderSelectedItems(GuiGraphics pGuiGraphics) {
 		for (Slot slot : this.menu.slots) {
@@ -729,11 +775,11 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 		return Pair.of(slot.x + getGuiLeft(), slot.y + getGuiTop());
 	}
 
-	public net.minecraftforge.client.gui.CreativeTabsScreenPage getCurrentPage() {
+	public CreativeTabsScreenPage getCurrentPage() {
 		return currentPage;
 	}
 
-	public void setCurrentPage(net.minecraftforge.client.gui.CreativeTabsScreenPage currentPage) {
+	public void setCurrentPage(CreativeTabsScreenPage currentPage) {
 		this.currentPage = currentPage;
 	}
 
@@ -760,7 +806,7 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 
 			for(int i = 0; i < 5; ++i) {
 				for(int j = 0; j < 9; ++j) {
-					this.addSlot(new FluidSelectionScreen.CustomCreativeSlot(this.CONTAINER, i * 9 + j, 9 + j * 18, 18 + i * 18));
+					this.addSlot(new CustomCreativeSlot(this.CONTAINER, i * 9 + j, 9 + j * 18, 18 + i * 18));
 				}
 			}
 

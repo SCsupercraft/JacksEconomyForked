@@ -1,25 +1,27 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.AcknowledgeUnlocksHandler;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.util.NewShopUnlocks;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.Objects;
-import java.util.function.Supplier;
+public record AcknowledgeUnlocksPacket(NewShopUnlocks newShopUnlocks) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<AcknowledgeUnlocksPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "acknowledge_unlocks"));
 
-public record AcknowledgeUnlocksPacket(NewShopUnlocks newShopUnlocks) {
+    public static final StreamCodec<ByteBuf, AcknowledgeUnlocksPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.COMPOUND_TAG.map(
+                    NewShopUnlocks::fromNbt,
+                    NewShopUnlocks::toNbt
+            ),
+            AcknowledgeUnlocksPacket::newShopUnlocks,
+            AcknowledgeUnlocksPacket::new
+    );
 
-    public static void encode(AcknowledgeUnlocksPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeNbt(msg.newShopUnlocks().toNbt());
-    }
-
-    public static AcknowledgeUnlocksPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new AcknowledgeUnlocksPacket(NewShopUnlocks.fromNbt(Objects.requireNonNull(friendlyByteBuf.readAnySizeNbt())));
-    }
-
-    public static void handle(AcknowledgeUnlocksPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> AcknowledgeUnlocksHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

@@ -34,7 +34,7 @@ public class AdminShopExitPromptScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, pMouseX, pMouseY, pPartialTick);
         super.render(guiGraphics, pMouseX, pMouseY, pPartialTick);
 
         guiGraphics.drawCenteredString(this.font, Component.translatable("jackseconomy.admin_shop_exit_prompt").withStyle(ChatFormatting.YELLOW), this.width / 2, this.height / 2 - 5, 0xFFFFFFFF);

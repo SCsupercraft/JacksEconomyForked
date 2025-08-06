@@ -1,23 +1,27 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.ChangeCurrencyTypeHandler;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.util.CurrencyType;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
+public record ChangeCurrencyTypePacket(CurrencyType currencyType) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<ChangeCurrencyTypePacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "change_currency_type"));
 
-public record ChangeCurrencyTypePacket(CurrencyType currencyType) {
-    public static void encode(ChangeCurrencyTypePacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeEnum(msg.currencyType);
-    }
+    public static final StreamCodec<ByteBuf, ChangeCurrencyTypePacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8.map(
+                    CurrencyType::valueOf,
+                    CurrencyType::name
+            ),
+            ChangeCurrencyTypePacket::currencyType,
+            ChangeCurrencyTypePacket::new
+    );
 
-    public static ChangeCurrencyTypePacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new ChangeCurrencyTypePacket(friendlyByteBuf.readEnum(CurrencyType.class));
-    }
-
-    public static void handle(ChangeCurrencyTypePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> ChangeCurrencyTypeHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

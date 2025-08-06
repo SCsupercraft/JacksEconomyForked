@@ -2,7 +2,7 @@ package me.khajiitos.jackseconomy.item;
 
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
-import me.khajiitos.jackseconomy.init.Packets;
+import me.khajiitos.jackseconomy.init.ComponentReg;
 import me.khajiitos.jackseconomy.init.Sounds;
 import me.khajiitos.jackseconomy.packet.WalletBalanceDifPacket;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
@@ -18,7 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,7 +30,7 @@ public class CheckItem extends Item implements IDisablable {
 
     public static BigDecimal getBalance(ItemStack itemStack) {
         try {
-            return new BigDecimal(itemStack.getOrCreateTag().getString("Balance"));
+            return itemStack.getOrDefault(ComponentReg.BALANCE, BigDecimal.ZERO);
         } catch (NumberFormatException e) {
             return BigDecimal.ZERO;
         }
@@ -41,11 +41,11 @@ public class CheckItem extends Item implements IDisablable {
     }
 
     public static void setBalance(ItemStack itemStack, BigDecimal bigDecimal) {
-        itemStack.getOrCreateTag().putString("Balance", bigDecimal.toString());
+        itemStack.set(ComponentReg.BALANCE, bigDecimal);
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+    public void appendHoverText(ItemStack pStack, TooltipContext tooltipContext, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         BigDecimal balance = getBalance(pStack);
 
         if (balance != null) {
@@ -84,7 +84,7 @@ public class CheckItem extends Item implements IDisablable {
         itemStack.shrink(1);
 
         if (pPlayer instanceof ServerPlayer serverPlayer) {
-            Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(newBalance.subtract(oldBalance)));
+            PacketDistributor.sendToPlayer(serverPlayer, new WalletBalanceDifPacket(newBalance.subtract(oldBalance)));
         }
 
         pPlayer.level().playSound(null, pPlayer.blockPosition(), Sounds.CASH.get(), SoundSource.PLAYERS, 1.f, 1.f);

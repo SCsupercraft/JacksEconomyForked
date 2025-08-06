@@ -75,8 +75,8 @@ public class FloatingEditBoxWidget extends EditBox {
     }
 
     @Override
-    public void moveCursorTo(int pPos) {
-        super.moveCursorTo(pPos);
+    public void moveCursorTo(int pPos, boolean select) {
+        super.moveCursorTo(pPos, select);
         this.calculateWidthAndPos();
     }
 

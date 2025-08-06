@@ -1,24 +1,25 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.RequestAdminShopSchemaHandler;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import javax.annotation.Nullable;
-import java.util.function.Supplier;
+import java.util.Optional;
 
-public record RequestAdminShopSchemaPacket(@Nullable String adminShopName) {
-    public static void encode(RequestAdminShopSchemaPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeBoolean(msg.adminShopName != null);
-        if (msg.adminShopName != null) friendlyByteBuf.writeUtf(msg.adminShopName);
-    }
+public record RequestAdminShopSchemaPacket(Optional<String> adminShopName) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<RequestAdminShopSchemaPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "request_admin_shop_schema"));
 
-    public static RequestAdminShopSchemaPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new RequestAdminShopSchemaPacket(friendlyByteBuf.readBoolean() ? friendlyByteBuf.readUtf() : null);
-    }
+    public static final StreamCodec<ByteBuf, RequestAdminShopSchemaPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8),
+            RequestAdminShopSchemaPacket::adminShopName,
+            RequestAdminShopSchemaPacket::new
+    );
 
-    public static void handle(RequestAdminShopSchemaPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> RequestAdminShopSchemaHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

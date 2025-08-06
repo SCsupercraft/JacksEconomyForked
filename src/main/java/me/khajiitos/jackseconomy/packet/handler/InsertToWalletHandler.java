@@ -1,7 +1,6 @@
 package me.khajiitos.jackseconomy.packet.handler;
 
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.item.CheckItem;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
@@ -10,19 +9,15 @@ import me.khajiitos.jackseconomy.packet.UpdateWalletBalancePacket;
 import me.khajiitos.jackseconomy.packet.WalletBalanceDifPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.function.Supplier;
 
 public class InsertToWalletHandler {
-    public static void handle(InsertToWalletPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ServerPlayer sender = ctx.get().getSender();
-
-        if (sender == null) {
-            return;
-        }
+    public static void handle(InsertToWalletPacket msg, final IPayloadContext context) {
+        ServerPlayer sender = (ServerPlayer) context.player();
 
         if (msg.slotId() >= 0 && msg.slotId() < sender.containerMenu.slots.size()) {
             ItemStack walletItemStack = CuriosWallet.get(sender);
@@ -59,8 +54,8 @@ public class InsertToWalletHandler {
             BigDecimal newBalance = oldBalance.add(dif);
             WalletItem.setBalance(walletItemStack, newBalance);
 
-            Packets.sendToClient(sender, new UpdateWalletBalancePacket(newBalance));
-            Packets.sendToClient(sender, new WalletBalanceDifPacket(dif));
+            PacketDistributor.sendToPlayer(sender, new UpdateWalletBalancePacket(newBalance));
+            PacketDistributor.sendToPlayer(sender, new WalletBalanceDifPacket(dif));
 
             clickedItem.setCount(count - toConsume);
         }

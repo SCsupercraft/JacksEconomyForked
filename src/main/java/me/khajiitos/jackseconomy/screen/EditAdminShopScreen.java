@@ -21,6 +21,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
@@ -413,7 +414,7 @@ public class EditAdminShopScreen extends AdminShopScreen {
     }
 
     private void sendChanges() {
-        Packets.sendToServer(new UpdateAdminShopPacket(this.toAdminShopUpdateCompound(), this.adminShopName));
+        PacketDistributor.sendToServer(new UpdateAdminShopPacket(this.toAdminShopUpdateCompound(), Optional.ofNullable(this.adminShopName)));
     }
 
     @Override

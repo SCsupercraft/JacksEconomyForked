@@ -2,7 +2,6 @@ package me.khajiitos.jackseconomy.item;
 
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.util.IDisablable;
-import me.khajiitos.jackseconomy.util.OIMWalletCapabilityWrapper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -10,10 +9,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -27,25 +24,20 @@ public class OIMWalletItem extends Item implements IDisablable {
     }
 
     public static long getDollars(ItemStack itemStack) {
-        LazyOptional<IItemHandler> cap = itemStack.getCapability(ForgeCapabilities.ITEM_HANDLER);
-        if (cap.isPresent()) {
-            Optional<IItemHandler> capOptional = cap.resolve();
+        IItemHandler itemHandler = itemStack.getCapability(Capabilities.ItemHandler.ITEM);
 
-            if (capOptional.isPresent()) {
-                IItemHandler itemHandler = capOptional.get();
+        if (itemHandler != null) {
+            long total = 0;
 
-                long total = 0;
+            for (int i = 0; i < itemHandler.getSlots(); i++) {
+                ItemStack item = itemHandler.getStackInSlot(i);
 
-                for (int i = 0; i < itemHandler.getSlots(); i++) {
-                    ItemStack item = itemHandler.getStackInSlot(i);
-
-                    if (item.getItem() instanceof CurrencyItem currencyItem && !currencyItem.isDisabled()) {
-                        total += currencyItem.value.multiply(BigDecimal.valueOf(item.getCount())).longValue();
-                    }
+                if (item.getItem() instanceof CurrencyItem currencyItem && !currencyItem.isDisabled()) {
+                    total += currencyItem.value.multiply(BigDecimal.valueOf(item.getCount())).longValue();
                 }
-
-                return total;
             }
+
+            return total;
         }
         return 0;
     }
@@ -74,14 +66,9 @@ public class OIMWalletItem extends Item implements IDisablable {
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         if (isDisabled()) {
-            pTooltipComponents.addAll(this.getDisabledTooltip());
+            tooltipComponents.addAll(this.getDisabledTooltip());
         }
-    }
-
-    @Override
-    public @Nullable ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-        return OIMWalletCapabilityWrapper.create(stack);
     }
 }

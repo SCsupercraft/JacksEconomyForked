@@ -13,14 +13,15 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.Optional;
 
 public class ImporterScreen extends AbstractImporterScreen<ImporterBlockEntity, ImporterMenu> {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/importer.png");
-    private static final ResourceLocation REDSTONE_SELECTION = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/importer.png");
+    private static final ResourceLocation REDSTONE_SELECTION = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
     private SpeedVerticalSlider slider;
     private EnergyStatusWidget energyStatus;
 
@@ -45,7 +46,7 @@ public class ImporterScreen extends AbstractImporterScreen<ImporterBlockEntity, 
 
         if (blockEntity != null) {
             this.slider = this.addRenderableWidget(new SpeedVerticalSlider(this.width / 2 + 70, this.height / 2 - 79, 12, 65, blockEntity.getSpeed(), newValue -> {
-                Packets.sendToServer(new ChangeSpeedPacket(newValue));
+                PacketDistributor.sendToServer(new ChangeSpeedPacket(newValue));
             }));
 
             this.energyStatus = this.addRenderableWidget(new EnergyStatusWidget(this.width / 2 + 50, this.height / 2 - 79, blockEntity.getEnergyStorage()));

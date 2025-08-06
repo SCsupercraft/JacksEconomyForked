@@ -2,88 +2,68 @@ package me.khajiitos.jackseconomy.data.price;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import me.khajiitos.jackseconomy.util.FluidHelper;
+import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.util.ComponentUtil;
 import me.khajiitos.jackseconomy.util.NBTUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
 import javax.annotation.Nullable;
 
-public record FluidDescription(Fluid fluid, CompoundTag compoundTag) {
-    public FluidDescription(Fluid fluid, @Nullable CompoundTag compoundTag) {
+public record FluidDescription(Holder<Fluid> fluid, DataComponentPatch components) {
+    public static final Codec<FluidDescription> CODEC = CompoundTag.CODEC.xmap(FluidDescription::fromNbt, FluidDescription::toNbt);
+    public static final StreamCodec<ByteBuf, FluidDescription> STREAM_CODEC = ByteBufCodecs.COMPOUND_TAG.map(FluidDescription::fromNbt, FluidDescription::toNbt);
+
+    public FluidDescription(Holder<Fluid> fluid, @Nullable DataComponentPatch components) {
         this.fluid = fluid;
 
-        if (compoundTag == null) {
-            this.compoundTag = new CompoundTag();
+        if (components == null) {
+            this.components = DataComponentPatch.builder().build();
         } else {
-            this.compoundTag = compoundTag.copy();
+            this.components = ComponentUtil.clone(components);
         }
     }
 
-    public static FluidDescription ofItem(ItemStack itemStack) {
-        IFluidHandlerItem cap = itemStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElseThrow(IllegalArgumentException::new);
-        return ofFluid(cap.getFluidInTank(0));
+    public static @Nullable FluidDescription ofItem(ItemStack itemStack) {
+        IFluidHandlerItem cap = itemStack.getCapability(Capabilities.FluidHandler.ITEM);
+        return cap != null ? ofFluid(cap.getFluidInTank(0)) : null;
     }
 
     public static FluidDescription ofFluid(FluidStack fluidStack) {
-        return new FluidDescription(fluidStack.getFluid(), fluidStack.getTag());
+        return new FluidDescription(fluidStack.getFluidHolder(), fluidStack.getComponentsPatch());
     }
 
     @Override
     public boolean equals(Object other) {
         if (this == other) return true;
         if (other instanceof FluidDescription fluidDescription) {
-            return fluid.equals(fluidDescription.fluid) && compoundTag.equals(fluidDescription.compoundTag);
+            return fluid.equals(fluidDescription.fluid) && components.equals(fluidDescription.components);
         }
         return false;
     }
 
     public CompoundTag toNbt() {
-        CompoundTag tag = new CompoundTag();
-        String fluidName = FluidHelper.getFluidName(this.fluid);
-
-        tag.putString("fluid", fluidName != null ? fluidName : "");
-
-        if (!this.compoundTag.isEmpty()) {
-            tag.put("nbt", this.compoundTag.copy());
-        }
-
-        return tag;
+        return (CompoundTag) createFluidStack().save(JacksEconomy.server.registryAccess());
     }
 
-    public static @Nullable FluidDescription fromNbt(CompoundTag compoundTag) {
-        String fluidName = compoundTag.getString("fluid");
-
-        if (fluidName.isEmpty()) {
-            return null;
-        }
-
-        Fluid fluid = FluidHelper.getFluid(fluidName);
-
-        if (fluid == null) {
-            return null;
-        }
-
-        CompoundTag tag = compoundTag.getCompound("nbt");
-
-        return new FluidDescription(fluid, tag);
+    public static @Nullable FluidDescription fromNbt(Tag tag) {
+        FluidStack stack = FluidStack.parse(JacksEconomy.server.registryAccess(), tag).orElse(null);
+        return stack != null ? ofFluid(stack) : null;
     }
 
     public FluidStack createFluidStack() {
-        FluidStack fluidStack = new FluidStack(this.fluid, 1);
-
-        CompoundTag tag = this.compoundTag();
-
-        if (!tag.isEmpty()) {
-            fluidStack.setTag(tag.copy());
-        }
-
-        return fluidStack;
+        return new FluidStack(this.fluid, 1, this.components);
     }
 
     public JsonObject toJson() {

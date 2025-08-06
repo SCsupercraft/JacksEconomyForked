@@ -1,28 +1,14 @@
 package me.khajiitos.jackseconomy.packet.handler;
 
-import me.khajiitos.jackseconomy.blockentity.ExporterBlockEntity;
-import me.khajiitos.jackseconomy.blockentity.FluidExporterBlockEntity;
-import me.khajiitos.jackseconomy.blockentity.FluidImporterBlockEntity;
-import me.khajiitos.jackseconomy.blockentity.ImporterBlockEntity;
-import me.khajiitos.jackseconomy.menu.ExporterMenu;
-import me.khajiitos.jackseconomy.menu.FluidExporterMenu;
-import me.khajiitos.jackseconomy.menu.FluidImporterMenu;
-import me.khajiitos.jackseconomy.menu.ImporterMenu;
+import me.khajiitos.jackseconomy.blockentity.*;
+import me.khajiitos.jackseconomy.menu.*;
 import me.khajiitos.jackseconomy.packet.ChangeSpeedPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ChangeSpeedHandler {
-    public static void handle(ChangeSpeedPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        if (msg.speed() < 0.f || msg.speed() > 1.0f) {
-            return;
-        }
-
-        ServerPlayer sender = ctx.get().getSender();
-
-        if (sender == null) {
+    public static void handle(final ChangeSpeedPacket msg, final IPayloadContext context) {
+        if (!(context.player() instanceof ServerPlayer sender) || msg.speed() < 0.f || msg.speed() > 1.0f) {
             return;
         }
 

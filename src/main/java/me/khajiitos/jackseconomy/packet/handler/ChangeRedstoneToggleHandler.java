@@ -4,20 +4,12 @@ import me.khajiitos.jackseconomy.blockentity.ITransactionMachineBlockEntity;
 import me.khajiitos.jackseconomy.menu.IBlockEntityContainer;
 import me.khajiitos.jackseconomy.packet.ChangeRedstoneTogglePacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ChangeRedstoneToggleHandler {
 
-    public static void handle(ChangeRedstoneTogglePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ServerPlayer sender = ctx.get().getSender();
-
-        if (sender == null) {
-            return;
-        }
-
-        if (sender.containerMenu instanceof IBlockEntityContainer<?> blockEntityContainer && blockEntityContainer.getBlockEntity() instanceof ITransactionMachineBlockEntity blockEntity) {
+    public static void handle(final ChangeRedstoneTogglePacket msg, final IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer sender && sender.containerMenu instanceof IBlockEntityContainer<?> blockEntityContainer && blockEntityContainer.getBlockEntity() instanceof ITransactionMachineBlockEntity blockEntity) {
             blockEntity.setRedstoneToggle(msg.redstoneToggle());
             blockEntity.markUpdated();
         }

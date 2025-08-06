@@ -1,0 +1,13 @@
+
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+          "item": "jackseconomy:penny_stack"
+        }
+    ],
+    "result": {
+      "id": "jackseconomy:penny",
+      "count": 9
+    }
+  }

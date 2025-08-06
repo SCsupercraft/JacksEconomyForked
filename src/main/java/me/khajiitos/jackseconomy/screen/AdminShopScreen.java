@@ -6,27 +6,27 @@ import com.mojang.datafixers.util.Pair;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.gamestages.GameStagesCheck;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.item.OIMWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.menu.AdminShopMenu;
 import me.khajiitos.jackseconomy.packet.AcknowledgeUnlocksPacket;
-import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.screen.widget.BetterScrollPanel;
 import me.khajiitos.jackseconomy.screen.widget.CategoryEntry;
+import me.khajiitos.jackseconomy.screen.widget.CustomImageButton;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import me.khajiitos.jackseconomy.util.NewShopUnlocks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -36,9 +36,12 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -48,12 +51,12 @@ import java.math.RoundingMode;
 import java.util.*;
 
 public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
-    protected static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/admin_shop.png");
-    protected static final ResourceLocation NO_WALLET = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/no_wallet.png");
-    protected static final ResourceLocation BALANCE_PROGRESS = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/balance_progress.png");
-    protected static final ResourceLocation QUESTION_MARK = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/question_mark.png");
-    protected static final ResourceLocation STAR = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/star.png");
-    protected static final ResourceLocation LOCK = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/lock.png");
+    protected static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/admin_shop.png");
+    protected static final ResourceLocation NO_WALLET = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/no_wallet.png");
+    protected static final ResourceLocation BALANCE_PROGRESS = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/balance_progress.png");
+    protected static final ResourceLocation QUESTION_MARK = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/question_mark.png");
+    protected static final ResourceLocation STAR = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/star.png");
+    protected static final ResourceLocation LOCK = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/lock.png");
 
     protected @Nullable String adminShopName;
 
@@ -70,11 +73,11 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
     protected int page = 0;
     protected List<Component> tooltip;
 
-    protected ImageButton categoryPreviousButton;
-    protected ImageButton categoryNextButton;
-    protected ImageButton pageNextButton;
-    protected ImageButton pagePreviousButton;
-    protected ImageButton shoppingCartButton;
+    protected CustomImageButton categoryPreviousButton;
+    protected CustomImageButton categoryNextButton;
+    protected CustomImageButton pageNextButton;
+    protected CustomImageButton pagePreviousButton;
+    protected CustomImageButton shoppingCartButton;
 
     protected boolean shouldRenderBackground;
 
@@ -273,28 +276,28 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
         }
 
         if (this.categoryOffset > 0) {
-            this.categoryPreviousButton = this.addRenderableWidget(new ImageButton(this.leftPos + 6, this.topPos + 30, 6, 10, 176, 58, 10, BACKGROUND, (b) -> {
+            this.categoryPreviousButton = this.addRenderableWidget(new CustomImageButton(this.leftPos + 6, this.topPos + 30, 6, 10, 176, 58, 10, BACKGROUND, (b) -> {
                 this.categoryOffset--;
                 this.initButtons();
             }));
         }
 
         if (this.categoryOffset + (this.isEditMode() ? 7 : 8) < this.shopItems.size()) {
-            this.categoryNextButton = this.addRenderableWidget(new ImageButton(this.leftPos + 164, this.topPos + 30, 6, 10, 182, 58, 10, BACKGROUND, (b) -> {
+            this.categoryNextButton = this.addRenderableWidget(new CustomImageButton(this.leftPos + 164, this.topPos + 30, 6, 10, 182, 58, 10, BACKGROUND, (b) -> {
                 this.categoryOffset++;
                 this.initButtons();
             }));
         }
 
         if (this.page > 0) {
-            this.pagePreviousButton = this.addRenderableWidget(new ImageButton(this.leftPos + 55, this.topPos + 126, 6, 10, 176, 58, 10, BACKGROUND, (b) -> {
+            this.pagePreviousButton = this.addRenderableWidget(new CustomImageButton(this.leftPos + 55, this.topPos + 126, 6, 10, 176, 58, 10, BACKGROUND, (b) -> {
                 this.page--;
                 this.initButtons();
             }));
         }
 
         if (this.isEditMode() || this.page < this.getPages(this.selectedCategory) - 1) {
-            this.pageNextButton = this.addRenderableWidget(new ImageButton(this.leftPos + 113, this.topPos + 126, 6, 10, 182, 58, 10, BACKGROUND, (b) -> {
+            this.pageNextButton = this.addRenderableWidget(new CustomImageButton(this.leftPos + 113, this.topPos + 126, 6, 10, 182, 58, 10, BACKGROUND, (b) -> {
                 this.page++;
                 this.initButtons();
             }));
@@ -522,7 +525,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
         initCategoryPanel();
 
         if (!this.isEditMode()) {
-            shoppingCartButton = this.addRenderableWidget(new ImageButton(this.leftPos + 139, this.topPos + 121, 30, 26, 176, 0, 26, BACKGROUND, 256, 256, (b) -> {
+            shoppingCartButton = this.addRenderableWidget(new CustomImageButton(this.leftPos + 139, this.topPos + 121, 30, 26, 176, 0, 26, BACKGROUND, 256, 256, (b) -> {
                 assert this.minecraft != null;
                 this.minecraft.screen = new ShoppingCartScreen(this.menu, this.menu.inventory, this);
                 this.minecraft.screen.init(this.minecraft, this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight());
@@ -541,11 +544,9 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
-        if (!this.shouldRenderBackground) {
-            return;
-        }
-
-        this.renderBackground(guiGraphics);
+        // if (!this.shouldRenderBackground) {
+        //     return;
+        // }
 
         RenderSystem.setShaderTexture(0, BACKGROUND);
         int i = this.leftPos;
@@ -617,8 +618,15 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         tooltip = null;
 
-        shouldRenderBackground = true;
-        this.renderBg(guiGraphics, pPartialTick, pMouseX, pMouseY);
+        // this.shouldRenderBackground = false;
+        guiGraphics.pose().pushPose();
+        // guiGraphics.pose().translate(0, 0, 256);
+        super.render(guiGraphics, pMouseX, pMouseY, pPartialTick);
+        renderDollarSignForSellableItems(guiGraphics, this.leftPos, this.topPos, this.menu.slots, this.itemsToSell, this.sellPrices);
+        guiGraphics.pose().popPose();
+
+        // shouldRenderBackground = true;
+        // this.renderBg(guiGraphics, pPartialTick, pMouseX, pMouseY);
 
         if (this.selectedCategory != null) {
             Component component = Component.translatable(this.selectedCategory.name);
@@ -741,10 +749,10 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
                         this.tooltip = new ArrayList<>();
 
                         if (this.isEditMode() || !shopItem.isLocked() || Config.showNamesForLockedAdminShopItems.get()) {
-                            this.tooltip.add(shopItem.customName != null ? Component.literal(shopItem.customName) :  itemStack.getHoverName().copy().withStyle(shopItem.itemDescription.item().getRarity(itemStack).getStyleModifier()));
+                            this.tooltip.add(shopItem.customName != null ? Component.literal(shopItem.customName) :  itemStack.getHoverName().copy().withStyle(shopItem.itemDescription.createItemStack().getOrDefault(DataComponents.RARITY, Rarity.COMMON).getStyleModifier()));
 
                             Level level = Minecraft.getInstance().player == null ? null : Minecraft.getInstance().player.level();
-                            itemStack.getItem().appendHoverText(itemStack, level, this.tooltip, TooltipFlag.Default.NORMAL);
+                            itemStack.getItem().appendHoverText(itemStack, Item.TooltipContext.of(level), this.tooltip, TooltipFlag.Default.NORMAL);
 
                             this.tooltip.add(Component.literal(" "));
                         }
@@ -823,12 +831,6 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
 
         }
 
-        this.shouldRenderBackground = false;
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0, 0, 256);
-        super.render(guiGraphics, pMouseX, pMouseY, pPartialTick);
-        renderDollarSignForSellableItems(guiGraphics, this.leftPos, this.topPos, this.menu.slots, this.itemsToSell, this.sellPrices);
-        guiGraphics.pose().popPose();
         this.renderStageTwo(guiGraphics, pMouseX, pMouseY, pPartialTick);
 
         if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
@@ -901,7 +903,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
         }
     }
 
-    public boolean hasAnyItemUnlocked(List<AdminShopScreen.ShopItem> shopItems) {
+    public boolean hasAnyItemUnlocked(List<ShopItem> shopItems) {
         boolean anyUnlocked = shopItems.isEmpty();
         for (ShopItem shopItem : shopItems) {
             if (!shopItem.isLocked()) {
@@ -1058,7 +1060,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
 
     public void sendShopUnlocksAcknowledgements() {
         if (!acknowledgedShopUnlocks.isEmpty()) {
-            Packets.sendToServer(new AcknowledgeUnlocksPacket(acknowledgedShopUnlocks));
+            PacketDistributor.sendToServer(new AcknowledgeUnlocksPacket(acknowledgedShopUnlocks));
             acknowledgedShopUnlocks.unlockedCategories.clear();
             acknowledgedShopUnlocks.unlockedItems.clear();
         }

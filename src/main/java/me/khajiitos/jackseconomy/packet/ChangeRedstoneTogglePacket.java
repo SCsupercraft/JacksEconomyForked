@@ -1,23 +1,27 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.ChangeRedstoneToggleHandler;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.util.RedstoneToggle;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
+public record ChangeRedstoneTogglePacket(RedstoneToggle redstoneToggle) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<ChangeRedstoneTogglePacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "change_redstone_toggle"));
 
-public record ChangeRedstoneTogglePacket(RedstoneToggle redstoneToggle) {
-    public static void encode(ChangeRedstoneTogglePacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeEnum(msg.redstoneToggle);
-    }
+    public static final StreamCodec<ByteBuf, ChangeRedstoneTogglePacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8.map(
+                    RedstoneToggle::valueOf,
+                    RedstoneToggle::name
+            ),
+            ChangeRedstoneTogglePacket::redstoneToggle,
+            ChangeRedstoneTogglePacket::new
+    );
 
-    public static ChangeRedstoneTogglePacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new ChangeRedstoneTogglePacket(friendlyByteBuf.readEnum(RedstoneToggle.class));
-    }
-
-    public static void handle(ChangeRedstoneTogglePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> ChangeRedstoneToggleHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

@@ -1,39 +1,39 @@
 package me.khajiitos.jackseconomy.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class Config {
-    public static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.ConfigValue<Integer> baseImporterEnergyUsage;
-    public static final ForgeConfigSpec.ConfigValue<Integer> baseExporterEnergyUsage;
-    public static final ForgeConfigSpec.ConfigValue<Integer> maxImporterEnergy;
-    public static final ForgeConfigSpec.ConfigValue<Integer> maxExporterEnergy;
-    public static final ForgeConfigSpec.ConfigValue<Integer> maxImporterEnergyReceive;
-    public static final ForgeConfigSpec.ConfigValue<Integer> maxExporterEnergyReceive;
-    public static final ForgeConfigSpec.ConfigValue<Double> baseExporterProgressPerTick;
-    public static final ForgeConfigSpec.ConfigValue<Double> baseImporterProgressPerTick;
-    public static final ForgeConfigSpec.ConfigValue<Double> maxExporterBalance;
-    public static final ForgeConfigSpec.ConfigValue<Double> maxImporterBalance;
-    public static final ForgeConfigSpec.ConfigValue<Double> maxCurrencyConverterBalance;
-    public static final ForgeConfigSpec.ConfigValue<Double> basicWalletCapacity;
-    public static final ForgeConfigSpec.ConfigValue<Double> intermediateWalletCapacity;
-    public static final ForgeConfigSpec.ConfigValue<Double> advancedWalletCapacity;
-    public static final ForgeConfigSpec.ConfigValue<Double> thePhatWalletCapacity;
-    public static final ForgeConfigSpec.ConfigValue<Double> mechanicalImporterProgressPerSpeed;
-    public static final ForgeConfigSpec.ConfigValue<Double> mechanicalExporterProgressPerSpeed;
-    public static final ForgeConfigSpec.ConfigValue<Double> mechanicalExporterStressPerRPM;
-    public static final ForgeConfigSpec.ConfigValue<Double> mechanicalImporterStressPerRPM;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> showNamesForLockedAdminShopItems;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> showStageForLockedAdminShopItems;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> showStageForLockedSellItems;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> disableAdminShopSelling;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> oneItemCurrencyMode;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> adminShopCommandForEveryone;
-    public static final ForgeConfigSpec.ConfigValue<String> adminShopCommandShopName;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> returnManifestItems;
+    public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.ConfigValue<Integer> baseImporterEnergyUsage;
+    public static final ModConfigSpec.ConfigValue<Integer> baseExporterEnergyUsage;
+    public static final ModConfigSpec.ConfigValue<Integer> maxImporterEnergy;
+    public static final ModConfigSpec.ConfigValue<Integer> maxExporterEnergy;
+    public static final ModConfigSpec.ConfigValue<Integer> maxImporterEnergyReceive;
+    public static final ModConfigSpec.ConfigValue<Integer> maxExporterEnergyReceive;
+    public static final ModConfigSpec.ConfigValue<Double> baseExporterProgressPerTick;
+    public static final ModConfigSpec.ConfigValue<Double> baseImporterProgressPerTick;
+    public static final ModConfigSpec.ConfigValue<Double> maxExporterBalance;
+    public static final ModConfigSpec.ConfigValue<Double> maxImporterBalance;
+    public static final ModConfigSpec.ConfigValue<Double> maxCurrencyConverterBalance;
+    public static final ModConfigSpec.ConfigValue<Double> basicWalletCapacity;
+    public static final ModConfigSpec.ConfigValue<Double> intermediateWalletCapacity;
+    public static final ModConfigSpec.ConfigValue<Double> advancedWalletCapacity;
+    public static final ModConfigSpec.ConfigValue<Double> thePhatWalletCapacity;
+    public static final ModConfigSpec.ConfigValue<Double> mechanicalImporterProgressPerSpeed;
+    public static final ModConfigSpec.ConfigValue<Double> mechanicalExporterProgressPerSpeed;
+    public static final ModConfigSpec.ConfigValue<Double> mechanicalExporterStressPerRPM;
+    public static final ModConfigSpec.ConfigValue<Double> mechanicalImporterStressPerRPM;
+    public static final ModConfigSpec.ConfigValue<Boolean> showNamesForLockedAdminShopItems;
+    public static final ModConfigSpec.ConfigValue<Boolean> showStageForLockedAdminShopItems;
+    public static final ModConfigSpec.ConfigValue<Boolean> showStageForLockedSellItems;
+    public static final ModConfigSpec.ConfigValue<Boolean> disableAdminShopSelling;
+    public static final ModConfigSpec.ConfigValue<Boolean> oneItemCurrencyMode;
+    public static final ModConfigSpec.ConfigValue<Boolean> adminShopCommandForEveryone;
+    public static final ModConfigSpec.ConfigValue<String> adminShopCommandShopName;
+    public static final ModConfigSpec.ConfigValue<Boolean> returnManifestItems;
 
     static {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
         baseImporterEnergyUsage = builder.define("baseImporterEnergyUsage", 8);
         baseExporterEnergyUsage = builder.define("baseExporterEnergyUsage", 6);

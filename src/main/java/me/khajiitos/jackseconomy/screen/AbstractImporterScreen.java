@@ -26,6 +26,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -34,8 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/importer.png");
-    private static final ResourceLocation REDSTONE_SELECTION = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/importer.png");
+    private static final ResourceLocation REDSTONE_SELECTION = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
     protected TicketPreviewWidget<ItemDescription> ticketPreview;
     protected List<Component> tooltip;
     protected ItemStack ticketItemLastTick;
@@ -101,7 +102,7 @@ public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T e
             if (!items.isEmpty()) {
                 this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<>(this.leftPos + 39, this.topPos + 65, true, items, blockEntity.getSelectedItem(), (newItemDescription) -> {
                     blockEntity.selectItem(newItemDescription);
-                    Packets.sendToServer(new ChangeSelectedItemPacket(newItemDescription));
+                    PacketDistributor.sendToServer(new ChangeSelectedItemPacket(newItemDescription));
                     this.refreshTicketPreview();
                 }, tooltip -> this.tooltip = tooltip));
             } else {
@@ -130,7 +131,7 @@ public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T e
         int y = this.topPos;
 
         if (this.sideConfig == null) {
-            this.sideConfig = new SideConfigWidget(x, y, new ResourceLocation(JacksEconomy.MOD_ID, "textures/block/importer.png"), getAllowedDirections(), this::getSideConfig, tooltip -> this.tooltip = tooltip);
+            this.sideConfig = new SideConfigWidget(x, y, ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/block/importer.png"), getAllowedDirections(), this::getSideConfig, tooltip -> this.tooltip = tooltip);
         } else {
             this.sideConfig.setX(x);
             this.sideConfig.setY(y);
@@ -142,7 +143,7 @@ public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T e
     @Override
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         tooltip = null;
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, pMouseX, pMouseY, pPartialTick);
         super.render(guiGraphics, pMouseX, pMouseY, pPartialTick);
 
         IImporterBlockEntity blockEntity = this.getBlockEntity();
@@ -195,7 +196,7 @@ public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T e
         if (blockEntity != null) {
             ItemStack ticketItem = blockEntity.getItem(9);
 
-            if (ticketItem == null && ticketItemLastTick != null || ticketItem != null && ticketItemLastTick == null || ticketItem != null && !ItemStack.isSameItemSameTags(ticketItem, ticketItemLastTick)) {
+            if (ticketItem == null && ticketItemLastTick != null || ticketItem != null && ticketItemLastTick == null || ticketItem != null && !ItemStack.isSameItemSameComponents(ticketItem, ticketItemLastTick)) {
                 this.refreshTicketPreview();
                 ticketItemLastTick = ticketItem;
             }

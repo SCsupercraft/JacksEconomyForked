@@ -11,7 +11,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -28,7 +27,7 @@ public class CurrencyStackBlock extends Block {
     protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[]{Shapes.empty(), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D), Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
 
     public CurrencyStackBlock(boolean bill) {
-        super((bill ? BlockBehaviour.Properties.of().strength(0.2f).sound(SoundType.WOOL) : BlockBehaviour.Properties.of().strength(0.2f).sound(SoundType.METAL)).isViewBlocking((a, b, c) -> a.getValue(CurrencyStackBlock.LAYERS) >= 8));
+        super((bill ? Properties.of().strength(0.2f).sound(SoundType.WOOL) : Properties.of().strength(0.2f).sound(SoundType.METAL)).isViewBlocking((a, b, c) -> a.getValue(CurrencyStackBlock.LAYERS) >= 8));
         this.registerDefaultState(this.stateDefinition.any().setValue(LAYERS, 1));
     }
 
@@ -53,9 +52,10 @@ public class CurrencyStackBlock extends Block {
         return true;
     }
 
-    public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
-        if (pType == PathComputationType.LAND) {
-            return pState.getValue(LAYERS) < 5;
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        if (pathComputationType == PathComputationType.LAND) {
+            return state.getValue(LAYERS) < 5;
         }
         return false;
     }

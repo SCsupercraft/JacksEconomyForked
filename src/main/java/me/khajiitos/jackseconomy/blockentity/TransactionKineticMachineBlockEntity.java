@@ -1,10 +1,11 @@
 package me.khajiitos.jackseconomy.blockentity;
 
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import me.khajiitos.jackseconomy.util.IItemCapable;
 import me.khajiitos.jackseconomy.util.RedstoneToggle;
 import me.khajiitos.jackseconomy.util.SideConfig;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -15,14 +16,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 
-public abstract class TransactionKineticMachineBlockEntity extends KineticBlockEntity implements WorldlyContainer, Container, MenuProvider, Nameable {
+public abstract class TransactionKineticMachineBlockEntity extends KineticBlockEntity implements WorldlyContainer, Container, MenuProvider, Nameable, IItemCapable {
     protected BigDecimal currency = BigDecimal.ZERO;
     protected RedstoneToggle redstoneToggle = RedstoneToggle.IGNORED;
     protected SideConfig sideConfig = new SideConfig();
@@ -77,32 +75,20 @@ public abstract class TransactionKineticMachineBlockEntity extends KineticBlockE
     }
 
     @Override
-    protected void write(CompoundTag compound, boolean clientPacket) {
-        super.write(compound, clientPacket);
-        ContainerHelper.saveAllItems(compound, this.items);
-        this.saveMachineData(compound);
+    protected void write(CompoundTag compound, HolderLookup.Provider provider, boolean clientPacket) {
+        super.write(compound, provider, clientPacket);
+        this.saveMachineData(compound, provider);
     }
 
-    @NotNull
-    @Override
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-    }
-
-    public void saveMachineData(CompoundTag tag) {
+    public void saveMachineData(CompoundTag tag, HolderLookup.Provider provider) {
         tag.putFloat("Speed", this.speed);
         tag.putString("Currency", this.currency.toString());
         tag.putInt("RedstoneToggle", this.redstoneToggle.ordinal());
         tag.put("SideConfig", this.sideConfig.toNbt());
-        ContainerHelper.saveAllItems(tag, this.items);
+        ContainerHelper.saveAllItems(tag, this.items, provider);
     }
 
-    public void loadMachineData(CompoundTag tag) {
+    public void loadMachineData(CompoundTag tag, HolderLookup.Provider provider) {
         this.speed = tag.getFloat("Speed");
         try {
             this.currency = new BigDecimal(tag.getString("Currency"));
@@ -118,15 +104,14 @@ public abstract class TransactionKineticMachineBlockEntity extends KineticBlockE
 
         this.sideConfig = SideConfig.fromIntArray(tag.getIntArray("SideConfig"));
 
-        ContainerHelper.loadAllItems(tag, this.items);
+        ContainerHelper.loadAllItems(tag, this.items, provider);
     }
 
     @Override
-    protected void read(CompoundTag compound, boolean clientPacket) {
-        super.read(compound, clientPacket);
+    protected void read(CompoundTag compound, HolderLookup.Provider provider, boolean clientPacket) {
+        super.read(compound, provider, clientPacket);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        //ContainerHelper.loadAllItems(tag, this.items);
-        this.loadMachineData(compound);
+        this.loadMachineData(compound, provider);
     }
 
     public SideConfig getSideConfig() {
@@ -154,7 +139,7 @@ public abstract class TransactionKineticMachineBlockEntity extends KineticBlockE
                 int stackSize = Math.min(remainingItems.getCount(), itemStack.getMaxStackSize());
                 ItemStack stackToAdd = remainingItems.split(stackSize);
                 items.set(i, stackToAdd);
-            } else if (ItemStack.isSameItemSameTags(slotStack, remainingItems)) {
+            } else if (ItemStack.isSameItemSameComponents(slotStack, remainingItems)) {
                 int spaceAvailable = itemStack.getMaxStackSize() - slotStack.getCount();
                 int stackSize = Math.min(remainingItems.getCount(), spaceAvailable);
                 slotStack.grow(stackSize);
@@ -177,7 +162,7 @@ public abstract class TransactionKineticMachineBlockEntity extends KineticBlockE
                 return true;
             }
 
-            if (ItemStack.isSameItemSameTags(itemStack, stackInSlot)) {
+            if (ItemStack.isSameItemSameComponents(itemStack, stackInSlot)) {
                 if (stackInSlot.getCount() + itemStack.getCount() <= stackInSlot.getMaxStackSize()) {
                     return true;
                 }
@@ -195,14 +180,12 @@ public abstract class TransactionKineticMachineBlockEntity extends KineticBlockE
 
     }
 
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        if (pkt.getTag() != null) {
-            this.load(pkt.getTag());
-        }
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider provider) {
+        this.read(pkt.getTag(), provider, true);
     }
 
-    public void handleUpdateTag(CompoundTag tag) {
-        this.load(tag);
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
+        this.read(tag, provider, true);
     }
 
     @Override
@@ -210,9 +193,9 @@ public abstract class TransactionKineticMachineBlockEntity extends KineticBlockE
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    public CompoundTag getUpdateTag() {
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        this.saveAdditional(tag);
+        this.write(tag, provider, true);
         return tag;
     }
 }

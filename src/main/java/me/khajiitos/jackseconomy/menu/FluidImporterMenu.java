@@ -33,7 +33,7 @@ public class FluidImporterMenu extends FluidTransactionMachineMenu {
             this.addSlot(new FilteredSlot(blockEntity, row, 8, 21 + row * 18, null, itemStack -> !(itemStack.getItem() instanceof ImporterTicketItem)));
         }
 
-        this.addSlot(new FilteredSlot(blockEntity, 3, 40, 48, new ResourceLocation(JacksEconomy.MOD_ID, "gui/ticket_slot"), itemStack -> itemStack.getItem() instanceof FluidImporterTicketItem));
+        this.addSlot(new FilteredSlot(blockEntity, 3, 40, 48, ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "gui/ticket_slot"), itemStack -> itemStack.getItem() instanceof FluidImporterTicketItem));
 
         this.addPlayerInventory(playerInv, 95);
     }

@@ -33,7 +33,7 @@ public class ShoppingCartSellEntry extends AbstractWidget {
     public void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         guiGraphics.renderItem(this.itemToSell.getKey().createItemStack(), this.getX() + 3, this.getY());
 
-        MutableComponent itemName = this.itemToSell.getKey().item().getDescription().copy();
+        MutableComponent itemName = this.itemToSell.getKey().item().value().getDescription().copy();
 
         int width = Minecraft.getInstance().font.width(itemName);
 

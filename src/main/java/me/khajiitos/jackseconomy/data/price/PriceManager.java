@@ -15,7 +15,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -30,13 +31,13 @@ public class PriceManager {
     );
 
     static {
-        itemPriceInfos.add(new ItemPriceEntry(new ItemDescription(Items.DIAMOND, null), new PricesItemPriceInfo(50.0, 45.0,100.0, null, null)));
-        itemPriceInfos.add(new ItemPriceEntry(new ItemDescription(Items.DIAMOND, null), new AdminShopItemPriceInfo(150.0, "General:Gems", 0, null, null, null)));
-        fluidPriceInfos.add(new FluidPriceEntry(new FluidDescription(Fluids.LAVA, null), new PricesFluidPriceInfo(0.02, 0.05)));
+        itemPriceInfos.add(new ItemPriceEntry(ItemDescription.ofItem(new ItemStack(Items.DIAMOND)), new PricesItemPriceInfo(50.0, 45.0,100.0, null, null)));
+        itemPriceInfos.add(new ItemPriceEntry(ItemDescription.ofItem(new ItemStack(Items.DIAMOND)), new AdminShopItemPriceInfo(150.0, "General:Gems", 0, null, null, null)));
+        fluidPriceInfos.add(new FluidPriceEntry(FluidDescription.ofFluid(new FluidStack(Fluids.LAVA, 1)), new PricesFluidPriceInfo(0.02, 0.05)));
 
         ArrayList<Category> categoriesInnerDefault = new ArrayList<>();
-        categoriesInnerDefault.add(new Category("Gems", new ItemDescription(Items.DIAMOND, new CompoundTag()), null));
-        categories.put(new Category("General", new ItemDescription(Items.DIRT, new CompoundTag()), null), categoriesInnerDefault);
+        categoriesInnerDefault.add(new Category("Gems", ItemDescription.ofItem(new ItemStack(Items.DIAMOND)), null));
+        categories.put(new Category("General", ItemDescription.ofItem(new ItemStack(Items.DIRT)), null), categoriesInnerDefault);
     }
 
     @Deprecated
@@ -116,7 +117,7 @@ public class PriceManager {
 
     private static @Nullable ItemDescription itemDescriptionFromJson(JsonObject element) {
         try {
-            return element.get("item").isJsonObject() ? ItemDescription.fromJson(element.get("item").getAsJsonObject()) :
+            return element.get("id").isJsonObject() ? ItemDescription.fromJson(element.get("id").getAsJsonObject()) :
                     ItemDescription.fromJson(element);
         } catch (NullPointerException e) {
             return null;
@@ -195,6 +196,7 @@ public class PriceManager {
         } else if (file.getParentFile().isDirectory() || file.getParentFile().mkdirs()) {
             save();
         }
+        JacksEconomy.LOGGER.info(categories.toString());
     }
 
     public static void save() {
@@ -386,7 +388,7 @@ public class PriceManager {
     }
 
     public static void sendDataToPlayers() {
-        JacksEconomy.server.getPlayerList().getPlayers().forEach(serverPlayer -> Packets.sendToClient(serverPlayer, new PricesInfoPacket(toTag(false), toTag(true))));
+        JacksEconomy.server.getPlayerList().getPlayers().forEach(serverPlayer -> PacketDistributor.sendToPlayer(serverPlayer, new PricesInfoPacket(toTag(false), toTag(true))));
     }
 
     private static JsonObject merge(JsonObject object1, JsonObject object2) {

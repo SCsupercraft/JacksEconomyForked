@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class CheckCreatorWidget extends AbstractWidget {
-    private static final ResourceLocation IMAGE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/item/check.png");
+    private static final ResourceLocation IMAGE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/item/check.png");
     private boolean open;
     private final Consumer<BigDecimal> onCreateCheck;
     private final Consumer<List<Component>> onTooltip;

@@ -8,7 +8,7 @@ public class CurrencyStackItem extends BlockItem {
     public final CurrencyType currencyType;
 
     public CurrencyStackItem(CurrencyType currencyType) {
-        super(currencyType.stackBlock, new Item.Properties());
+        super(currencyType.stackBlock, new Properties());
         this.currencyType = currencyType;
     }
 }

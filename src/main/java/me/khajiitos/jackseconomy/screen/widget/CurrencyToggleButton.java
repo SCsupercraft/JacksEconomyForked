@@ -1,10 +1,10 @@
 package me.khajiitos.jackseconomy.screen.widget;
 
 import me.khajiitos.jackseconomy.util.CurrencyType;
+import me.khajiitos.jackseconomy.util.ItemHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -30,11 +30,11 @@ public class CurrencyToggleButton extends SimpleImageButton {
     }
 
     private static ResourceLocation getImage(Item item) {
-        ResourceLocation resourceLocation = ForgeRegistries.ITEMS.getKey(item);
+        ResourceLocation resourceLocation = ItemHelper.getItemResourceLocation(item);
         if (resourceLocation == null) {
             return null;
         }
-        return new ResourceLocation(resourceLocation.getNamespace(), "textures/item/" + resourceLocation.getPath() + ".png");
+        return ResourceLocation.fromNamespaceAndPath(resourceLocation.getNamespace(), "textures/item/" + resourceLocation.getPath() + ".png");
     }
 
     public void setCurrencyType(CurrencyType currencyType) {

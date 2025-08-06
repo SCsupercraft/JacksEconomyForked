@@ -1,4 +1,3 @@
 package me.khajiitos.jackseconomy.item;
 
-public class ImporterTicketItem extends TicketItem {
-}
+public class ImporterTicketItem extends TicketItem {}

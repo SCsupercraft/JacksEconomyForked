@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraftforge.client.gui.widget.ScrollPanel;
+import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +25,11 @@ public class BetterScrollPanel extends ScrollPanel {
             height += entry.getHeight() + 5;
         }
         return height;
+    }
+
+    @Override
+    protected void drawBackground(GuiGraphics guiGraphics, Tesselator tess, float partialTick) {
+        drawGradientRect(guiGraphics, this.left, this.top, this.right, this.bottom, 0xC0101010, 0xD0101010);
     }
 
     @Override
@@ -59,9 +64,9 @@ public class BetterScrollPanel extends ScrollPanel {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
-        if (scroll != 0) {
-            this.scrollDistance += (float) (-scroll * getScrollAmount());
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scrollY != 0) {
+            this.scrollDistance += (float) (-scrollY * getScrollAmount());
             applyScrollLimits();
             return true;
         }

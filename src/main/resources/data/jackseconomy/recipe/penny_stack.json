@@ -1,0 +1,17 @@
+
+{
+    "type": "minecraft:crafting_shaped",
+    "key": {
+      "#": {
+        "item": "jackseconomy:penny"
+      }
+    },
+    "pattern": [
+      "###",
+      "###",
+      "###"
+    ],
+    "result": {
+      "id": "jackseconomy:penny_stack"
+    }
+  }

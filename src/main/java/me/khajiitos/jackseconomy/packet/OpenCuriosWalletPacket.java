@@ -1,20 +1,18 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.OpenCuriosWalletHandler;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
+public record  OpenCuriosWalletPacket() implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<OpenCuriosWalletPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "open_curios_wallet"));
 
-public record OpenCuriosWalletPacket() {
-    public static void encode(OpenCuriosWalletPacket msg, FriendlyByteBuf friendlyByteBuf) {}
+    public static final StreamCodec<ByteBuf, OpenCuriosWalletPacket> STREAM_CODEC = StreamCodec.unit(new OpenCuriosWalletPacket());
 
-    public static OpenCuriosWalletPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new OpenCuriosWalletPacket();
-    }
-
-    public static void handle(OpenCuriosWalletPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> OpenCuriosWalletHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

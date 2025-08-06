@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 public class MechanicalImporterBlock extends KineticTransactionMachineBlock<MechanicalImporterBlockEntity> {
 
     public MechanicalImporterBlock() {
-        super(BlockBehaviour.Properties.of().sound(SoundType.METAL).noOcclusion().strength(1.5F, 6.0F));
+        super(Properties.of().sound(SoundType.METAL).noOcclusion().strength(1.5F, 6.0F));
         this.registerDefaultState(this.stateDefinition.any().setValue(HORIZONTAL_FACING, Direction.NORTH));
     }
 

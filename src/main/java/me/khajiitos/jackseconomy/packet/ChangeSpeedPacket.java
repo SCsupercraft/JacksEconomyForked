@@ -1,22 +1,23 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.ChangeSpeedHandler;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
+public record ChangeSpeedPacket(float speed) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<ChangeSpeedPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "change_speed"));
 
-public record ChangeSpeedPacket(float speed) {
-    public static void encode(ChangeSpeedPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeFloat(msg.speed);
-    }
+    public static final StreamCodec<ByteBuf, ChangeSpeedPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.FLOAT,
+            ChangeSpeedPacket::speed,
+            ChangeSpeedPacket::new
+    );
 
-    public static ChangeSpeedPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new ChangeSpeedPacket(friendlyByteBuf.readFloat());
-    }
-
-    public static void handle(ChangeSpeedPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> ChangeSpeedHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

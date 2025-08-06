@@ -1,21 +1,32 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.AdminShopPurchaseHandler;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.Optional;
 
-public record AdminShopPurchasePacket(Map<ShopItemDescription, Integer> shoppingCart, Map<ItemDescription, Integer> itemsToSell, @Nullable String adminShopName) {
+public record AdminShopPurchasePacket(Map<ShopItemDescription, Integer> shoppingCart, Map<ItemDescription, Integer> itemsToSell, Optional<String> adminShopName) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<AdminShopPurchasePacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "admin_shop_purchase"));
 
-    public static void encode(AdminShopPurchasePacket msg, FriendlyByteBuf friendlyByteBuf) {
+    public static final StreamCodec<ByteBuf, AdminShopPurchasePacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.COMPOUND_TAG,
+            AdminShopPurchasePacket::encode,
+            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8),
+            AdminShopPurchasePacket::adminShopName,
+            AdminShopPurchasePacket::decode
+    );
+
+    public static CompoundTag encode(AdminShopPurchasePacket msg) {
         CompoundTag compoundTag = new CompoundTag();
         ListTag shoppingCartData = new ListTag();
         ListTag sellData = new ListTag();
@@ -37,14 +48,10 @@ public record AdminShopPurchasePacket(Map<ShopItemDescription, Integer> shopping
         compoundTag.put("shoppingCart", shoppingCartData);
         compoundTag.put("sellData", sellData);
 
-        friendlyByteBuf.writeNbt(compoundTag);
-        friendlyByteBuf.writeBoolean(msg.adminShopName != null);
-        if (msg.adminShopName != null) friendlyByteBuf.writeUtf(msg.adminShopName);
+        return compoundTag;
     }
 
-    public static AdminShopPurchasePacket decode(FriendlyByteBuf friendlyByteBuf) {
-        CompoundTag compoundTag = friendlyByteBuf.readAnySizeNbt();
-
+    public static AdminShopPurchasePacket decode(CompoundTag compoundTag, Optional<String> adminShopName) {
         Map<ShopItemDescription, Integer> shoppingCartMap = new HashMap<>();
         Map<ItemDescription, Integer> itemsToSellMap = new HashMap<>();
 
@@ -83,12 +90,12 @@ public record AdminShopPurchasePacket(Map<ShopItemDescription, Integer> shopping
             });
         }
 
-        return new AdminShopPurchasePacket(shoppingCartMap, itemsToSellMap, friendlyByteBuf.readBoolean() ? friendlyByteBuf.readUtf() : null);
+        return new AdminShopPurchasePacket(shoppingCartMap, itemsToSellMap, adminShopName);
     }
 
-    public static void handle(AdminShopPurchasePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> AdminShopPurchaseHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
     public record ShopItemDescription(ItemDescription itemDescription, int slot, String category) { }

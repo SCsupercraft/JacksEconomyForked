@@ -1,0 +1,17 @@
+
+{
+    "type": "minecraft:crafting_shaped",
+    "key": {
+      "#": {
+        "item": "jackseconomy:nickel"
+      }
+    },
+    "pattern": [
+      "###",
+      "###",
+      "###"
+    ],
+    "result": {
+      "id": "jackseconomy:nickel_stack"
+    }
+  }

@@ -1,25 +1,24 @@
 package me.khajiitos.jackseconomy.packet;
 
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
-import me.khajiitos.jackseconomy.packet.handler.ChangeSelectedFluidHandler;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
+public record ChangeSelectedFluidPacket(FluidDescription selectedFluid) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<ChangeSelectedFluidPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "change_selected_fluid"));
 
-public record ChangeSelectedFluidPacket(FluidDescription selectedFluid) {
-    public static void encode(ChangeSelectedFluidPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeNbt(msg.selectedFluid.toNbt());
-    }
+    public static final StreamCodec<ByteBuf, ChangeSelectedFluidPacket> STREAM_CODEC = StreamCodec.composite(
+            FluidDescription.STREAM_CODEC,
+            ChangeSelectedFluidPacket::selectedFluid,
+            ChangeSelectedFluidPacket::new
+    );
 
-    public static ChangeSelectedFluidPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        CompoundTag nbt = friendlyByteBuf.readAnySizeNbt();
-        return new ChangeSelectedFluidPacket(FluidDescription.fromNbt(nbt == null ? new CompoundTag() : nbt));
-    }
-
-    public static void handle(ChangeSelectedFluidPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> ChangeSelectedFluidHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

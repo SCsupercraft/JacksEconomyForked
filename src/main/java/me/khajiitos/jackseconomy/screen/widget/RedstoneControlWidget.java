@@ -14,12 +14,13 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public class RedstoneControlWidget extends AbstractWidget {
-    private static final ResourceLocation IMAGE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
+    private static final ResourceLocation IMAGE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
     private final ITransactionMachineBlockEntity blockEntity;
     private final Consumer<List<Component>> onTooltip;
 
@@ -86,7 +87,7 @@ public class RedstoneControlWidget extends AbstractWidget {
 
         blockEntity.setRedstoneToggle(newToggle);
 
-        Packets.sendToServer(new ChangeRedstoneTogglePacket(newToggle));
+        PacketDistributor.sendToServer(new ChangeRedstoneTogglePacket(newToggle));
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 
         return super.mouseClicked(pMouseX, pMouseY, pButton);

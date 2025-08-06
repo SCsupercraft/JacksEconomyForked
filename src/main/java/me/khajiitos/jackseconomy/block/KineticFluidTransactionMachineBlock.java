@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 
 public abstract class KineticFluidTransactionMachineBlock<T extends BlockEntity> extends HorizontalKineticBlock implements IBE<T> {
     public KineticFluidTransactionMachineBlock(Properties properties) {
@@ -31,11 +30,11 @@ public abstract class KineticFluidTransactionMachineBlock<T extends BlockEntity>
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof MenuProvider menuProvider) {
             if (!level.isClientSide()) {
-                NetworkHooks.openScreen((ServerPlayer)player, menuProvider, pos);
+                player.openMenu(menuProvider, pos);
             }
         }
 

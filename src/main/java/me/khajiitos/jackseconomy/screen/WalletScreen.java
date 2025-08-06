@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.config.ClientConfig;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.menu.WalletMenu;
 import me.khajiitos.jackseconomy.packet.CreateCheckPacket;
@@ -32,6 +31,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
@@ -45,9 +45,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static me.khajiitos.jackseconomy.screen.ShoppingCartScreen.BALANCE_PROGRESS;
 
 public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet.png");
-    private static final ResourceLocation ADMIN_SHOP_ICON = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/admin_shop_icon.png");
-    private static final ResourceLocation ID_CARD = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/id_card.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet.png");
+    private static final ResourceLocation ADMIN_SHOP_ICON = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/admin_shop_icon.png");
+    private static final ResourceLocation ID_CARD = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/id_card.png");
 
     private List<Component> tooltip;
     private boolean tooltipShift = false;
@@ -78,14 +78,14 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
 
         this.addRenderableWidget(new CheckCreatorWidget(this.leftPos - 21, this.topPos + 1, value -> {
             if (value.compareTo(BigDecimal.ZERO) > 0 && value.compareTo(WalletItem.getBalance(itemStack)) <= 0) {
-                Packets.sendToServer(new CreateCheckPacket(value));
+                PacketDistributor.sendToServer(new CreateCheckPacket(value));
             }
         }, tooltip -> this.tooltip = tooltip));
 
         balanceTextbox = this.addRenderableWidget(new TextBox(this.leftPos + 70, this.topPos + 10, 101, 15, "", 0xFFBBBBBB));
 
         this.addRenderableWidget(new SimpleButton(this.leftPos + 6, this.topPos + 90, 56, 16, Component.translatable("jackseconomy.deposit_all"), b -> {
-            Packets.sendToServer(new DepositAllPacket());
+            PacketDistributor.sendToServer(new DepositAllPacket());
         }));
     }
 
@@ -110,7 +110,6 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
     protected void renderBg(GuiGraphics guiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
         tooltip = null;
         tooltipShift = false;
-        this.renderBackground(guiGraphics);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, BACKGROUND);
@@ -136,8 +135,8 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
         guiGraphics.blit(ID_CARD, this.leftPos + 75, this.topPos + 40, 0/*this.getBlitOffset()*/, 0, 0, 91, 44, 91, 44);
 
         if (Minecraft.getInstance().player != null) {
-            RenderSystem.setShaderTexture(0, Minecraft.getInstance().player.getSkinTextureLocation());
-            PlayerFaceRenderer.draw(guiGraphics, Minecraft.getInstance().player.getSkinTextureLocation(), this.leftPos + 75 + 4, this.topPos + 40 + 15, 25);
+            RenderSystem.setShaderTexture(0, Minecraft.getInstance().player.getSkin().texture());
+            PlayerFaceRenderer.draw(guiGraphics, Minecraft.getInstance().player.getSkin().texture(), this.leftPos + 75 + 4, this.topPos + 40 + 15, 25);
         }
 
         if (this.itemStack.getItem() instanceof WalletItem walletItem && WalletItem.getBalance(itemStack).compareTo(BigDecimal.valueOf(walletItem.getCapacity())) > 0) {
@@ -300,7 +299,7 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
 
                     if (count.compareTo(BigDecimal.ZERO) > 0) {
                         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.F));
-                        Packets.sendToServer(new WithdrawBalanceSpecificPacket(count, item.currencyType));
+                        PacketDistributor.sendToServer(new WithdrawBalanceSpecificPacket(count, item.currencyType));
                         return true;
                     }
 
@@ -314,17 +313,17 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
     }
 
     private record ClickableCurrencyItem(int x, int y, int width, int height, CurrencyType currencyType) {
-        private static final ResourceLocation PENNY_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/penny.png");
-        private static final ResourceLocation NICKEL_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/nickel.png");
-        private static final ResourceLocation DIME_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/dime.png");
-        private static final ResourceLocation QUARTER_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/quarter.png");
-        private static final ResourceLocation DOLLAR_BILL_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/dollar_bill.png");
-        private static final ResourceLocation FIVE_DOLLAR_BILL_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/five_dollar_bill.png");
-        private static final ResourceLocation TEN_DOLLAR_BILL_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/ten_dollar_bill.png");
-        private static final ResourceLocation TWENTY_DOLLAR_BILL_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/twenty_dollar_bill.png");
-        private static final ResourceLocation FIFTY_DOLLAR_BILL_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/fifty_dollar_bill.png");
-        private static final ResourceLocation HUNDRED_DOLLAR_BILL_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/hundred_dollar_bill.png");
-        private static final ResourceLocation THOUSAND_DOLLAR_BILL_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/wallet_items/thousand_dollar_bill.png");
+        private static final ResourceLocation PENNY_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/penny.png");
+        private static final ResourceLocation NICKEL_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/nickel.png");
+        private static final ResourceLocation DIME_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/dime.png");
+        private static final ResourceLocation QUARTER_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/quarter.png");
+        private static final ResourceLocation DOLLAR_BILL_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/dollar_bill.png");
+        private static final ResourceLocation FIVE_DOLLAR_BILL_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/five_dollar_bill.png");
+        private static final ResourceLocation TEN_DOLLAR_BILL_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/ten_dollar_bill.png");
+        private static final ResourceLocation TWENTY_DOLLAR_BILL_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/twenty_dollar_bill.png");
+        private static final ResourceLocation FIFTY_DOLLAR_BILL_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/fifty_dollar_bill.png");
+        private static final ResourceLocation HUNDRED_DOLLAR_BILL_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/hundred_dollar_bill.png");
+        private static final ResourceLocation THOUSAND_DOLLAR_BILL_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/wallet_items/thousand_dollar_bill.png");
 
         public ResourceLocation getTexture() {
             return switch (this.currencyType) {

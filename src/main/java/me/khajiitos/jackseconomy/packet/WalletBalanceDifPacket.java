@@ -1,23 +1,25 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.WalletBalanceDifHandler;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.util.Utils;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
 import java.math.BigDecimal;
-import java.util.function.Supplier;
 
-public record WalletBalanceDifPacket(BigDecimal delta) {
-    public static void encode(WalletBalanceDifPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeUtf(msg.delta.toString());
-    }
+public record WalletBalanceDifPacket(BigDecimal delta) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<WalletBalanceDifPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "wallet_balance_dif"));
 
-    public static WalletBalanceDifPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new WalletBalanceDifPacket(new BigDecimal(friendlyByteBuf.readUtf()));
-    }
+    public static final StreamCodec<ByteBuf, WalletBalanceDifPacket> STREAM_CODEC = StreamCodec.composite(
+            Utils.BIG_DECIMAL_STREAM_CODEC,
+            WalletBalanceDifPacket::delta,
+            WalletBalanceDifPacket::new
+    );
 
-    public static void handle(WalletBalanceDifPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> WalletBalanceDifHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

@@ -1,8 +1,10 @@
 package me.khajiitos.jackseconomy.item;
 
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.init.ComponentReg;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -21,120 +23,53 @@ import java.util.List;
 
 public abstract class TicketItem extends Item {
     public TicketItem() {
-        super(new Item.Properties().stacksTo(1));
+        super(new Properties().stacksTo(1));
     }
 
-    public TicketItem(Item.Properties properties) {
+    public TicketItem(Properties properties) {
         super(properties);
     }
 
     public static List<ItemDescription> getItems(ItemStack itemStack) {
-        List<ItemDescription> list = new ArrayList<>();
-
-        if (!(itemStack.getItem() instanceof TicketItem)) {
-            return list;
-        }
-
-        CompoundTag nbtTag = itemStack.getTag();
-
-        if (nbtTag == null) {
-            return list;
-        }
-
-        ListTag listTag = nbtTag.getList("Items", Tag.TAG_COMPOUND);
-        listTag.forEach(tag -> {
-            if (tag instanceof CompoundTag compoundTag) {
-                ItemDescription itemDescription = ItemDescription.fromNbt(compoundTag);
-                if (itemDescription != null) {
-                    list.add(itemDescription);
-                }
-            }
-        });
-        return list;
+        return itemStack.getOrDefault(ComponentReg.TICKET_ITEMS, new ArrayList<>());
     }
 
     public static void setItems(ItemStack itemStack, List<ItemDescription> items) {
-        ListTag tag = new ListTag();
-        items.forEach(s -> tag.add(s.toNbt()));
-        itemStack.getOrCreateTag().put("Items", tag);
+        itemStack.set(ComponentReg.TICKET_ITEMS, items);
     }
 
     public static int getMaxProcessCount(ItemStack itemStack) {
-        if (!(itemStack.getItem() instanceof TicketItem)) {
-            return 0;
-        }
-
-        CompoundTag nbtTag = itemStack.getTag();
-
-        if (nbtTag == null || !nbtTag.contains("MaxProcessCount", Tag.TAG_INT)) {
-            return itemStack.getItem() instanceof FluidTicketItem ? 1000 : 1;
-        }
-
-        return nbtTag.getInt("MaxProcessCount");
+        return itemStack.getOrDefault(ComponentReg.MAX_PROCESS_COUNT, itemStack.getItem() instanceof FluidTicketItem ? 1000 : 1);
     }
 
     public static void setMaxProcessCount(ItemStack itemStack, int processCount) {
-        if (!(itemStack.getItem() instanceof TicketItem)) {
-            return;
-        }
-
-        CompoundTag nbtTag = itemStack.getOrCreateTag();
-        nbtTag.putInt("MaxProcessCount", processCount);
+        itemStack.set(ComponentReg.MAX_PROCESS_COUNT, processCount);
     }
 
     public static void setMaxUsage(ItemStack itemStack, int useCount) {
-        if (!(itemStack.getItem() instanceof TicketItem)) {
-            return;
-        }
-
         itemStack.setDamageValue(0);
-
-        CompoundTag nbtTag = itemStack.getOrCreateTag();
-        nbtTag.putInt("MaxUsage", useCount);
+        itemStack.set(DataComponents.MAX_DAMAGE, useCount);
     }
 
     public static int getMaxUsage(ItemStack itemStack) {
-        if (!(itemStack.getItem() instanceof TicketItem)) {
-            return 0;
-        }
-
-        CompoundTag nbtTag = itemStack.getTag();
-
-        if (nbtTag == null || !nbtTag.contains("MaxUsage", Tag.TAG_INT)) {
-            return 1;
-        }
-
-        return nbtTag.getInt("MaxUsage");
+        return itemStack.getOrDefault(DataComponents.MAX_DAMAGE, 1);
     }
 
     public static void removeMaxUsage(ItemStack itemStack) {
-        if (!(itemStack.getItem() instanceof TicketItem)) {
-            return;
-        }
-
         itemStack.setDamageValue(0);
-
-        CompoundTag nbtTag = itemStack.getOrCreateTag();
-        nbtTag.remove("MaxUsage");
+        itemStack.remove(DataComponents.MAX_DAMAGE);
     }
 
     public static boolean hasMaxUsage(ItemStack itemStack) {
-        CompoundTag nbtTag = itemStack.getTag();
-        return nbtTag != null && nbtTag.contains("MaxUsage", Tag.TAG_INT);
+        return itemStack.has(DataComponents.MAX_DAMAGE);
     }
 
     public static int getUsesLeft(ItemStack itemStack) {
-        if (!(itemStack.getItem() instanceof TicketItem)) {
-            return 0;
+        if (!(itemStack.getItem() instanceof TicketItem) || !hasMaxUsage(itemStack)) {
+            return 1;
         }
 
-        if (!hasMaxUsage(itemStack)) return Integer.MAX_VALUE;
-
-        CompoundTag nbtTag = itemStack.getTag();
-        int maxUsage = getMaxUsage(itemStack);
-
-        if (nbtTag == null || !nbtTag.contains("Damage", Tag.TAG_INT)) return maxUsage;
-        return maxUsage - nbtTag.getInt("Damage");
+        return getMaxUsage(itemStack) - itemStack.getOrDefault(DataComponents.DAMAGE, 0);
     }
 
     public static boolean handleDamage(ItemStack stack, int damage) {
@@ -167,11 +102,11 @@ public abstract class TicketItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+    public void appendHoverText(ItemStack pStack, TooltipContext tooltipContext, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         List<ItemDescription> itemDescriptions = getItems(pStack);
 
         for (ItemDescription itemDescription : itemDescriptions) {
-            if (itemDescription.item() != Items.AIR) {
+            if (itemDescription.item().value() != Items.AIR) {
                 pTooltipComponents.add(Component.literal("- ").append(itemDescription.createItemStack().getHoverName().copy()).withStyle(ChatFormatting.AQUA));
             }
         }
@@ -204,7 +139,7 @@ public abstract class TicketItem extends Item {
 
     @Override
     public int getMaxDamage(ItemStack stack) {
-        return TicketItem.getMaxUsage(stack);
+        return getMaxUsage(stack);
     }
 
     @Override

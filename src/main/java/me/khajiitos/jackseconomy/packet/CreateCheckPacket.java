@@ -1,23 +1,33 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.CreateCheckHandler;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
 import java.math.BigDecimal;
-import java.util.function.Supplier;
 
-public record CreateCheckPacket(BigDecimal amount) {
-    public static void encode(CreateCheckPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeUtf(msg.amount.toString());
+public record CreateCheckPacket(BigDecimal amount) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<CreateCheckPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "create_check"));
+
+    public static final StreamCodec<ByteBuf, CreateCheckPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8,
+            CreateCheckPacket::encode,
+            CreateCheckPacket::decode
+    );
+
+    @Override
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
-    public static CreateCheckPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new CreateCheckPacket(new BigDecimal(friendlyByteBuf.readUtf()));
+    public String encode() {
+        return amount.toString();
     }
 
-    public static void handle(CreateCheckPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> CreateCheckHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    public static CreateCheckPacket decode(String data) {
+        return new CreateCheckPacket(new BigDecimal(data));
     }
 }

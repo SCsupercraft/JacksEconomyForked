@@ -1,9 +1,10 @@
 package me.khajiitos.jackseconomy.menu;
 
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.item.EmptyTicketItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
-import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.util.ItemHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -143,7 +144,7 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
 
             pPlayer.setItemInHand(hand, ticketItem);
 
-            CompoundTag nbt = ticketItem.getOrCreateTag();
+            CompoundTag nbt = (CompoundTag) ticketItem.save(JacksEconomy.server.registryAccess());
 
             if (serverPlayer.hasPermissions(4) && serverPlayer.isCreative()) {
                 String command = "/give @p " + ItemHelper.getItemName(ticketItem.getItem()) + nbt;

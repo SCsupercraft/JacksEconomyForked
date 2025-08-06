@@ -1,6 +1,6 @@
 package me.khajiitos.jackseconomy.util;
 
-import net.minecraftforge.energy.EnergyStorage;
+import net.neoforged.neoforge.energy.EnergyStorage;
 
 public class JacksEnergyStorage extends EnergyStorage {
     public JacksEnergyStorage(int capacity, int maxReceive, int maxExtract) {

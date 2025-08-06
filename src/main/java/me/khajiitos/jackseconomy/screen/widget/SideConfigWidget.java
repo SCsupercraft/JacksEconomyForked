@@ -14,6 +14,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.Set;
@@ -21,12 +22,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class SideConfigWidget extends AbstractWidget {
-    private static final ResourceLocation IMAGE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/side_config.png");
+    private static final ResourceLocation IMAGE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/side_config.png");
     private final ResourceLocation faceTexture;
-    private static final ResourceLocation NONE_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/block/machine.png");
-    private static final ResourceLocation INPUT_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/block/input.png");
-    private static final ResourceLocation OUTPUT_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/block/output.png");
-    private static final ResourceLocation REJECTION_OUTPUT_TEXTURE = new ResourceLocation(JacksEconomy.MOD_ID, "textures/block/rejection_output.png");
+    private static final ResourceLocation NONE_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/block/machine.png");
+    private static final ResourceLocation INPUT_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/block/input.png");
+    private static final ResourceLocation OUTPUT_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/block/output.png");
+    private static final ResourceLocation REJECTION_OUTPUT_TEXTURE = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/block/rejection_output.png");
     private boolean open;
     private final Set<Direction> allowedDirections;
     private final Supplier<SideConfig> sideConfigSupplier;
@@ -128,7 +129,7 @@ public class SideConfigWidget extends AbstractWidget {
 
             if (pMouseX >= this.getX() + xOffset && pMouseX <= this.getX() + xOffset + 16 && pMouseY >= this.getY() + yOffset && pMouseY <= this.getY() + yOffset + 16) {
                 this.sideConfigSupplier.get().switchValue(direction, pButton == 0);
-                Packets.sendToServer(new UpdateSideConfigPacket(this.sideConfigSupplier.get().getIntValues()));
+                PacketDistributor.sendToServer(new UpdateSideConfigPacket(this.sideConfigSupplier.get().getIntValues()));
                 return false;
             }
         }

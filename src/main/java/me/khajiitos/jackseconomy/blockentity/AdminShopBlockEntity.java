@@ -4,6 +4,7 @@ import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.block.AdminShopBlock;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
@@ -25,23 +26,23 @@ public class AdminShopBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag tag) {
+	public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
 		name = tag.contains("adminShopName", Tag.TAG_STRING) ? tag.getString("adminShopName") : null;
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag) {
+	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
 		if (name != null) tag.putString("adminShopName", name);
 	}
 
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-		if (pkt.getTag() != null) {
-			this.load(pkt.getTag());
-		}
+	@Override
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider provider) {
+		this.loadAdditional(pkt.getTag(), provider);
 	}
 
-	public void handleUpdateTag(CompoundTag tag) {
-		this.load(tag);
+	@Override
+	public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
+		this.loadAdditional(tag, provider);
 	}
 
 	@Nullable
@@ -51,9 +52,9 @@ public class AdminShopBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
 		CompoundTag tag = new CompoundTag();
-		this.saveAdditional(tag);
+		this.saveAdditional(tag, provider);
 		return tag;
 	}
 

@@ -1,5 +1,6 @@
 package me.khajiitos.jackseconomy.menu;
 
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
 import me.khajiitos.jackseconomy.item.EmptyTicketItem;
@@ -21,7 +22,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -126,7 +127,7 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
                 ItemStack item = this.container.getItem(i);
 
                 if (!item.isEmpty()) {
-                    FluidDescription fluidDescription = FluidDescription.ofFluid(item.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElseThrow(RuntimeException::new).getFluidInTank(0));
+                    FluidDescription fluidDescription = FluidDescription.ofFluid(item.getCapability(Capabilities.FluidHandler.ITEM).getFluidInTank(0));
 
                     if (!fluidDescriptions.contains(fluidDescription)) {
                         fluidDescriptions.add(fluidDescription);
@@ -145,7 +146,7 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
 
             pPlayer.setItemInHand(hand, ticketItem);
 
-            CompoundTag nbt = ticketItem.getOrCreateTag();
+            CompoundTag nbt = (CompoundTag) ticketItem.save(JacksEconomy.server.registryAccess());
 
             if (serverPlayer.hasPermissions(4) && serverPlayer.isCreative()) {
                 String command = "/give @p " + ItemHelper.getItemName(ticketItem.getItem()) + nbt;
@@ -166,7 +167,7 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
 
         @Override
         public boolean mayPlace(@NotNull ItemStack pStack) {
-            return pStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent();
+            return pStack.getCapability(Capabilities.FluidHandler.ITEM) != null;
         }
     }
 }

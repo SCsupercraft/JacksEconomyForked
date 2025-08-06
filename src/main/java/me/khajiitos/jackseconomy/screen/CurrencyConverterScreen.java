@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.blockentity.CurrencyConverterBlockEntity;
 import me.khajiitos.jackseconomy.config.Config;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.menu.CurrencyConverterMenu;
 import me.khajiitos.jackseconomy.packet.ChangeCurrencyTypePacket;
 import me.khajiitos.jackseconomy.screen.widget.CurrencyToggleButton;
@@ -21,6 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -33,7 +33,7 @@ import static me.khajiitos.jackseconomy.screen.ShoppingCartScreen.BALANCE_PROGRE
 
 
 public class CurrencyConverterScreen extends AbstractContainerScreen<CurrencyConverterMenu> {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/currency_converter.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/currency_converter.png");
     private CurrencyType currencyType;
     private final CurrencyConverterBlockEntity blockEntity;
     private List<Component> tooltip;
@@ -66,7 +66,7 @@ public class CurrencyConverterScreen extends AbstractContainerScreen<CurrencyCon
         int y = this.topPos;
 
         if (this.sideConfig == null) {
-            this.sideConfig = new SideConfigWidget(x, y, new ResourceLocation(JacksEconomy.MOD_ID, "textures/block/currency_converter.png"), getAllowedDirections(), this::getSideConfig, tooltip -> this.tooltip = tooltip);
+            this.sideConfig = new SideConfigWidget(x, y, ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/block/currency_converter.png"), getAllowedDirections(), this::getSideConfig, tooltip -> this.tooltip = tooltip);
         } else {
             this.sideConfig.setX(x);
             this.sideConfig.setY(y);
@@ -85,7 +85,7 @@ public class CurrencyConverterScreen extends AbstractContainerScreen<CurrencyCon
 
         this.addRenderableWidget(new CurrencyToggleButton(this.leftPos + 70, this.topPos + 38, 18, 18, newCurrencyType -> {
             this.currencyType = newCurrencyType;
-            Packets.sendToServer(new ChangeCurrencyTypePacket(newCurrencyType));
+            PacketDistributor.sendToServer(new ChangeCurrencyTypePacket(newCurrencyType));
         }, (a) -> {
             this.tooltip = List.of(this.currencyType.item.getDescription());
         }, this.currencyType));
@@ -96,7 +96,6 @@ public class CurrencyConverterScreen extends AbstractContainerScreen<CurrencyCon
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
         tooltip = null;
-        this.renderBackground(guiGraphics);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         guiGraphics.blit(BACKGROUND, this.leftPos, (this.height - this.imageHeight) / 2, 0, 0, this.imageWidth, this.imageHeight);

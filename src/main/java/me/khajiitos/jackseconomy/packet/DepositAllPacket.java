@@ -1,20 +1,18 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.DepositAllHandler;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
+public record DepositAllPacket() implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<DepositAllPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "deposit_all"));
 
-public record DepositAllPacket() {
-    public static void encode(DepositAllPacket msg, FriendlyByteBuf friendlyByteBuf) { }
+    public static final StreamCodec<ByteBuf, DepositAllPacket> STREAM_CODEC = StreamCodec.unit(new DepositAllPacket());
 
-    public static DepositAllPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new DepositAllPacket();
-    }
-
-    public static void handle(DepositAllPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> DepositAllHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

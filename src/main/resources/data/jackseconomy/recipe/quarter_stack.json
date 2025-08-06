@@ -1,0 +1,17 @@
+
+{
+    "type": "minecraft:crafting_shaped",
+    "key": {
+      "#": {
+        "item": "jackseconomy:quarter"
+      }
+    },
+    "pattern": [
+      "###",
+      "###",
+      "###"
+    ],
+    "result": {
+      "id": "jackseconomy:quarter_stack"
+    }
+  }

@@ -3,7 +3,6 @@ package me.khajiitos.jackseconomy.packet.handler;
 //TODO: imports and stuff
 
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.item.CheckItem;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.InfiniteWalletItem;
@@ -14,23 +13,18 @@ import me.khajiitos.jackseconomy.packet.WalletBalanceDifPacket;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class DepositAllHandler {
 
-    public static void handle(DepositAllPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ServerPlayer sender = ctx.get().getSender();
-
-        if (sender == null) {
-            return;
-        }
-
+    public static void handle(DepositAllPacket msg, final IPayloadContext context) {
+        ServerPlayer sender = (ServerPlayer) context.player();
         ItemStack walletItemStack = CuriosWallet.get(sender);
 
         if (walletItemStack == null || !(walletItemStack.getItem() instanceof WalletItem walletItem)) {
@@ -60,8 +54,8 @@ public class DepositAllHandler {
 
                 WalletItem.setBalance(walletItemStack, newBalance);
 
-                //Packets.sendToClient(sender, new UpdateWalletBalancePacket(newBalance));
-                //Packets.sendToClient(sender, new WalletBalanceDifPacket(dif));
+                //PacketDistributor.sendToPlayer(sender, new UpdateWalletBalancePacket(newBalance));
+                //PacketDistributor.sendToPlayer(sender, new WalletBalanceDifPacket(dif));
 
                 itemStack.setCount(0);
             });
@@ -93,8 +87,8 @@ public class DepositAllHandler {
                 BigDecimal newBalance = oldBalance.add(dif);
                 WalletItem.setBalance(walletItemStack, newBalance);
 
-                //Packets.sendToClient(sender, new UpdateWalletBalancePacket(newBalance));
-                //Packets.sendToClient(sender, new WalletBalanceDifPacket(dif));
+                //PacketDistributor.sendToPlayer(sender, new UpdateWalletBalancePacket(newBalance));
+                //PacketDistributor.sendToPlayer(sender, new WalletBalanceDifPacket(dif));
 
                 itemStack.setCount(count - toConsume);
             });
@@ -106,8 +100,8 @@ public class DepositAllHandler {
         }
 
         if (startingBalance.compareTo(newBalance) != 0) {
-            Packets.sendToClient(sender, new UpdateWalletBalancePacket(newBalance));
-            Packets.sendToClient(sender, new WalletBalanceDifPacket(newBalance.subtract(startingBalance)));
+            PacketDistributor.sendToPlayer(sender, new UpdateWalletBalancePacket(newBalance));
+            PacketDistributor.sendToPlayer(sender, new WalletBalanceDifPacket(newBalance.subtract(startingBalance)));
         }
     }
 }

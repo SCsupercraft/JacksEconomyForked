@@ -1,0 +1,5 @@
+{
+  "order": 0,
+  "icon": "jackseconomy:gui/wallet_slot",
+  "validators": ["jackseconomy:wallet"]
+}

@@ -14,6 +14,7 @@ import me.khajiitos.jackseconomy.util.SideConfig;
 import me.khajiitos.jackseconomy.util.SlottedItemStackHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -28,13 +29,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.IItemHandler;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -47,9 +44,6 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
     public static final int slotTicket = 3;
     protected SlottedItemStackHandler itemHandlerInput;
     protected SlottedItemStackHandler itemHandlerRejectionOutput;
-    protected LazyOptional<IItemHandler> itemHandlerInputLazy = LazyOptional.of(() -> itemHandlerInput);
-    protected LazyOptional<IItemHandler> itemHandlerRejectionOutputLazy = LazyOptional.of(() -> itemHandlerRejectionOutput);
-
     public FluidDescription selectedFluid;
     private float progress;
 
@@ -106,8 +100,8 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
     }
 
     @Override
-    public void saveMachineData(CompoundTag tag) {
-        super.saveMachineData(tag);
+    public void saveMachineData(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveMachineData(tag, provider);
         tag.putFloat("Progress", this.progress);
 
         if (this.selectedFluid != null) {
@@ -116,8 +110,8 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
     }
 
     @Override
-    public void loadMachineData(CompoundTag tag) {
-        super.loadMachineData(tag);
+    public void loadMachineData(CompoundTag tag, HolderLookup.Provider provider) {
+        super.loadMachineData(tag, provider);
 
         // When items are loaded, the items array is a completely new array
         this.itemHandlerInput.changeItems(this.items);
@@ -148,30 +142,24 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
     }
 
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
+    public IItemHandler getItemCapability(Direction direction) {
+        if (direction == null) return null;
         Direction facing = this.getBlockState().getValue(TransactionMachineBlock.FACING);
-
-        if (cap == ForgeCapabilities.ITEM_HANDLER && side != null) {
-            switch (sideConfig.getValue(SideConfig.directionRelative(facing, side))) {
-                case INPUT -> {
-                    return itemHandlerInputLazy.cast();
-                }
-                case REJECTION_OUTPUT -> {
-                    return itemHandlerRejectionOutputLazy.cast();
-                }
+        switch (sideConfig.getValue(SideConfig.directionRelative(facing, direction))) {
+            case INPUT -> {
+                return itemHandlerInput;
             }
-        } else if (cap == ForgeCapabilities.FLUID_HANDLER && side != null && (sideConfig.getValue(SideConfig.directionRelative(facing, side)) == SideConfig.Value.OUTPUT)) {
-            return lazyOutputFluidStorage.cast();
+            case REJECTION_OUTPUT -> {
+                return itemHandlerRejectionOutput;
+            }
         }
-
-        return super.getCapability(cap, side);
+        return null;
     }
 
     @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        itemHandlerInputLazy.invalidate();
-        itemHandlerRejectionOutputLazy.invalidate();
+    public IFluidHandler getFluidCapability(Direction direction) {
+        Direction facing = this.getBlockState().getValue(TransactionMachineBlock.FACING);
+        return direction != null && sideConfig.getValue(SideConfig.directionRelative(facing, direction)) == SideConfig.Value.OUTPUT ? outputFluidStorage : null;
     }
 
     public double getProgressPerTick() {
@@ -218,7 +206,7 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
         if (importer.selectedFluid != null) {
             for (FluidDescription fluidDescription : fluids) {
                 if (importer.selectedFluid.equals(fluidDescription)) {
-                    fluidToBuy = fluidDescription.fluid();
+                    fluidToBuy = fluidDescription.fluid().value();
                     break;
                 }
             }
@@ -271,7 +259,7 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
         );
         BigDecimal totalPrice = BigDecimal.valueOf(price).multiply(BigDecimal.valueOf(stack.getAmount()));
 
-        if ((!fluidStorage.getFluid().isFluidEqual(stack) && !fluidStorage.isEmpty()) || getBalance().compareTo(totalPrice) < 0) return;
+        if ((!FluidStack.isSameFluidSameComponents(fluidStorage.getFluid(), stack) && !fluidStorage.isEmpty()) || getBalance().compareTo(totalPrice) < 0) return;
         currency = currency.subtract(totalPrice);
         fluidStorage.fill(stack, IFluidHandler.FluidAction.EXECUTE);
 

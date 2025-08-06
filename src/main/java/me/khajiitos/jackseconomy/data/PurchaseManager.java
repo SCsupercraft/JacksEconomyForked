@@ -40,14 +40,17 @@ public class PurchaseManager {
 		}
 		JacksEconomy.server.addTickable(StockMarketManager::tick);
 	}
+
 	public static void save() {
 		data.put("players", players);
 
 		dataHandler.save(data);
 	}
+
 	public static void resetData() {
 		players = new CompoundTag();
 	}
+
 	public static void processPurchases(ArrayList<Purchase> purchases, ServerPlayer player) {
 		String buyerKey = player.getUUID().toString();
 		Buyer buyer = players.contains(buyerKey) ? Buyer.fromNbt(players.getCompound(buyerKey)) : new Buyer(player.getUUID(), player.getName().getString(), new ArrayList<>());
@@ -117,6 +120,7 @@ public class PurchaseManager {
 			return tag;
 		}
 	}
+
 	public record Purchase(ItemDescription itemDescription, long count, long time) {
 		public static Purchase fromJson(JsonElement element) {
 			return fromJson(element.getAsJsonObject());

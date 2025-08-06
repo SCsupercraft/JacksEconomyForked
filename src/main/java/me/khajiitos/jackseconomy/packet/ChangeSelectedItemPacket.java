@@ -1,25 +1,24 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.ChangeSelectedItemHandler;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
+public record ChangeSelectedItemPacket(ItemDescription selectedItem) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<ChangeSelectedItemPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "change_selected_item"));
 
-public record ChangeSelectedItemPacket(ItemDescription selectedItem) {
-    public static void encode(ChangeSelectedItemPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeNbt(msg.selectedItem().toNbt());
-    }
+    public static final StreamCodec<ByteBuf, ChangeSelectedItemPacket> STREAM_CODEC = StreamCodec.composite(
+            ItemDescription.STREAM_CODEC,
+            ChangeSelectedItemPacket::selectedItem,
+            ChangeSelectedItemPacket::new
+    );
 
-    public static ChangeSelectedItemPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        CompoundTag nbt = friendlyByteBuf.readAnySizeNbt();
-        return new ChangeSelectedItemPacket(ItemDescription.fromNbt(nbt == null ? new CompoundTag() : nbt));
-    }
-
-    public static void handle(ChangeSelectedItemPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> ChangeSelectedItemHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

@@ -1,25 +1,32 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.WithdrawBalanceSpecificHandler;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.util.CurrencyType;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import me.khajiitos.jackseconomy.util.Utils;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
 import java.math.BigDecimal;
-import java.util.function.Supplier;
 
-public record WithdrawBalanceSpecificPacket(BigDecimal items, CurrencyType currencyType) {
-    public static void encode(WithdrawBalanceSpecificPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeUtf(msg.items.toString());
-        friendlyByteBuf.writeEnum(msg.currencyType);
-    }
+public record WithdrawBalanceSpecificPacket(BigDecimal items, CurrencyType currencyType) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<WithdrawBalanceSpecificPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "withdraw_balance_specific"));
 
-    public static WithdrawBalanceSpecificPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new WithdrawBalanceSpecificPacket(new BigDecimal(friendlyByteBuf.readUtf()), friendlyByteBuf.readEnum(CurrencyType.class));
-    }
+    public static final StreamCodec<ByteBuf, WithdrawBalanceSpecificPacket> STREAM_CODEC = StreamCodec.composite(
+            Utils.BIG_DECIMAL_STREAM_CODEC,
+            WithdrawBalanceSpecificPacket::items,
+            ByteBufCodecs.STRING_UTF8.map(
+                    CurrencyType::valueOf,
+                    CurrencyType::name
+            ),
+            WithdrawBalanceSpecificPacket::currencyType,
+            WithdrawBalanceSpecificPacket::new
+    );
 
-    public static void handle(WithdrawBalanceSpecificPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> WithdrawBalanceSpecificHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

@@ -6,9 +6,9 @@ import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.gamestages.GameStagesCheck;
+import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.init.ContainerReg;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.packet.RequestAdminShopSchemaPacket;
 import me.khajiitos.jackseconomy.packet.UpdateAdminShopPacket;
 import me.khajiitos.jackseconomy.screen.widget.BetterScrollPanel;
@@ -18,6 +18,7 @@ import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -28,15 +29,18 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
 public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen.Menu> {
-	private static final ResourceLocation SLOT = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/bulk_admin_shop_opts.png");
+	private static final ResourceLocation SLOT = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/bulk_admin_shop_opts.png");
 	protected @Nullable String adminShopName;
 	protected AdminShopScreen.Category category;
 	protected AdminShopScreen.InnerCategory innerCategory;
@@ -272,7 +276,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 	}
 
 	@Override
-	protected void slotClicked(@org.jetbrains.annotations.Nullable Slot pSlot, int pSlotId, int pMouseButton, ClickType pType) {
+	protected void slotClicked(@Nullable Slot pSlot, int pSlotId, int pMouseButton, ClickType pType) {
 		if (pSlot == null || pSlot.container != this.menu.OPT_CONTAINER && (pSlot.container != this.menu.CONTAINER || this.categoryPanel == null)) {
 			super.slotClicked(pSlot, pSlotId, pMouseButton, pType);
 			return;
@@ -297,7 +301,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 	}
 
 	protected void optSlotClicked(Slot pSlot, int pSlotId, int pMouseButton, ClickType pType) {
-		CompoundTag tag = pSlot.getItem().getOrCreateTag();
+		CompoundTag tag = pSlot.getItem().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe();
 		if (!tag.contains("adminShopBulkOpt")) return;
 
 		int opt = tag.getInt("adminShopBulkOpt");
@@ -314,6 +318,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 
 			}
 			case 1 -> { // Right-click (Edit)
+				if (this.categoryPanel != null || floatingEditBox != null) return;
 				this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, false, (value) -> {
 					this.sendChanges();
 					adminShopName = value.equals("") ? null : value;
@@ -324,7 +329,11 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 				this.setFocused(this.floatingEditBox);
 			}
 			case 2 -> { // Middle-click (Reset)
-				this.sendChanges();
+				if (this.categoryPanel != null || this.floatingEditBox == null) return;
+
+				clearWidgets();
+				if (adminShopName == null) return;
+				sendChanges();
 				adminShopName = null;
 				this.requestShopData();
 			}
@@ -337,6 +346,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 
 			}
 			case 1 -> { // Right-click (Change)
+				if (this.categoryPanel != null || floatingEditBox != null) return;
 				setupCategoryPanel();
 			}
 			case 2 -> { // Middle-click (Cancel)
@@ -355,11 +365,11 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 
 			}
 			case 1 -> { // Right-click (Change)
-				if (this.category == null) return;
+				if (this.category == null || this.categoryPanel != null || floatingEditBox != null) return;
 				setupInnerCategoryPanel();
 			}
 			case 2 -> { // Middle-click (Cancel)
-				if (this.categoryPanel == null) return;
+				if (this.categoryPanel == null || this.category == null) return;
 
 				updateOpts();
 				refreshItemsWith();
@@ -370,8 +380,6 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 
 	@Override
 	protected void onTooltip(List<Component> components, ItemStack stack) {
-		super.onTooltip(components, stack);
-		if (this.categoryPanel != null) components.add(Component.literal("Right-click to create category").withStyle(ChatFormatting.AQUA));
 		if (this.categoryPanel != null || this.innerCategory == null) return;
 
 		ItemDescription description = ItemDescription.ofItem(stack);
@@ -411,43 +419,47 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 
 	@Override
 	public List<Component> getTooltipFromContainerItem(ItemStack pStack) {
-		CompoundTag tag = pStack.getOrCreateTag();
-		if (tag.contains("adminShopBulkOpt")) {
+		if (categoryPanel != null) {
 			List<Component> list = new ArrayList<>();
-
-			int opt = tag.getInt("adminShopBulkOpt");
-			switch (opt) {
-				case 0 -> {
-					list.add(Component.translatable(adminShopName != null ? adminShopName : "jackseconomy.default"));
-					list.add(Component.empty());
-
-					list.add(Component.translatable("jackseconomy.right_click_to_change").withStyle(ChatFormatting.AQUA));
-					list.add(Component.translatable("jackseconomy.middle_click_to_reset").withStyle(ChatFormatting.RED));
-				}
-				case 1 -> {
-					list.add(category != null ? Component.literal(category.name) : Component.translatable("jackseconomy.none_selected"));
-					list.add(Component.empty());
-
-					list.add(Component.translatable("jackseconomy.right_click_to_change").withStyle(ChatFormatting.AQUA));
-					if (this.categoryPanel != null) list.add(Component.translatable("jackseconomy.middle_click_to_cancel").withStyle(ChatFormatting.RED));
-				}
-				case 2 -> {
-					list.add(innerCategory != null ? Component.literal(innerCategory.name) : Component.translatable("jackseconomy.none_selected"));
-					if (this.category == null) return list;
-
-					list.add(Component.empty());
-					list.add(Component.translatable("jackseconomy.right_click_to_change").withStyle(ChatFormatting.AQUA));
-					if (this.categoryPanel != null) list.add(Component.translatable("jackseconomy.middle_click_to_cancel").withStyle(ChatFormatting.RED));
-				}
-			}
+			if (floatingEditBox == null) list.add(Component.literal("Right-click to create category").withStyle(ChatFormatting.AQUA));
 			return list;
 		}
 		return super.getTooltipFromContainerItem(pStack);
 	}
 
+	public List<Component> getTooltipFromOptContainerItem(ItemStack stack, int opt) {
+		List<Component> list = new ArrayList<>();
+		switch (opt) {
+			case 0 -> {
+				list.add(Component.translatable(adminShopName != null ? adminShopName : "jackseconomy.default"));
+				if (this.categoryPanel == null) {
+					list.add(Component.empty());
+					if (floatingEditBox == null) list.add(Component.translatable("jackseconomy.right_click_to_change").withStyle(ChatFormatting.AQUA));
+					if (adminShopName != null || floatingEditBox != null) list.add(Component.translatable("jackseconomy.middle_click_to_reset").withStyle(ChatFormatting.RED));
+				}
+			}
+			case 1 -> {
+				list.add(category != null ? Component.literal(category.name) : Component.translatable("jackseconomy.none_selected"));
+
+				if (this.categoryPanel != null || floatingEditBox == null) list.add(Component.empty());
+				if (this.categoryPanel == null && floatingEditBox == null) list.add(Component.translatable("jackseconomy.right_click_to_change").withStyle(ChatFormatting.AQUA));
+				if (this.categoryPanel != null) list.add(Component.translatable("jackseconomy.middle_click_to_cancel").withStyle(ChatFormatting.RED));
+			}
+			case 2 -> {
+				list.add(innerCategory != null ? Component.literal(innerCategory.name) : Component.translatable("jackseconomy.none_selected"));
+				if (this.category == null) return list;
+
+				if (this.categoryPanel != null || floatingEditBox == null) list.add(Component.empty());
+				if (this.categoryPanel == null && floatingEditBox == null) list.add(Component.translatable("jackseconomy.right_click_to_change").withStyle(ChatFormatting.AQUA));
+				if (this.categoryPanel != null) list.add(Component.translatable("jackseconomy.middle_click_to_cancel").withStyle(ChatFormatting.RED));
+			}
+		}
+		return list;
+	}
+
 	@Override
-	public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
-		return this.categoryPanel != null && this.categoryPanel.isMouseOver(pMouseX, pMouseY) ? this.categoryPanel.mouseScrolled(pMouseX, pMouseY, pDelta) : super.mouseScrolled(pMouseX, pMouseY, pDelta);
+	public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta, double pOffset) {
+		return this.categoryPanel != null && this.categoryPanel.isMouseOver(pMouseX, pMouseY) ? this.categoryPanel.mouseScrolled(pMouseX, pMouseY, pDelta, pOffset) : super.mouseScrolled(pMouseX, pMouseY, pDelta, pOffset);
 	}
 
 	@Override
@@ -457,7 +469,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 	}
 
 	@Override
-	protected void renderTooltip(GuiGraphics guiGraphics, int pX, int pY) {
+	protected void renderTooltip(GuiGraphics guiGraphics, int x, int y) {
 		if (categoryHovered) {
 			List<Component> list = List.of(
 					Component.translatable("jackseconomy.right_click_to_rename").withStyle(ChatFormatting.AQUA),
@@ -465,11 +477,18 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 			);
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate(0, 0, 256);
-			guiGraphics.renderTooltip(this.font, list, Optional.empty(), pX, pY);
+			guiGraphics.renderTooltip(this.font, list, Optional.empty(), x, y);
 			guiGraphics.pose().popPose();
 			return;
 		}
-		super.renderTooltip(guiGraphics, pX, pY);
+
+		if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
+			ItemStack itemstack = this.hoveredSlot.getItem();
+
+			if (this.hoveredSlot.container == this.menu.OPT_CONTAINER) {
+				guiGraphics.renderTooltip(this.font, this.getTooltipFromOptContainerItem(itemstack, this.hoveredSlot.getContainerSlot()), itemstack.getTooltipImage(), itemstack, x, y);
+			} else guiGraphics.renderTooltip(this.font, this.getTooltipFromContainerItem(itemstack), itemstack.getTooltipImage(), itemstack, x, y);
+		}
 	}
 
 	@Override
@@ -482,11 +501,11 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 	}
 
 	protected void requestShopData() {
-		Packets.sendToServer(new RequestAdminShopSchemaPacket(adminShopName));
+		PacketDistributor.sendToServer(new RequestAdminShopSchemaPacket(Optional.ofNullable(adminShopName)));
 	}
 
 	private void sendChanges() {
-		Packets.sendToServer(new UpdateAdminShopPacket(this.toAdminShopUpdateCompound(), adminShopName));
+		PacketDistributor.sendToServer(new UpdateAdminShopPacket(this.toAdminShopUpdateCompound(), Optional.ofNullable(adminShopName)));
 	}
 
 	public CompoundTag toAdminShopUpdateCompound() {
@@ -683,12 +702,6 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 	@Override
 	protected void clearWidgets() {
 		super.clearWidgets();
-
-		if (this.pages.size() > 1) {
-			addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.literal("<"), b -> setCurrentPage(this.pages.get(Math.max(this.pages.indexOf(this.currentPage) - 1, 0)))).pos(leftPos,  topPos - 50).size(20, 20).build());
-			addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.literal(">"), b -> setCurrentPage(this.pages.get(Math.min(this.pages.indexOf(this.currentPage) + 1, this.pages.size() - 1)))).pos(leftPos + imageWidth - 20, topPos - 50).size(20, 20).build());
-		}
-
 		this.floatingEditBox = null;
 		this.categoryPanel = null;
 	}
@@ -725,6 +738,13 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 	}
 
 	protected void updateOpts() {
+		ItemStack adminShopStack = new ItemStack(ItemBlockReg.ADMIN_SHOP.get());
+		if (adminShopName != null) {
+			CompoundTag tag = new CompoundTag();
+			tag.putString("adminShopName", adminShopName);
+			BlockItem.setBlockEntityData(adminShopStack, BlockEntityReg.ADMIN_SHOP.get(), tag);
+		}
+		menu.OPT_CONTAINER.setItem(0, menu.setOpt(adminShopStack, 0));
 		menu.OPT_CONTAINER.setItem(1, menu.setOpt(category != null ? category.itemDescription.createItemStack() : new ItemStack(Items.BARRIER), 1));
 		menu.OPT_CONTAINER.setItem(2, menu.setOpt(innerCategory != null ? innerCategory.itemDescription.createItemStack() : new ItemStack(Items.BARRIER), 2));
 
@@ -928,7 +948,9 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 		}
 
 		public ItemStack setOpt(ItemStack stack, int opt) {
-			stack.getOrCreateTag().putInt("adminShopBulkOpt", opt);
+			CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+			tag.putInt("adminShopBulkOpt", opt);
+			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 			return stack;
 		}
 

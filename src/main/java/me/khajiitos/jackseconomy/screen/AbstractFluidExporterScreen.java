@@ -28,8 +28,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public abstract class AbstractFluidExporterScreen<S extends IFluidExporterBlockEntity, T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
-    protected static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/fluid_exporter.png");
-    protected static final ResourceLocation REDSTONE_SELECTION = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
+    protected static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/fluid_exporter.png");
+    protected static final ResourceLocation REDSTONE_SELECTION = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
     protected List<Component> tooltip;
     protected ItemStack ticketItemLastTick;
     protected TicketPreviewWidget<FluidDescription> ticketPreview;
@@ -131,7 +131,7 @@ public abstract class AbstractFluidExporterScreen<S extends IFluidExporterBlockE
         int y = this.topPos;
 
         if (this.sideConfig == null) {
-            this.sideConfig = new SideConfigWidget(x, y, new ResourceLocation(JacksEconomy.MOD_ID, "textures/block/exporter.png"), getAllowedDirections(), this::getSideConfig, tooltip -> this.tooltip = tooltip);
+            this.sideConfig = new SideConfigWidget(x, y, ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/block/exporter.png"), getAllowedDirections(), this::getSideConfig, tooltip -> this.tooltip = tooltip);
         } else {
             this.sideConfig.setX(x);
             this.sideConfig.setY(y);
@@ -146,7 +146,7 @@ public abstract class AbstractFluidExporterScreen<S extends IFluidExporterBlockE
     @Override
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         this.tooltip = null;
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, pMouseX, pMouseY, pPartialTick);
         super.render(guiGraphics, pMouseX, pMouseY, pPartialTick);
 
         IFluidExporterBlockEntity blockEntity = this.getBlockEntity();
@@ -186,7 +186,7 @@ public abstract class AbstractFluidExporterScreen<S extends IFluidExporterBlockE
         if (blockEntity != null) {
             ItemStack ticketItem = blockEntity.getItem(6);
 
-            if (ticketItem == null && ticketItemLastTick != null || ticketItem != null && ticketItemLastTick == null || ticketItem != null && !ItemStack.isSameItemSameTags(ticketItem, ticketItemLastTick)) {
+            if (ticketItem == null && ticketItemLastTick != null || ticketItem != null && ticketItemLastTick == null || ticketItem != null && !ItemStack.isSameItemSameComponents(ticketItem, ticketItemLastTick)) {
                 this.refreshTicketPreview();
                 ticketItemLastTick = ticketItem;
             }

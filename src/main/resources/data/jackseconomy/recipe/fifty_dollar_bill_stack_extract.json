@@ -1,0 +1,13 @@
+
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+          "item": "jackseconomy:fifty_dollar_bill_stack"
+        }
+    ],
+    "result": {
+      "id": "jackseconomy:fifty_dollar_bill",
+      "count": 9
+    }
+  }

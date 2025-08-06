@@ -1,36 +1,31 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.AdminShopColorHandler;
-import net.minecraft.nbt.CompoundTag;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
+public record AdminShopColorPacket(ListTag colors, int defaultColor) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<AdminShopColorPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "admin_shop_color"));
 
-public record AdminShopColorPacket(ListTag colors, int defaultColor) {
-    public static void encode(AdminShopColorPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        CompoundTag dataCompound = new CompoundTag();
-        dataCompound.put("Colors", msg.colors);
-        dataCompound.putInt("DefaultColor", msg.defaultColor);
-        friendlyByteBuf.writeNbt(dataCompound);
+    public static final StreamCodec<ByteBuf, AdminShopColorPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.TAG,
+            AdminShopColorPacket::colors,
+            ByteBufCodecs.INT,
+            AdminShopColorPacket::defaultColor,
+            AdminShopColorPacket::create
+    );
+
+    public static AdminShopColorPacket create(Tag colors, int defaultColor) {
+        return new AdminShopColorPacket((ListTag) colors, defaultColor);
     }
 
-    public static AdminShopColorPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        CompoundTag dataCompound = friendlyByteBuf.readAnySizeNbt();
-
-        if (dataCompound == null) {
-            return new AdminShopColorPacket(new ListTag(), -1);
-        }
-
-        ListTag colors = dataCompound.getList("Colors", Tag.TAG_COMPOUND);
-        int defaultColor = dataCompound.getInt("DefaultColor");
-        return new AdminShopColorPacket(colors, defaultColor);
-    }
-
-    public static void handle(AdminShopColorPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> AdminShopColorHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

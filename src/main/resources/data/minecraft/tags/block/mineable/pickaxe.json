@@ -1,0 +1,26 @@
+{
+  "values": [
+    "jackseconomy:exporter",
+    "jackseconomy:importer",
+    "jackseconomy:fluid_exporter",
+    "jackseconomy:fluid_importer",
+    {
+      "id": "jackseconomy:mechanical_fluid_exporter",
+      "required": false
+    },
+    {
+      "id": "jackseconomy:mechanical_fluid_importer",
+      "required": false
+    },
+    {
+      "id": "jackseconomy:mechanical_exporter",
+      "required": false
+    },
+    {
+      "id": "jackseconomy:mechanical_importer",
+      "required": false
+    },
+    "jackseconomy:currency_converter",
+    "jackseconomy:admin_shop"
+  ]
+}

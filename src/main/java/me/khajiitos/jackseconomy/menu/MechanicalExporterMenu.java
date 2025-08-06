@@ -32,7 +32,7 @@ public class MechanicalExporterMenu extends KineticTransactionMachineMenu {
             this.addSlot(new OutputSlot(blockEntity, 3 + i, 71 + (i % 2) * 18, 21 + (i / 2) * 18));
         }
 
-        this.addSlot(new FilteredSlot(blockEntity, 9, 40, 48, new ResourceLocation(JacksEconomy.MOD_ID, "gui/ticket_slot"), itemStack -> itemStack.getItem() instanceof ExporterTicketItem));
+        this.addSlot(new FilteredSlot(blockEntity, 9, 40, 48, ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "gui/ticket_slot"), itemStack -> itemStack.getItem() instanceof ExporterTicketItem));
 
         this.addPlayerInventory(playerInv, 95);
     }

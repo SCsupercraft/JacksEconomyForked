@@ -9,6 +9,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class AdminShopColorManager {
 	}
 
 	public static void updatePlayer(ServerPlayer player) {
-		Packets.sendToClient(player, toUpdatePacket());
+		PacketDistributor.sendToPlayer(player, toUpdatePacket());
 	}
 	public static void updateAll() {
 		JacksEconomy.server.getPlayerList().getPlayers().forEach(AdminShopColorManager::updatePlayer);

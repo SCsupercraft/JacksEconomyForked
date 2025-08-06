@@ -34,8 +34,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public abstract class AbstractExporterScreen<S extends IExporterBlockEntity, T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
-    protected static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/exporter.png");
-    protected static final ResourceLocation REDSTONE_SELECTION = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
+    protected static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/exporter.png");
+    protected static final ResourceLocation REDSTONE_SELECTION = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/redstone_selection.png");
     protected List<Component> tooltip;
     protected ItemStack ticketItemLastTick;
     protected TicketPreviewWidget<ItemDescription> ticketPreview;
@@ -137,7 +137,7 @@ public abstract class AbstractExporterScreen<S extends IExporterBlockEntity, T e
         int y = this.topPos;
 
         if (this.sideConfig == null) {
-            this.sideConfig = new SideConfigWidget(x, y, new ResourceLocation(JacksEconomy.MOD_ID, "textures/block/exporter.png"), getAllowedDirections(), this::getSideConfig, tooltip -> this.tooltip = tooltip);
+            this.sideConfig = new SideConfigWidget(x, y, ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/block/exporter.png"), getAllowedDirections(), this::getSideConfig, tooltip -> this.tooltip = tooltip);
         } else {
             this.sideConfig.setX(x);
             this.sideConfig.setY(y);
@@ -152,7 +152,6 @@ public abstract class AbstractExporterScreen<S extends IExporterBlockEntity, T e
     @Override
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         this.tooltip = null;
-        this.renderBackground(guiGraphics);
         super.render(guiGraphics, pMouseX, pMouseY, pPartialTick);
 
         IExporterBlockEntity blockEntity = this.getBlockEntity();
@@ -192,7 +191,7 @@ public abstract class AbstractExporterScreen<S extends IExporterBlockEntity, T e
         if (blockEntity != null) {
             ItemStack ticketItem = blockEntity.getItem(9);
 
-            if (ticketItem == null && ticketItemLastTick != null || ticketItem != null && ticketItemLastTick == null || ticketItem != null && !ItemStack.isSameItemSameTags(ticketItem, ticketItemLastTick)) {
+            if (ticketItem == null && ticketItemLastTick != null || ticketItem != null && ticketItemLastTick == null || ticketItem != null && !ItemStack.isSameItemSameComponents(ticketItem, ticketItemLastTick)) {
                 this.refreshTicketPreview();
                 ticketItemLastTick = ticketItem;
             }

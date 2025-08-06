@@ -11,7 +11,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +43,7 @@ public class ExporterScreen extends AbstractExporterScreen<ExporterBlockEntity, 
         if (blockEntity != null) {
             this.slider = this.addRenderableWidget(new SpeedVerticalSlider(this.width / 2 + 70, this.height / 2 - 79, 12, 65, blockEntity.getSpeed(), newValue -> {
                 blockEntity.setSpeed(newValue);
-                Packets.sendToServer(new ChangeSpeedPacket(newValue));
+                PacketDistributor.sendToServer(new ChangeSpeedPacket(newValue));
             }));
 
             this.energyStatus = this.addRenderableWidget(new EnergyStatusWidget(this.width / 2 + 50, this.height / 2 - 79, blockEntity.getEnergyStorage()));

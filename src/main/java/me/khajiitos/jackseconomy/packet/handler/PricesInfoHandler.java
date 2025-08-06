@@ -2,18 +2,16 @@ package me.khajiitos.jackseconomy.packet.handler;
 
 import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
-import me.khajiitos.jackseconomy.data.price.PricesFluidPriceInfo;
-import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.PricesFluidPriceInfo;
 import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
+import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class PricesInfoHandler {
 
-    public static void handle(PricesInfoPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(PricesInfoPacket msg, final IPayloadContext context) {
         JacksEconomyClient.priceInfos.clear();
         JacksEconomyClient.fluidPriceInfos.clear();
 

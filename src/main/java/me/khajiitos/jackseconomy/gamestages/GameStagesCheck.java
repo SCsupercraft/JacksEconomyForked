@@ -1,18 +1,8 @@
 package me.khajiitos.jackseconomy.gamestages;
 
+// TODO: Game Stages doesn't support later than 1.20.3, should it be replaced by another mod?
 public class GameStagesCheck {
-    private static boolean installed;
-
-    static {
-        try {
-            Class.forName("net.darkhax.gamestages.GameStages");
-            installed = true;
-        } catch (ClassNotFoundException e) {
-            installed = false;
-        }
-    }
-
     public static boolean isInstalled() {
-        return installed;
+        return false;
     }
 }

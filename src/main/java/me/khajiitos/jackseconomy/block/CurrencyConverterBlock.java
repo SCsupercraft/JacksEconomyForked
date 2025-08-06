@@ -1,5 +1,6 @@
 package me.khajiitos.jackseconomy.block;
 
+import com.mojang.serialization.MapCodec;
 import me.khajiitos.jackseconomy.blockentity.CurrencyConverterBlockEntity;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
@@ -9,7 +10,6 @@ import me.khajiitos.jackseconomy.util.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -19,19 +19,18 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 public class CurrencyConverterBlock extends BaseEntityBlock implements IDisablable {
+    public static final MapCodec<CurrencyConverterBlock> CODEC = CurrencyConverterBlock.simpleCodec(unused -> new CurrencyConverterBlock());
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     public CurrencyConverterBlock() {
-        super(BlockBehaviour.Properties.of().sound(SoundType.METAL).strength(1.5F, 6.0F));
+        super(Properties.of().sound(SoundType.METAL).strength(1.5F, 6.0F));
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
@@ -48,12 +47,17 @@ public class CurrencyConverterBlock extends BaseEntityBlock implements IDisablab
     }
 
     @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
+    @Override
     public RenderShape getRenderShape(BlockState pState) {
         return RenderShape.MODEL;
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (this.isDisabled()) {
             return InteractionResult.PASS;
         }
@@ -61,7 +65,7 @@ public class CurrencyConverterBlock extends BaseEntityBlock implements IDisablab
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof CurrencyConverterBlockEntity currencyConverterBlockEntity) {
             if (!level.isClientSide()) {
-                NetworkHooks.openScreen((ServerPlayer)player, currencyConverterBlockEntity, pos);
+                player.openMenu(currencyConverterBlockEntity, pos);
             }
 
             return InteractionResult.SUCCESS;

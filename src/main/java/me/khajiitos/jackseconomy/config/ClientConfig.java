@@ -1,17 +1,17 @@
 package me.khajiitos.jackseconomy.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ClientConfig {
-    public static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> hidePriceTooltips;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> alternativeTooltipFormat;
-    public static final ForgeConfigSpec.ConfigValue<Double> balanceChangePopupTime;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> walletHudPositionRight;
-    public static final ForgeConfigSpec.ConfigValue<Integer> walletHudPositionYOffset;
+    public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.ConfigValue<Boolean> hidePriceTooltips;
+    public static final ModConfigSpec.ConfigValue<Boolean> alternativeTooltipFormat;
+    public static final ModConfigSpec.ConfigValue<Double> balanceChangePopupTime;
+    public static final ModConfigSpec.ConfigValue<Boolean> walletHudPositionRight;
+    public static final ModConfigSpec.ConfigValue<Integer> walletHudPositionYOffset;
 
     static {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
         hidePriceTooltips = builder.define("hidePriceTooltips", false);
         alternativeTooltipFormat = builder.define("alternativeTooltipFormat", true);

@@ -10,6 +10,7 @@ import me.khajiitos.jackseconomy.menu.MechanicalFluidExporterMenu;
 import me.khajiitos.jackseconomy.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -22,13 +23,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.IItemHandler;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -40,8 +37,6 @@ public class MechanicalFluidExporterBlockEntity extends FluidTransactionKineticM
     private float progress = 0.f;
     protected AdvancedFluidTank.SuppliedFluidTank rejectedFluidStorage = new AdvancedFluidTank.SuppliedFluidTank(this::getFluidStorage, false, true);
     protected SlottedItemStackHandler itemHandlerOutput;
-    protected LazyOptional<IItemHandler> itemHandlerOutputLazy = LazyOptional.of(() -> itemHandlerOutput);
-    protected final LazyOptional<IFluidHandler> lazyRejectedFluidStorage = LazyOptional.of(() -> rejectedFluidStorage);
 
     public MechanicalFluidExporterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityReg.MECHANICAL_FLUID_EXPORTER.get(), pos, state);
@@ -189,45 +184,39 @@ public class MechanicalFluidExporterBlockEntity extends FluidTransactionKineticM
     }
 
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
+    public IItemHandler getItemCapability(Direction direction) {
         Direction facing = this.getBlockState().getValue(TransactionMachineBlock.FACING);
+        return direction == null || sideConfig.getValue(SideConfig.directionRelative(facing, direction)) == SideConfig.Value.OUTPUT ? itemHandlerOutput : null;
+    }
 
-        if (cap == ForgeCapabilities.ITEM_HANDLER && (side == null || sideConfig.getValue(SideConfig.directionRelative(facing, side)) == SideConfig.Value.OUTPUT)) {
-            return itemHandlerOutputLazy.cast();
-        } else if (cap == ForgeCapabilities.FLUID_HANDLER  && side != null) {
-            switch (sideConfig.getValue(SideConfig.directionRelative(facing, side))) {
-                case INPUT ->  {
-                    return lazyInputFluidStorage.cast();
-                }
-                case OUTPUT -> {
-                    return lazyOutputFluidStorage.cast();
-                }
-                case REJECTION_OUTPUT -> {
-                    return lazyRejectedFluidStorage.cast();
-                }
+    @Override
+    public IFluidHandler getFluidCapability(Direction direction) {
+        Direction facing = this.getBlockState().getValue(TransactionMachineBlock.FACING);
+        if (direction == null) return null;
+        switch (sideConfig.getValue(SideConfig.directionRelative(facing, direction))) {
+            case INPUT ->  {
+                return inputFluidStorage;
+            }
+            case OUTPUT -> {
+                return outputFluidStorage;
+            }
+            case REJECTION_OUTPUT -> {
+                return rejectedFluidStorage;
             }
         }
-
-        return super.getCapability(cap, side);
+        return null;
     }
 
     @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        itemHandlerOutputLazy.invalidate();
-        lazyRejectedFluidStorage.invalidate();
-    }
-
-    @Override
-    public void saveMachineData(CompoundTag tag) {
-        super.saveMachineData(tag);
+    public void saveMachineData(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveMachineData(tag, provider);
 
         tag.putFloat("Progress", this.progress);
     }
 
     @Override
-    public void loadMachineData(CompoundTag tag) {
-        super.loadMachineData(tag);
+    public void loadMachineData(CompoundTag tag, HolderLookup.Provider provider) {
+        super.loadMachineData(tag, provider);
 
         // When items are loaded, the items array is a completely new array
 

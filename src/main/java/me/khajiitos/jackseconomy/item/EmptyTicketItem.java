@@ -11,13 +11,12 @@ import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkHooks;
 
 public class EmptyTicketItem extends Item {
     public final Type type;
 
     public EmptyTicketItem(Type type) {
-        super(new Item.Properties().stacksTo(1));
+        super(new Properties().stacksTo(1));
         this.type = type;
     }
 
@@ -26,8 +25,7 @@ public class EmptyTicketItem extends Item {
         ItemStack itemStack = pPlayer.getItemInHand(pUsedHand);
 
         if (pPlayer instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openScreen(serverPlayer,
-                    new SimpleMenuProvider(this.type.menuConstructor, itemStack.getItem().getDescription()));
+            serverPlayer.openMenu(new SimpleMenuProvider(this.type.menuConstructor, itemStack.getItem().getDescription()));
         }
 
         return InteractionResultHolder.success(itemStack);

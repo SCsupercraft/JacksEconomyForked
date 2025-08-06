@@ -2,17 +2,18 @@ package me.khajiitos.jackseconomy.blockentity;
 
 import me.khajiitos.jackseconomy.block.TransactionMachineBlock;
 import me.khajiitos.jackseconomy.config.Config;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.menu.MechanicalImporterMenu;
-import me.khajiitos.jackseconomy.data.price.ItemDescription;
-import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.util.RedstoneToggle;
 import me.khajiitos.jackseconomy.util.SideConfig;
 import me.khajiitos.jackseconomy.util.SlottedItemStackHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -25,11 +26,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -45,10 +42,6 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
     protected SlottedItemStackHandler itemHandlerInput;
     protected SlottedItemStackHandler itemHandlerOutput;
     protected SlottedItemStackHandler itemHandlerRejectionOutput;
-    protected LazyOptional<IItemHandler> itemHandlerInputLazy = LazyOptional.of(() -> itemHandlerInput);
-    protected LazyOptional<IItemHandler> itemHandlerOutputLazy = LazyOptional.of(() -> itemHandlerOutput);
-    protected LazyOptional<IItemHandler> itemHandlerRejectionOutputLazy = LazyOptional.of(() -> itemHandlerRejectionOutput);
-
     public ItemDescription selectedItem;
     private float progress;
 
@@ -98,8 +91,8 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
     }
 
     @Override
-    public void saveMachineData(CompoundTag tag) {
-        super.saveMachineData(tag);
+    public void saveMachineData(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveMachineData(tag, provider);
         tag.putFloat("Progress", this.progress);
 
         if (this.selectedItem != null) {
@@ -108,8 +101,8 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
     }
 
     @Override
-    public void loadMachineData(CompoundTag tag) {
-        super.loadMachineData(tag);
+    public void loadMachineData(CompoundTag tag, HolderLookup.Provider provider) {
+        super.loadMachineData(tag, provider);
 
         // When items are loaded, the items array is a completely new array
         this.itemHandlerInput.changeItems(this.items);
@@ -144,35 +137,22 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
     }
 
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
+    public IItemHandler getItemCapability(Direction direction) {
         Direction facing = this.getBlockState().getValue(TransactionMachineBlock.FACING);
+        if (direction == null) return itemHandlerOutput;
 
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            if (side == null) {
-                return itemHandlerOutputLazy.cast();
+        switch (sideConfig.getValue(SideConfig.directionRelative(facing, direction))) {
+            case INPUT -> {
+                return itemHandlerInput;
             }
-            switch (sideConfig.getValue(SideConfig.directionRelative(facing, side))) {
-                case INPUT -> {
-                    return itemHandlerInputLazy.cast();
-                }
-                case OUTPUT-> {
-                    return itemHandlerOutputLazy.cast();
-                }
-                case REJECTION_OUTPUT -> {
-                    return itemHandlerRejectionOutputLazy.cast();
-                }
+            case OUTPUT-> {
+                return itemHandlerOutput;
+            }
+            case REJECTION_OUTPUT -> {
+                return itemHandlerRejectionOutput;
             }
         }
-
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        itemHandlerInputLazy.invalidate();
-        itemHandlerOutputLazy.invalidate();
-        itemHandlerRejectionOutputLazy.invalidate();
+        return null;
     }
 
     public double getProgressPerTick() {

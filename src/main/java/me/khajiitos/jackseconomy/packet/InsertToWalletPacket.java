@@ -1,22 +1,23 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.InsertToWalletHandler;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
+public record InsertToWalletPacket(int slotId) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<InsertToWalletPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "insert_to_wallet"));
 
-public record InsertToWalletPacket(int slotId) {
-    public static void encode(InsertToWalletPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeInt(msg.slotId);
-    }
+    public static final StreamCodec<ByteBuf, InsertToWalletPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT,
+            InsertToWalletPacket::slotId,
+            InsertToWalletPacket::new
+    );
 
-    public static InsertToWalletPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new InsertToWalletPacket(friendlyByteBuf.readInt());
-    }
-
-    public static void handle(InsertToWalletPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> InsertToWalletHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

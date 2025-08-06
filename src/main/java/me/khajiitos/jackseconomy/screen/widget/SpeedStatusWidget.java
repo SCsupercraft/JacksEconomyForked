@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class SpeedStatusWidget extends AbstractWidget {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/mechanical_speed_bar.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/mechanical_speed_bar.png");
     private final Supplier<Float> speedSupplier;
     private final Consumer<List<Component>> onTooltip;
     private final Supplier<Double> progressPerTickSupplier;

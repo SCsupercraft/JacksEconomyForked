@@ -2,7 +2,6 @@ package me.khajiitos.jackseconomy.menu;
 
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.init.ContainerReg;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.item.CheckItem;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.InfiniteWalletItem;
@@ -18,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.math.BigDecimal;
 
@@ -110,8 +110,8 @@ public class WalletMenu extends AbstractContainerMenu {
 
                 JacksEconomy.server.getPlayerList().getPlayers().forEach(serverPlayer -> {
                     if (serverPlayer.containerMenu == this) {
-                        Packets.sendToClient(serverPlayer, new UpdateWalletBalancePacket(newBalance));
-                        Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(dif));
+                        PacketDistributor.sendToPlayer(serverPlayer, new UpdateWalletBalancePacket(newBalance));
+                        PacketDistributor.sendToPlayer(serverPlayer, new WalletBalanceDifPacket(dif));
                     }
                 });
                 input.setCount(0);
@@ -139,8 +139,8 @@ public class WalletMenu extends AbstractContainerMenu {
                         BigDecimal dif = value.multiply(BigDecimal.valueOf(count));
                         BigDecimal newBalance = CurrencyHelper.addMoney(dif, itemStack, serverPlayer);
 
-                        Packets.sendToClient(serverPlayer, new UpdateWalletBalancePacket(newBalance));
-                        Packets.sendToClient(serverPlayer, new WalletBalanceDifPacket(newBalance.subtract(oldBalance)));
+                        PacketDistributor.sendToPlayer(serverPlayer, new UpdateWalletBalancePacket(newBalance));
+                        PacketDistributor.sendToPlayer(serverPlayer, new WalletBalanceDifPacket(newBalance.subtract(oldBalance)));
                     }
                 });
                 input.setCount(0);

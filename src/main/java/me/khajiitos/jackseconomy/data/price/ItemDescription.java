@@ -2,34 +2,48 @@ package me.khajiitos.jackseconomy.data.price;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.util.ComponentUtil;
 import me.khajiitos.jackseconomy.util.ItemHelper;
 import me.khajiitos.jackseconomy.util.NBTUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public record ItemDescription(Item item, CompoundTag compoundTag) {
-    public ItemDescription(Item item, @Nullable CompoundTag compoundTag) {
+public record ItemDescription(Holder<Item> item, @NotNull DataComponentPatch components) {
+    public static final Codec<ItemDescription> CODEC = CompoundTag.CODEC.xmap(ItemDescription::fromNbt, ItemDescription::toNbt);
+    public static final StreamCodec<ByteBuf, ItemDescription> STREAM_CODEC = ByteBufCodecs.COMPOUND_TAG.map(ItemDescription::fromNbt, ItemDescription::toNbt);
+
+    public ItemDescription(Holder<Item> item, DataComponentPatch components) {
         if (item == null) throw new NullPointerException();
         this.item = item;
 
-        if (compoundTag == null) {
-            CompoundTag tag = new CompoundTag();
-            if (item.canBeDepleted()) {
-                tag.putInt("Damage", 0);
+        if (components == null || components.isEmpty()) {
+            DataComponentPatch.Builder builder = DataComponentPatch.builder();
+            if (item.value().isDamageable(new ItemStack(item, 1, builder.build()))) {
+                builder.set(DataComponents.DAMAGE, 0);
             }
-            this.compoundTag = tag;
+            this.components = builder.build();
         } else {
-            this.compoundTag = compoundTag.copy();
+            this.components = ComponentUtil.clone(components);
         }
     }
 
     public static ItemDescription ofItem(ItemStack itemStack) {
-        return new ItemDescription(itemStack.getItem(), itemStack.getTag());
+        return new ItemDescription(itemStack.getItemHolder(), itemStack.getComponentsPatch());
     }
 
     @Override
@@ -37,50 +51,20 @@ public record ItemDescription(Item item, CompoundTag compoundTag) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ItemDescription that = (ItemDescription) o;
-        return Objects.equals(item, that.item) && Objects.equals(compoundTag, that.compoundTag);
+        return Objects.equals(item, that.item) && Objects.equals(components, that.components);
     }
 
     public CompoundTag toNbt() {
-        CompoundTag tag = new CompoundTag();
-        String itemName = ItemHelper.getItemName(this.item);
-
-        tag.putString("item", itemName != null ? itemName : "");
-
-        if (!this.compoundTag.isEmpty()) {
-            tag.put("nbt", this.compoundTag.copy());
-        }
-
-        return tag;
+        return (CompoundTag) createItemStack().save(JacksEconomy.server.registryAccess());
     }
 
-    public static @Nullable ItemDescription fromNbt(CompoundTag compoundTag) {
-        String itemName = compoundTag.getString("item");
-
-        if (itemName.isEmpty()) {
-            return null;
-        }
-
-        Item item = ItemHelper.getItem(itemName);
-
-        if (item == null) {
-            return null;
-        }
-
-        CompoundTag tag = compoundTag.getCompound("nbt");
-
-        return new ItemDescription(item, tag);
+    public static @Nullable ItemDescription fromNbt(Tag tag) {
+        ItemStack stack = ItemStack.parse(JacksEconomy.server.registryAccess(), tag).orElse(null);
+        return stack != null ? ofItem(stack) : null;
     }
 
     public ItemStack createItemStack() {
-        ItemStack itemStack = new ItemStack(this.item);
-
-        CompoundTag tag = this.compoundTag();
-
-        if (!tag.isEmpty()) {
-            itemStack.setTag(tag.copy());
-        }
-
-        return itemStack;
+        return new ItemStack(this.item, 1, this.components);
     }
 
     public JsonObject toJson() {

@@ -1,26 +1,28 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.AdminShopSchemaHandler;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import javax.annotation.Nullable;
-import java.util.function.Supplier;
+import java.util.Optional;
 
-public record AdminShopSchemaPacket(CompoundTag data, @Nullable String adminShopName) {
-    public static void encode(AdminShopSchemaPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeNbt(msg.data);
-        friendlyByteBuf.writeBoolean(msg.adminShopName != null);
-        if (msg.adminShopName != null) friendlyByteBuf.writeUtf(msg.adminShopName);
-    }
+public record AdminShopSchemaPacket(CompoundTag data, Optional<String> adminShopName) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<AdminShopSchemaPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "admin_shop_schema"));
 
-    public static AdminShopSchemaPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new AdminShopSchemaPacket(friendlyByteBuf.readAnySizeNbt(), friendlyByteBuf.readBoolean() ? friendlyByteBuf.readUtf() : null);
-    }
+    public static final StreamCodec<ByteBuf, AdminShopSchemaPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.COMPOUND_TAG,
+            AdminShopSchemaPacket::data,
+            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8),
+            AdminShopSchemaPacket::adminShopName,
+            AdminShopSchemaPacket::new
+    );
 
-    public static void handle(AdminShopSchemaPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> AdminShopSchemaHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

@@ -1,11 +1,9 @@
 package me.khajiitos.jackseconomy.blockentity;
 
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
-import me.khajiitos.jackseconomy.util.AdvancedFluidTank;
-import me.khajiitos.jackseconomy.util.RedstoneToggle;
-import me.khajiitos.jackseconomy.util.SideConfig;
+import me.khajiitos.jackseconomy.util.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -17,15 +15,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 
-public abstract class FluidTransactionKineticMachineBlockEntity extends KineticBlockEntity implements WorldlyContainer, Container, MenuProvider, Nameable {
+public abstract class FluidTransactionKineticMachineBlockEntity extends KineticBlockEntity implements WorldlyContainer, Container, MenuProvider, Nameable, IItemCapable, IFluidCapable {
     protected AdvancedFluidTank fluidStorage = new AdvancedFluidTank(
             10000
     ) {
@@ -36,9 +30,6 @@ public abstract class FluidTransactionKineticMachineBlockEntity extends KineticB
     };
     protected AdvancedFluidTank.SuppliedFluidTank inputFluidStorage = new AdvancedFluidTank.SuppliedFluidTank(this::getFluidStorage, true, false);
     protected AdvancedFluidTank.SuppliedFluidTank outputFluidStorage = new AdvancedFluidTank.SuppliedFluidTank(this::getFluidStorage, false, true);
-    protected final LazyOptional<IFluidHandler> lazyInputFluidStorage = LazyOptional.of(() -> inputFluidStorage);
-    protected final LazyOptional<IFluidHandler> lazyOutputFluidStorage = LazyOptional.of(() -> outputFluidStorage);
-
     protected BigDecimal currency = BigDecimal.ZERO;
     protected RedstoneToggle redstoneToggle = RedstoneToggle.IGNORED;
     protected SideConfig sideConfig = new SideConfig();
@@ -98,40 +89,26 @@ public abstract class FluidTransactionKineticMachineBlockEntity extends KineticB
     }
 
     @Override
-    protected void write(CompoundTag compound, boolean clientPacket) {
-        super.write(compound, clientPacket);
-        ContainerHelper.saveAllItems(compound, this.items);
-        this.saveMachineData(compound);
-    }
-
-    @NotNull
-    @Override
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        lazyInputFluidStorage.invalidate();
-        lazyOutputFluidStorage.invalidate();
+    protected void write(CompoundTag compound, HolderLookup.Provider provider, boolean clientPacket) {
+        super.write(compound, provider, clientPacket);
+        this.saveMachineData(compound, provider);
     }
 
     public AdvancedFluidTank getFluidStorage() {
         return this.fluidStorage;
     }
 
-    public void saveMachineData(CompoundTag tag) {
-        tag.put("Fluid", this.fluidStorage.writeToNBT(new CompoundTag()));
+    public void saveMachineData(CompoundTag tag, HolderLookup.Provider provider) {
+        this.fluidStorage.writeToNBT(provider, tag);
         tag.putFloat("Speed", this.speed);
         tag.putString("Currency", this.currency.toString());
         tag.putInt("RedstoneToggle", this.redstoneToggle.ordinal());
         tag.put("SideConfig", this.sideConfig.toNbt());
-        ContainerHelper.saveAllItems(tag, this.items);
+        ContainerHelper.saveAllItems(tag, this.items, provider);
     }
 
-    public void loadMachineData(CompoundTag tag) {
-        this.fluidStorage.readFromNBT(tag.getCompound("Fluid"));
+    public void loadMachineData(CompoundTag tag, HolderLookup.Provider provider) {
+        this.fluidStorage.readFromNBT(provider, tag);
         this.speed = tag.getFloat("Speed");
         try {
             this.currency = new BigDecimal(tag.getString("Currency"));
@@ -147,15 +124,14 @@ public abstract class FluidTransactionKineticMachineBlockEntity extends KineticB
 
         this.sideConfig = SideConfig.fromIntArray(tag.getIntArray("SideConfig"));
 
-        ContainerHelper.loadAllItems(tag, this.items);
+        ContainerHelper.loadAllItems(tag, this.items, provider);
     }
 
     @Override
-    protected void read(CompoundTag compound, boolean clientPacket) {
-        super.read(compound, clientPacket);
+    protected void read(CompoundTag compound, HolderLookup.Provider provider, boolean clientPacket) {
+        super.read(compound, provider, clientPacket);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        //ContainerHelper.loadAllItems(tag, this.items);
-        this.loadMachineData(compound);
+        this.loadMachineData(compound, provider);
     }
 
     public SideConfig getSideConfig() {
@@ -183,7 +159,7 @@ public abstract class FluidTransactionKineticMachineBlockEntity extends KineticB
                 int stackSize = Math.min(remainingItems.getCount(), itemStack.getMaxStackSize());
                 ItemStack stackToAdd = remainingItems.split(stackSize);
                 items.set(i, stackToAdd);
-            } else if (ItemStack.isSameItemSameTags(slotStack, remainingItems)) {
+            } else if (ItemStack.isSameItemSameComponents(slotStack, remainingItems)) {
                 int spaceAvailable = itemStack.getMaxStackSize() - slotStack.getCount();
                 int stackSize = Math.min(remainingItems.getCount(), spaceAvailable);
                 slotStack.grow(stackSize);
@@ -206,7 +182,7 @@ public abstract class FluidTransactionKineticMachineBlockEntity extends KineticB
                 return true;
             }
 
-            if (ItemStack.isSameItemSameTags(itemStack, stackInSlot)) {
+            if (ItemStack.isSameItemSameComponents(itemStack, stackInSlot)) {
                 if (stackInSlot.getCount() + itemStack.getCount() <= stackInSlot.getMaxStackSize()) {
                     return true;
                 }
@@ -221,17 +197,16 @@ public abstract class FluidTransactionKineticMachineBlockEntity extends KineticB
             this.setChanged();
             this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
         }
-
     }
 
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        if (pkt.getTag() != null) {
-            this.load(pkt.getTag());
-        }
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider provider) {
+        this.read(pkt.getTag(), provider, true);
     }
 
-    public void handleUpdateTag(CompoundTag tag) {
-        this.load(tag);
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
+        this.read(tag, provider, true);
     }
 
     @Override
@@ -239,9 +214,10 @@ public abstract class FluidTransactionKineticMachineBlockEntity extends KineticB
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    public CompoundTag getUpdateTag() {
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        this.saveAdditional(tag);
+        this.write(tag, provider, true);
         return tag;
     }
 }

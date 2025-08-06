@@ -20,7 +20,7 @@ public class InfiniteWalletItem extends WalletItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+    public void appendHoverText(ItemStack pStack, TooltipContext tooltipContext, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         if (isDisabled()) {
             pTooltipComponents.addAll(this.getDisabledTooltip());
         } else {

@@ -3,32 +3,27 @@ package me.khajiitos.jackseconomy.packet.handler;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
 import me.khajiitos.jackseconomy.data.PurchaseManager;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.OIMWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.packet.AdminShopPurchasePacket;
-import me.khajiitos.jackseconomy.data.price.ItemDescription;
-import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import me.khajiitos.jackseconomy.util.ItemHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Supplier;
 
 public class AdminShopPurchaseHandler {
-    public static void handle(AdminShopPurchasePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ServerPlayer sender = ctx.get().getSender();
-
-        if (sender == null) {
-            return;
-        }
+    public static void handle(AdminShopPurchasePacket msg, final IPayloadContext context) {
+        ServerPlayer sender = (ServerPlayer) context.player();
 
         ArrayList<PurchaseManager.Purchase> purchases = new ArrayList<>();
         ItemStack wallet = CuriosWallet.get(sender);
@@ -36,7 +31,7 @@ public class AdminShopPurchaseHandler {
         BigDecimal value = BigDecimal.ZERO;
         for (Map.Entry<AdminShopPurchasePacket.ShopItemDescription, Integer> entry : msg.shoppingCart().entrySet()) {
             ItemDescription description = entry.getKey().itemDescription();
-            double price = PriceManager.getAdminShopBuyPrice(description, entry.getValue(), entry.getKey().slot(), entry.getKey().category(), msg.adminShopName());
+            double price = PriceManager.getAdminShopBuyPrice(description, entry.getValue(), entry.getKey().slot(), entry.getKey().category(), msg.adminShopName().orElse(null));
             if (price <= 0) {
                 return;
             }
@@ -52,11 +47,11 @@ public class AdminShopPurchaseHandler {
 
         if (!Config.disableAdminShopSelling.get()) {
             for (Map.Entry<ItemDescription, Integer> entry : msg.itemsToSell().entrySet()) {
-                double price = PriceManager.getAdminShopSellPrice(entry.getKey(), entry.getValue(), msg.adminShopName());
+                double price = PriceManager.getAdminShopSellPrice(entry.getKey(), entry.getValue(), msg.adminShopName().orElse(null));
                 if (price <= 0) {
                     return;
                 }
-                String stage = PriceManager.getAdminShopSellStage(entry.getKey(), msg.adminShopName());
+                String stage = PriceManager.getAdminShopSellStage(entry.getKey(), msg.adminShopName().orElse(null));
 
                 if (stage != null && !GameStagesManager.hasGameStage(sender, stage)) {
                     // Player doesn't have required game stage to sell item
@@ -135,12 +130,11 @@ public class AdminShopPurchaseHandler {
             if (valueLong < 0) {
                 // Should only be $1 bills
                 List<ItemStack> items = CurrencyHelper.getCurrencyItems(BigDecimal.valueOf(-valueLong));
-                Optional<IItemHandler> handlerOptional = wallet.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
+                IItemHandler itemHandler = wallet.getCapability(Capabilities.ItemHandler.ITEM);
 
                 items.forEach(itemStack -> {
                     ItemStack left = itemStack;
-                    if (handlerOptional.isPresent()) {
-                        IItemHandler itemHandler = handlerOptional.get();
+                    if (itemHandler != null) {
                         for (int i = 0; i < itemHandler.getSlots(); i++) {
                             left = itemHandler.insertItem(i, left, false);
 
@@ -171,17 +165,15 @@ public class AdminShopPurchaseHandler {
                 }
                 // money not in the inventory, take from wallet
                 if (left > 0) {
-                    Optional<IItemHandler> handlerOptional = wallet.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
-                    if (handlerOptional.isPresent()) {
-                        IItemHandler handler = handlerOptional.get();
-
-                        for (int i = 0; i < handler.getSlots(); i++) {
-                            ItemStack itemStack = handler.getStackInSlot(i);
+                    IItemHandler itemHandler = wallet.getCapability(Capabilities.ItemHandler.ITEM);
+                    if (itemHandler != null) {
+                        for (int i = 0; i < itemHandler.getSlots(); i++) {
+                            ItemStack itemStack = itemHandler.getStackInSlot(i);
 
                             if (itemStack.getItem() instanceof CurrencyItem currencyItem && !currencyItem.isDisabled()) {
                                 int toTake = Math.min(itemStack.getCount(), (int)Math.ceil(left / currencyItem.value.doubleValue()));
                                 left -= toTake * currencyItem.value.doubleValue();
-                                handler.extractItem(i, toTake, false);
+                                itemHandler.extractItem(i, toTake, false);
 
                                 if (left <= 0) {
                                     break;
@@ -229,11 +221,11 @@ public class AdminShopPurchaseHandler {
 
         for (Map.Entry<AdminShopPurchasePacket.ShopItemDescription, Integer> entry : msg.shoppingCart().entrySet()) {
             int countLeft = entry.getValue();
-            int stackCount = entry.getKey().itemDescription().item().getMaxStackSize();
+            int stackCount = entry.getKey().itemDescription().createItemStack().getMaxStackSize();
 
             while (countLeft > 0) {
                 int thisStackCount = Math.min(countLeft, stackCount);
-                double price = PriceManager.getAdminShopBuyPrice(entry.getKey().itemDescription(), thisStackCount, entry.getKey().slot(), entry.getKey().category(), msg.adminShopName());
+                double price = PriceManager.getAdminShopBuyPrice(entry.getKey().itemDescription(), thisStackCount, entry.getKey().slot(), entry.getKey().category(), msg.adminShopName().orElse(null));
                 if (price <= 0) {
                     continue;
                 }

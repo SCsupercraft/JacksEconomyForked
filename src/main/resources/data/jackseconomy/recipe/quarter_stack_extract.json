@@ -1,0 +1,13 @@
+
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+          "item": "jackseconomy:quarter_stack"
+        }
+    ],
+    "result": {
+      "id": "jackseconomy:quarter",
+      "count": 9
+    }
+  }

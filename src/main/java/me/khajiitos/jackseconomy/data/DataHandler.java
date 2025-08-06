@@ -34,7 +34,7 @@ public abstract class DataHandler {
 				CompoundTag nbt = (CompoundTag) NBTUtil.jsonToNbt(object);
 				if (nbt == null) { return; }
 
-				NbtIo.write(nbt, DATA_FILE);
+				NbtIo.write(nbt, DATA_FILE.toPath());
 			} catch (IOException e) {
 				JacksEconomy.LOGGER.error("Failed to save data", e);
 			}
@@ -45,7 +45,7 @@ public abstract class DataHandler {
 			if (!DATA_FILE.getParentFile().isDirectory() && !DATA_FILE.getParentFile().mkdirs()) { return; }
 
 			try {
-				NbtIo.write(compoundTag, DATA_FILE);
+				NbtIo.write(compoundTag, DATA_FILE.toPath());
 			} catch (IOException e) {
 				JacksEconomy.LOGGER.error("Failed to save data", e);
 			}
@@ -56,7 +56,7 @@ public abstract class DataHandler {
 			JacksEconomy.LOGGER.info("Load: {}", DATA_FILE.getName());
 			if (DATA_FILE.exists()) {
 				try {
-					return NBTUtil.nbtToJson(NbtIo.read(DATA_FILE)).getAsJsonObject();
+					return NBTUtil.nbtToJson(NbtIo.read(DATA_FILE.toPath())).getAsJsonObject();
 				} catch (IOException e) {
 					JacksEconomy.LOGGER.error("Failed to load data", e);
 				}
@@ -70,7 +70,7 @@ public abstract class DataHandler {
 			JacksEconomy.LOGGER.info("Load: {}", DATA_FILE.getName());
 			if (DATA_FILE.exists()) {
 				try {
-					return NbtIo.read(DATA_FILE);
+					return NbtIo.read(DATA_FILE.toPath());
 				} catch (IOException e) {
 					JacksEconomy.LOGGER.error("Failed to load data", e);
 				}

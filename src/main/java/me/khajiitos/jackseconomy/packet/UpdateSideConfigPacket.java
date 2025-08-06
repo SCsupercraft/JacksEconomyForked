@@ -1,22 +1,27 @@
 package me.khajiitos.jackseconomy.packet;
 
-import me.khajiitos.jackseconomy.packet.handler.UpdateSideConfigHandler;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.util.Utils;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
+import java.util.ArrayList;
+import java.util.List;
 
-public record UpdateSideConfigPacket(int[] sideConfigInts) {
-    public static void encode(UpdateSideConfigPacket msg, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeVarIntArray(msg.sideConfigInts());
-    }
+public record UpdateSideConfigPacket(int[] sideConfigInts) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<UpdateSideConfigPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "update_side_config"));
 
-    public static UpdateSideConfigPacket decode(FriendlyByteBuf friendlyByteBuf) {
-        return new UpdateSideConfigPacket(friendlyByteBuf.readVarIntArray(6));
-    }
+    public static final StreamCodec<ByteBuf, UpdateSideConfigPacket> STREAM_CODEC = StreamCodec.composite(
+            Utils.INT_ARRAY_STREAM_CODEC,
+            UpdateSideConfigPacket::sideConfigInts,
+            UpdateSideConfigPacket::new
+    );
 
-    public static void handle(UpdateSideConfigPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> UpdateSideConfigHandler.handle(msg, ctx));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

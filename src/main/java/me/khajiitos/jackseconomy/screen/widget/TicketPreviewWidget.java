@@ -10,9 +10,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class TicketPreviewWidget<T> extends AbstractWidget {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/ticket_slot_preview.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/ticket_slot_preview.png");
     private final boolean openable;
     private boolean open = false;
     private final List<T> items;
@@ -64,14 +66,17 @@ public class TicketPreviewWidget<T> extends AbstractWidget {
             for (T description : items) {
                 guiGraphics.blit(BACKGROUND, x, this.getY(), 0/*this.getBlitOffset()*/, description.equals(this.selectedDescription) ? 18 : 0, 0, 18, 18, 36, 18);
 
-                ItemStack itemStack = isItemTicket() ? ((ItemDescription) description).createItemStack() : new ItemStack(((FluidDescription) description).fluid().getBucket(), 1).setHoverName(((FluidDescription) description).fluid().getFluidType().getDescription().copy());
+                ItemStack itemStack = isItemTicket() ? ((ItemDescription) description).createItemStack() : new ItemStack(((FluidDescription) description).fluid().value().getBucket(), 1);
+                if (isFluidTicket()) {
+                    itemStack.set(DataComponents.CUSTOM_NAME, ((FluidDescription) description).fluid().value().getFluidType().getDescription().copy());
+                }
                 guiGraphics.renderItem(itemStack, x + 1, this.getY() + 1);
 
                 if (pMouseX >= x + 1 && pMouseX <= x + 17 && pMouseY >= getY() + 1 && pMouseY <= getY() + 17) {
                     AbstractContainerScreen.renderSlotHighlight(guiGraphics, x + 1, getY() + 1, 0/*this.getBlitOffset()*/);
 
                     if (this.onTooltip != null) {
-                        List<Component> tooltip = itemStack.getTooltipLines(Minecraft.getInstance().player, TooltipFlag.Default.NORMAL);
+                        List<Component> tooltip = itemStack.getTooltipLines(Item.TooltipContext.EMPTY, Minecraft.getInstance().player, TooltipFlag.Default.NORMAL);
                         if (description.equals(this.selectedDescription)) {
                             tooltip.add(Component.literal(" "));
                             tooltip.add(Component.translatable("jackseconomy.selected").withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_GRAY));
@@ -91,12 +96,15 @@ public class TicketPreviewWidget<T> extends AbstractWidget {
             if (!items.isEmpty()) {
                 T description = openable ? (items.stream().anyMatch(desc -> desc.equals(this.selectedDescription)) ? this.selectedDescription : items.get(0)) : items.get((tickCount / 20) % items.size());
 
-                ItemStack itemStack = isItemTicket() ? ((ItemDescription) description).createItemStack() : new ItemStack(((FluidDescription) description).fluid().getBucket(), 1).setHoverName(((FluidDescription)description).fluid().getFluidType().getDescription().copy().setStyle(Style.EMPTY.withItalic(false)));
+                ItemStack itemStack = isItemTicket() ? ((ItemDescription) description).createItemStack() : new ItemStack(((FluidDescription) description).fluid().value().getBucket(), 1);
+                if (isFluidTicket()) {
+                    itemStack.set(DataComponents.CUSTOM_NAME, ((FluidDescription)description).fluid().value().getFluidType().getDescription().copy().setStyle(Style.EMPTY.withItalic(false)));
+                }
                 guiGraphics.renderItem(itemStack, this.getX() + 1, this.getY() + 1);
 
                 if (pMouseX >= getX() + 1 && pMouseX <= getX() + 17 && pMouseY >= getY() + 1 && pMouseY <= getY() + 17) {
                     AbstractContainerScreen.renderSlotHighlight(guiGraphics, getX() + 1, getY() + 1, 0/*this.getBlitOffset()*/);
-                    this.onTooltip.accept(itemStack.getTooltipLines(Minecraft.getInstance().player, TooltipFlag.Default.NORMAL));
+                    this.onTooltip.accept(itemStack.getTooltipLines(Item.TooltipContext.EMPTY, Minecraft.getInstance().player, TooltipFlag.Default.NORMAL));
                 }
             }
 

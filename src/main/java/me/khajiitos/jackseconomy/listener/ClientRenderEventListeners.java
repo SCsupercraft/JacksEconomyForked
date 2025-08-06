@@ -14,18 +14,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientRenderEventListeners {
-
-    protected static final ResourceLocation BALANCE_PROGRESS = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/balance_progress.png");
+    protected static final ResourceLocation BALANCE_PROGRESS = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/balance_progress.png");
 
     @SubscribeEvent
     public void onDrawHud(RenderGuiEvent.Post e) {

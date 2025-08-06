@@ -18,26 +18,31 @@ import me.khajiitos.jackseconomy.screen.*;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.BlockItem;
-import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.settings.KeyConflictContext;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraft.world.item.component.CustomData;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
+import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 
+@Mod(value = JacksEconomy.MOD_ID, dist = Dist.CLIENT)
+@EventBusSubscriber(modid = JacksEconomy.MOD_ID, value = Dist.CLIENT)
 public class JacksEconomyClient {
     public static final KeyMapping OPEN_WALLET = new KeyMapping("key.jackseconomy.open_wallet", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, "key.categories.jackseconomy");
     public static HashMap<ItemDescription, PricesItemPriceInfo> priceInfos = new HashMap<>();
@@ -47,47 +52,52 @@ public class JacksEconomyClient {
     public static BigDecimal balanceDifPopup = null;
     public static long balanceDifPopupStartMillis = -1;
 
-    public static void init() {
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public JacksEconomyClient(ModContainer container) {
+        NeoForge.EVENT_BUS.register(new ClientEventListeners());
+        NeoForge.EVENT_BUS.register(new ClientRenderEventListeners());
 
-        MinecraftForge.EVENT_BUS.register(new ClientEventListeners());
-        MinecraftForge.EVENT_BUS.register(new ClientRenderEventListeners());
+        container.registerExtensionPoint(IConfigScreenFactory.class, (modContainer, screen) -> new ClientConfigScreen(screen));
 
-        eventBus.addListener(JacksEconomyClient::onClientSetup);
-        eventBus.addListener(JacksEconomyClient::onKeybindRegister);
-        eventBus.addListener(JacksEconomyClient::onRegisterBlockEntityRenderers);
-        eventBus.addListener(JacksEconomyClient::onRegisterBlockColorProviders);
-        eventBus.addListener(JacksEconomyClient::onRegisterItemColorProviders);
-
-        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(ClientConfigScreen::new));
-
-        if (CreateCheck.isInstalled()) { CreatePonder.init(); }
+        if (CreateCheck.isInstalled()) {
+            CreatePonder.init();
+        }
     }
 
+    @SubscribeEvent
+    public static void onKeybindRegister(RegisterKeyMappingsEvent e) {
+        e.register(OPEN_WALLET);
+    }
+
+    @SubscribeEvent
+    public static void registerScreens(RegisterMenuScreensEvent e) {
+        e.register(ContainerReg.EXPORTER_MENU.get(), ExporterScreen::new);
+        e.register(ContainerReg.IMPORTER_MENU.get(), ImporterScreen::new);
+        e.register(ContainerReg.FLUID_EXPORTER_MENU.get(), FluidExporterScreen::new);
+        e.register(ContainerReg.FLUID_IMPORTER_MENU.get(), FluidImporterScreen::new);
+        e.register(ContainerReg.WALLET_MENU.get(), WalletScreen::new);
+        e.register(ContainerReg.OIM_WALLET_MENU.get(), OIMWalletScreen::new);
+        e.register(ContainerReg.ADMIN_SHOP_MENU.get(), AdminShopScreen::new);
+        e.register(ContainerReg.CURRENCY_CONVERTER_MENU.get(), CurrencyConverterScreen::new);
+        e.register(ContainerReg.IMPORTER_TICKET_CREATOR_MENU.get(), TicketCreatorScreen::new);
+        e.register(ContainerReg.EXPORTER_TICKET_CREATOR_MENU.get(), TicketCreatorScreen::new);
+        e.register(ContainerReg.FLUID_IMPORTER_TICKET_CREATOR_MENU.get(), FluidTicketCreatorScreen::new);
+        e.register(ContainerReg.FLUID_EXPORTER_TICKET_CREATOR_MENU.get(), FluidTicketCreatorScreen::new);
+
+        e.register(ContainerReg.BULK_FLUID_MENU.get(), BulkFluidScreen::new);
+        e.register(ContainerReg.BULK_ITEM_MENU.get(), BulkItemScreen::new);
+        e.register(ContainerReg.BULK_ADMIN_SHOP_MENU.get(), BulkAdminShopScreen::new);
+
+        if (CreateCheck.isInstalled()) { CreateClient.registerScreens(e); }
+    }
+
+    @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent e) {
-        MenuScreens.register(ContainerReg.EXPORTER_MENU.get(), ExporterScreen::new);
-        MenuScreens.register(ContainerReg.IMPORTER_MENU.get(), ImporterScreen::new);
-        MenuScreens.register(ContainerReg.FLUID_EXPORTER_MENU.get(), FluidExporterScreen::new);
-        MenuScreens.register(ContainerReg.FLUID_IMPORTER_MENU.get(), FluidImporterScreen::new);
-        MenuScreens.register(ContainerReg.WALLET_MENU.get(), WalletScreen::new);
-        MenuScreens.register(ContainerReg.OIM_WALLET_MENU.get(), OIMWalletScreen::new);
-        MenuScreens.register(ContainerReg.ADMIN_SHOP_MENU.get(), AdminShopScreen::new);
-        MenuScreens.register(ContainerReg.CURRENCY_CONVERTER_MENU.get(), CurrencyConverterScreen::new);
-        MenuScreens.register(ContainerReg.IMPORTER_TICKET_CREATOR_MENU.get(), TicketCreatorScreen::new);
-        MenuScreens.register(ContainerReg.EXPORTER_TICKET_CREATOR_MENU.get(), TicketCreatorScreen::new);
-        MenuScreens.register(ContainerReg.FLUID_IMPORTER_TICKET_CREATOR_MENU.get(), FluidTicketCreatorScreen::new);
-        MenuScreens.register(ContainerReg.FLUID_EXPORTER_TICKET_CREATOR_MENU.get(), FluidTicketCreatorScreen::new);
-
-        MenuScreens.register(ContainerReg.BULK_FLUID_MENU.get(), BulkFluidScreen::new);
-        MenuScreens.register(ContainerReg.BULK_ITEM_MENU.get(), BulkItemScreen::new);
-        MenuScreens.register(ContainerReg.BULK_ADMIN_SHOP_MENU.get(), BulkAdminShopScreen::new);
-
         ItemProperties.register(
                 ItemBlockReg.ADMIN_SHOP_ITEM.get(),
-                new ResourceLocation(JacksEconomy.MOD_ID, "colored"),
+                ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "colored"),
                 (pStack, pLevel, pEntity, pSeed) -> {
-                    CompoundTag tag = BlockItem.getBlockEntityData(pStack);
-                    String name = tag != null && tag.contains("adminShopName") ? tag.getString("adminShopName") : null;
+                    CompoundTag tag = pStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).getUnsafe();
+                    String name = tag.contains("adminShopName") ? tag.getString("adminShopName") : null;
                     int color = name != null && JacksEconomyClient.adminShopColors.containsKey(name)
                             ? JacksEconomyClient.adminShopColors.get(name)
                             : JacksEconomyClient.defaultAdminShopColor;
@@ -99,14 +109,12 @@ public class JacksEconomyClient {
         if (CreateCheck.isInstalled()) { CreateClient.onClientSetup(e); }
     }
 
-    public static void onKeybindRegister(RegisterKeyMappingsEvent e) {
-        e.register(OPEN_WALLET);
-    }
-
+    @SubscribeEvent
     public static void onRegisterBlockEntityRenderers(EntityRenderersEvent.RegisterRenderers e) {
         if (CreateCheck.isInstalled()) { CreateClient.onRegisterBlockEntityRenderers(e); }
     }
 
+    @SubscribeEvent
     public static void onRegisterBlockColorProviders(RegisterColorHandlersEvent.Block registry) {
         BlockColor adminShopColor = (pState, pLevel, pPos, pTintIndex) -> {
             if (pTintIndex != 0 || pLevel == null || pPos == null) return -1;
@@ -122,12 +130,13 @@ public class JacksEconomyClient {
         registry.register(adminShopColor, ItemBlockReg.ADMIN_SHOP.get());
     }
 
+    @SubscribeEvent
     public static void onRegisterItemColorProviders(RegisterColorHandlersEvent.Item registry) {
         ItemColor adminShopColor = (pStack, pTintIndex) -> {
-            CompoundTag tag = BlockItem.getBlockEntityData(pStack);
+            CompoundTag tag = pStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).getUnsafe();
             if (pTintIndex != 0) return -1;
 
-            String name = tag != null && tag.contains("adminShopName") ? tag.getString("adminShopName") : null;
+            String name = tag.contains("adminShopName") ? tag.getString("adminShopName") : null;
             return name != null && JacksEconomyClient.adminShopColors.containsKey(name)
                     ? JacksEconomyClient.adminShopColors.get(name)
                     : JacksEconomyClient.defaultAdminShopColor;

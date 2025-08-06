@@ -1,0 +1,13 @@
+
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+          "item": "jackseconomy:nickel_stack"
+        }
+    ],
+    "result": {
+      "id": "jackseconomy:nickel",
+      "count": 9
+    }
+  }

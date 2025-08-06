@@ -1,32 +1,54 @@
 package me.khajiitos.jackseconomy.listener;
 
+import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.AdminShopColorManager;
-import me.khajiitos.jackseconomy.init.Packets;
+import me.khajiitos.jackseconomy.data.PurchaseManager;
+import me.khajiitos.jackseconomy.data.StockMarketManager;
+import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.menu.WalletMenu;
 import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
-import me.khajiitos.jackseconomy.data.price.PriceManager;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class OtherEventListeners {
+	@SubscribeEvent
+	public void onServerStarting(ServerStartingEvent e) {
+		JacksEconomy.server = e.getServer();
+
+		PriceManager.load();
+
+		AdminShopColorManager.load();
+		StockMarketManager.load();
+		PurchaseManager.load();
+	}
+
+	@SubscribeEvent
+	public void onServerStopped(ServerStoppedEvent e) {
+		AdminShopColorManager.save();
+		StockMarketManager.save();
+		PurchaseManager.save();
+
+		JacksEconomy.server = null;
+	}
 
     @SubscribeEvent
-    public void onTick(TickEvent.ServerTickEvent e) {
-        if (e.phase == TickEvent.Phase.START) {
-            e.getServer().getPlayerList().getPlayers().forEach(serverPlayer -> {
-                if (serverPlayer.containerMenu instanceof WalletMenu walletMenu) {
-                    walletMenu.tick();
-                }
-            });
-        }
+    public void onTick(ServerTickEvent.Pre e) {
+		e.getServer().getPlayerList().getPlayers().forEach(serverPlayer -> {
+			if (serverPlayer.containerMenu instanceof WalletMenu walletMenu) {
+				walletMenu.tick();
+			}
+		});
     }
 
     @SubscribeEvent
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent e) {
         if (e.getEntity() instanceof ServerPlayer serverPlayer) {
-            Packets.sendToClient(serverPlayer, new PricesInfoPacket(PriceManager.toTag(false), PriceManager.toTag(true)));
+            PacketDistributor.sendToPlayer(serverPlayer, new PricesInfoPacket(PriceManager.toTag(false), PriceManager.toTag(true)));
             AdminShopColorManager.updatePlayer(serverPlayer);
         }
     }

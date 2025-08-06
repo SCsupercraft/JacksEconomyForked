@@ -17,7 +17,7 @@ public class GoldenFluidExporterTicketItem extends FluidExporterTicketItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+    public void appendHoverText(ItemStack pStack, TooltipContext tooltipContext, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         pTooltipComponents.add(Component.translatable("jackseconomy.golden_fluid_exporter_manifest_description").withStyle(ChatFormatting.GOLD));
 
         int processCount = getMaxProcessCount(pStack);

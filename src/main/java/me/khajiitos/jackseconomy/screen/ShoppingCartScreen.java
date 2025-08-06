@@ -5,15 +5,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.init.Sounds;
 import me.khajiitos.jackseconomy.item.OIMWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.menu.AdminShopMenu;
 import me.khajiitos.jackseconomy.packet.AdminShopPurchasePacket;
-import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.screen.widget.BetterScrollPanel;
 import me.khajiitos.jackseconomy.screen.widget.ShoppingCartEntry;
 import me.khajiitos.jackseconomy.screen.widget.ShoppingCartSellEntry;
@@ -33,6 +32,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -41,9 +41,9 @@ import java.math.RoundingMode;
 import java.util.*;
 
 public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/shopping_cart.png");
-    private static final ResourceLocation NO_WALLET = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/no_wallet.png");
-    protected static final ResourceLocation BALANCE_PROGRESS = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/balance_progress.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/shopping_cart.png");
+    private static final ResourceLocation NO_WALLET = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/no_wallet.png");
+    protected static final ResourceLocation BALANCE_PROGRESS = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/balance_progress.png");
 
     public final AdminShopScreen parent;
     private BetterScrollPanel shoppingCartPanel;
@@ -102,8 +102,9 @@ public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(Sounds.CHECKOUT.get(), 1.0F));
 
             Map<AdminShopPurchasePacket.ShopItemDescription, Integer> map = new HashMap<>();
+            Map<ItemDescription, Integer> sellMap = new LinkedHashMap<>(this.parent.itemsToSell);
             this.parent.shoppingCart.forEach((shopItem, amount) -> map.put(new AdminShopPurchasePacket.ShopItemDescription(shopItem.itemDescription(), shopItem.slot(), shopItem.category()), amount));
-            Packets.sendToServer(new AdminShopPurchasePacket(map, this.parent.itemsToSell, parent.adminShopName));
+            PacketDistributor.sendToServer(new AdminShopPurchasePacket(map, sellMap, Optional.ofNullable(parent.adminShopName)));
 
             this.parent.shoppingCart.clear();
             this.parent.itemsToSell.clear();
@@ -158,7 +159,6 @@ public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
-        this.renderBackground(guiGraphics);
         RenderSystem.setShaderTexture(0, BACKGROUND);
         int i = this.leftPos;
         int j = (this.height - this.imageHeight) / 2;
@@ -207,7 +207,7 @@ public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
 
                     tooltip.add(Component.translatable("jackseconomy.buying").withStyle(ChatFormatting.GRAY));
                     this.parent.shoppingCart.forEach(((shopItem, amount) -> {
-                        tooltip.add(shopItem.itemDescription().item().getDescription().copy().withStyle(ChatFormatting.BLUE).append(Component.literal(" x" + amount).withStyle(ChatFormatting.BLUE)));
+                        tooltip.add(shopItem.itemDescription().item().value().getDescription().copy().withStyle(ChatFormatting.BLUE).append(Component.literal(" x" + amount).withStyle(ChatFormatting.BLUE)));
                     }));
                 }
 
@@ -216,7 +216,7 @@ public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
 
                     tooltip.add(Component.translatable("jackseconomy.selling").withStyle(ChatFormatting.GRAY));
                     this.parent.itemsToSell.forEach(((itemDescription, amount) -> {
-                        tooltip.add(itemDescription.item().getDescription().copy().withStyle(ChatFormatting.BLUE).append(Component.literal(" x" + amount).withStyle(ChatFormatting.BLUE)));
+                        tooltip.add(itemDescription.item().value().getDescription().copy().withStyle(ChatFormatting.BLUE).append(Component.literal(" x" + amount).withStyle(ChatFormatting.BLUE)));
                     }));
                 }
             }

@@ -8,17 +8,11 @@ import me.khajiitos.jackseconomy.packet.UpdateSideConfigPacket;
 import me.khajiitos.jackseconomy.util.SideConfig;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class UpdateSideConfigHandler {
-    public static void handle(UpdateSideConfigPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ServerPlayer sender = ctx.get().getSender();
-
-        if (sender == null) {
-            return;
-        }
+    public static void handle(UpdateSideConfigPacket msg, final IPayloadContext context) {
+        ServerPlayer sender = (ServerPlayer) context.player();
 
         if (sender.containerMenu instanceof IBlockEntityContainer<?> blockEntityContainer && blockEntityContainer.getBlockEntity() instanceof ISideConfigurable sideConfigurable) {
             SideConfig sideConfig = sideConfigurable.getSideConfig();

@@ -1,6 +1,7 @@
 package me.khajiitos.jackseconomy.item;
 
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
+import me.khajiitos.jackseconomy.init.ComponentReg;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,43 +26,20 @@ public abstract class FluidTicketItem extends TicketItem {
     }
 
     public static List<FluidDescription> getFluids(ItemStack itemStack) {
-        List<FluidDescription> list = new ArrayList<>();
-
-        if (!(itemStack.getItem() instanceof FluidTicketItem)) {
-            return list;
-        }
-
-        CompoundTag nbtTag = itemStack.getTag();
-
-        if (nbtTag == null) {
-            return list;
-        }
-
-        ListTag listTag = nbtTag.getList("Fluids", Tag.TAG_COMPOUND);
-        listTag.forEach(tag -> {
-            if (tag instanceof CompoundTag compoundTag) {
-                FluidDescription fluidDescription = FluidDescription.fromNbt(compoundTag);
-                if (fluidDescription != null) {
-                    list.add(fluidDescription);
-                }
-            }
-        });
-        return list;
+        return itemStack.getOrDefault(ComponentReg.TICKET_FLUIDS, new ArrayList<>());
     }
 
-    public static void setFluids(ItemStack itemStack, List<FluidDescription> items) {
-        ListTag tag = new ListTag();
-        items.forEach(s -> tag.add(s.toNbt()));
-        itemStack.getOrCreateTag().put("Fluids", tag);
+    public static void setFluids(ItemStack itemStack, List<FluidDescription> fluids) {
+        itemStack.set(ComponentReg.TICKET_FLUIDS, fluids);
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+    public void appendHoverText(ItemStack pStack, TooltipContext tooltipContext, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         List<FluidDescription> fluidDescriptions = getFluids(pStack);
 
         for (FluidDescription fluidDescription : fluidDescriptions) {
-            if (fluidDescription.fluid() != Fluids.EMPTY) {
-                pTooltipComponents.add(Component.literal("- ").append(fluidDescription.fluid().getFluidType().getDescription().copy()).withStyle(ChatFormatting.AQUA));
+            if (fluidDescription.fluid().value() != Fluids.EMPTY) {
+                pTooltipComponents.add(Component.literal("- ").append(fluidDescription.fluid().value().getFluidType().getDescription().copy()).withStyle(ChatFormatting.AQUA));
             }
         }
 

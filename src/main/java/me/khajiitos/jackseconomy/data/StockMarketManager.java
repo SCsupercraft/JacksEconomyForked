@@ -28,20 +28,26 @@ public class StockMarketManager {
 		}
 		JacksEconomy.server.addTickable(StockMarketManager::tick);
 	}
+
 	public static void save() {
 		data.addProperty("lastUpdated", lastUpdated);
 
 		dataHandler.save(data);
 	}
+
 	public static void tick() {
+		if (JacksEconomy.server == null) return;
+
 		if (getDay() > lastUpdated) {
 			lastUpdated = getDay();
 			update();
 		}
 	}
+
 	private static long getDay() {
 		return JacksEconomy.server.overworld().getDayTime() / 24000;
 	}
+
 	private static void update() {
 		JacksEconomy.LOGGER.info("Updating stock market...");
 		try {

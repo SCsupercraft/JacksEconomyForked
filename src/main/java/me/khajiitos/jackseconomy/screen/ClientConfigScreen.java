@@ -2,13 +2,12 @@ package me.khajiitos.jackseconomy.screen;
 
 import me.khajiitos.jackseconomy.config.ClientConfig;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ClientConfigScreen extends Screen {
     public final Screen parent;
@@ -16,10 +15,6 @@ public class ClientConfigScreen extends Screen {
     public ClientConfigScreen(Screen parent) {
         super(Component.literal("Jack's Economy Config"));
         this.parent = parent;
-    }
-
-    public ClientConfigScreen(Minecraft minecraft, Screen screen) {
-        this(screen);
     }
 
     public Component getBooleanComponent(boolean bool) {
@@ -30,7 +25,7 @@ public class ClientConfigScreen extends Screen {
         return Component.translatable(translationName, getBooleanComponent(value));
     }
 
-    private Button configBooleanButton(int y, ForgeConfigSpec.ConfigValue<Boolean> configValue, String translationName) {
+    private Button configBooleanButton(int y, ModConfigSpec.ConfigValue<Boolean> configValue, String translationName) {
         return Button.builder(getBooleanButtonComponent(translationName, configValue.get()), button -> {
             configValue.set(!configValue.get());
             button.setMessage(getBooleanButtonComponent(translationName, configValue.get()));
@@ -62,7 +57,7 @@ public class ClientConfigScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, pMouseX, pMouseY, pPartialTick);
         super.render(guiGraphics, pMouseX, pMouseY, pPartialTick);
     }
 }

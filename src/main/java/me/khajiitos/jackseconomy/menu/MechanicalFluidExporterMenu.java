@@ -28,7 +28,7 @@ public class MechanicalFluidExporterMenu extends KineticFluidTransactionMachineM
             this.addSlot(new OutputSlot(blockEntity, i, 71 + (i % 2) * 18, 21 + (i / 2) * 18));
         }
 
-        this.addSlot(new FilteredSlot(blockEntity, 6, 40, 48, new ResourceLocation(JacksEconomy.MOD_ID, "gui/ticket_slot"), itemStack -> itemStack.getItem() instanceof FluidExporterTicketItem));
+        this.addSlot(new FilteredSlot(blockEntity, 6, 40, 48, ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "gui/ticket_slot"), itemStack -> itemStack.getItem() instanceof FluidExporterTicketItem));
 
         this.addPlayerInventory(playerInv, 95);
     }

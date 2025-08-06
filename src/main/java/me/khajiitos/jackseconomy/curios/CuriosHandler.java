@@ -1,14 +1,13 @@
 package me.khajiitos.jackseconomy.curios;
 
 import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.item.OIMWalletItem;
+import me.khajiitos.jackseconomy.item.WalletItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.InterModComms;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import top.theillusivec4.curios.api.CuriosApi;
-import top.theillusivec4.curios.api.SlotTypeMessage;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
@@ -16,32 +15,26 @@ import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 import java.util.Map;
 
 public class CuriosHandler {
+	public static ItemStack getWallet(Player player) {
+		ICuriosItemHandler handler = CuriosApi.getCuriosInventory(player).orElse(null);
 
-    // FIXME: EVERYTHING is deprecated...
-    // but I don't feel like fixing it
+		if (handler != null) {
+			Map<String, ICurioStacksHandler> curios = handler.getCurios();
+			if (curios != null && curios.containsKey("wallet")) {
+				IDynamicStackHandler stacks = curios.get("wallet").getStacks();
+				if (stacks != null) {
+					return stacks.getStackInSlot(0);
+				}
+			}
+		}
 
-    @SubscribeEvent
-    public static void onImc(InterModEnqueueEvent e) {
-        InterModComms.sendTo("curios",
-                "register_type",
-                () -> new SlotTypeMessage.Builder("wallet")
-                        .icon(new ResourceLocation(JacksEconomy.MOD_ID, "gui/wallet_slot"))
-                        .build());
-    }
+		return ItemStack.EMPTY;
+	}
 
-    public static ItemStack getWallet(Player player) {
-        ICuriosItemHandler handler = CuriosApi.getCuriosHelper().getCuriosHandler(player).resolve().orElse(null);
-
-        if (handler != null) {
-            Map<String, ICurioStacksHandler> curios = handler.getCurios();
-            if (curios != null && curios.containsKey("wallet")) {
-                IDynamicStackHandler stacks = curios.get("wallet").getStacks();
-                if (stacks != null) {
-                    return stacks.getStackInSlot(0);
-                }
-            }
-        }
-
-        return ItemStack.EMPTY;
-    }
+	public static void init() {
+		CuriosApi.registerCurioPredicate(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "wallet"), (slotResult) -> {
+			Item item = slotResult.stack().getItem();
+			return item instanceof WalletItem || item instanceof OIMWalletItem;
+		});
+	}
 }

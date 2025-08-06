@@ -13,115 +13,116 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 public class CurrencyHelper {
-    private static final BigDecimal TRILLION = new BigDecimal("1000000000000");
-    private static final BigDecimal BILLION = new BigDecimal("1000000000");
-    private static final BigDecimal MILLION = new BigDecimal("1000000");
-    private static final BigDecimal THOUSAND = new BigDecimal("1000");
+	private static final BigDecimal TRILLION = new BigDecimal("1000000000000");
+	private static final BigDecimal BILLION = new BigDecimal("1000000000");
+	private static final BigDecimal MILLION = new BigDecimal("1000000");
+	private static final BigDecimal THOUSAND = new BigDecimal("1000");
 
-    public static List<ItemStack> getCurrencyItems(BigDecimal value) {
-        List<ItemStack> items = new ArrayList<>();
-        List<CurrencyType> sortedCurrencies = Config.oneItemCurrencyMode.get() ? List.of(CurrencyType.DOLLAR_BILL) : Arrays.stream(CurrencyType.values()).sorted(Comparator.comparing(CurrencyType::getWorth).reversed()).toList();
+	public static List<ItemStack> getCurrencyItems(BigDecimal value) {
+		List<ItemStack> items = new ArrayList<>();
+		List<CurrencyType> sortedCurrencies = Config.oneItemCurrencyMode.get() ? List.of(CurrencyType.DOLLAR_BILL) : Arrays.stream(CurrencyType.values()).sorted(Comparator.comparing(CurrencyType::getWorth).reversed()).toList();
 
-        while (value.compareTo(BigDecimal.ZERO) > 0) {
-            boolean anything = false;
-            for (CurrencyType currencyType : sortedCurrencies) {
-                if (value.compareTo(currencyType.worth) >= 0) {
-                    int count = Math.min(currencyType.item.getMaxStackSize(), value.divide(currencyType.worth, RoundingMode.DOWN).intValue());
-                    items.add(new ItemStack(currencyType.item, count));
-                    value = value.subtract(currencyType.worth.multiply(new BigDecimal(count)));
-                    anything = true;
-                    break;
-                }
-            }
+		while (value.compareTo(BigDecimal.ZERO) > 0) {
+			boolean anything = false;
+			for (CurrencyType currencyType : sortedCurrencies) {
+				if (value.compareTo(currencyType.worth) >= 0) {
+					int count = Math.min(currencyType.item.getDefaultMaxStackSize(), value.divide(currencyType.worth, RoundingMode.DOWN).intValue());
+					items.add(new ItemStack(currencyType.item, count));
+					value = value.subtract(currencyType.worth.multiply(new BigDecimal(count)));
+					anything = true;
+					break;
+				}
+			}
 
-            if (!anything) {
-                break;
-            }
-        }
-        return items;
-    }
+			if (!anything) {
+				break;
+			}
+		}
+		return items;
+	}
 
-    public static BigDecimal addMoney(BigDecimal money, ItemStack wallet, Player player) {
-        if (wallet.getItem() instanceof WalletItem) {
-            BigDecimal balance = WalletItem.getBalance(wallet);
-            BigDecimal newBalance = balance.add(money);
+	public static BigDecimal addMoney(BigDecimal money, ItemStack wallet, Player player) {
+		if (wallet.getItem() instanceof WalletItem) {
+			BigDecimal balance = WalletItem.getBalance(wallet);
+			BigDecimal newBalance = balance.add(money);
 
-            WalletItem.setBalance(wallet, newBalance);
-            return giveChange(player, wallet);
-        }
-        return null;
-    }
-    public static BigDecimal giveChange(Player player, ItemStack itemStack) {
-        if (itemStack.getItem() instanceof InfiniteWalletItem walletItem) {
-            return WalletItem.getBalance(itemStack);
-        } else if (itemStack.getItem() instanceof WalletItem walletItem) {
-            BigDecimal capacity = BigDecimal.valueOf(walletItem.getCapacity());
-            BigDecimal balance = WalletItem.getBalance(itemStack);
+			WalletItem.setBalance(wallet, newBalance);
+			return giveChange(player, wallet);
+		}
+		return null;
+	}
+	public static BigDecimal giveChange(Player player, ItemStack itemStack) {
+		if (itemStack.getItem() instanceof InfiniteWalletItem walletItem) {
+			return WalletItem.getBalance(itemStack);
+		} else if (itemStack.getItem() instanceof WalletItem walletItem) {
+			BigDecimal capacity = BigDecimal.valueOf(walletItem.getCapacity());
+			BigDecimal balance = WalletItem.getBalance(itemStack);
 
-            if (balance.compareTo(capacity) > 0) {
-                double change = balance.subtract(capacity).doubleValue();
+			if (balance.compareTo(capacity) > 0) {
+				double change = balance.subtract(capacity).doubleValue();
 
-                change = giveChange(player, change, CurrencyType.THOUSAND_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.HUNDRED_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.FIFTY_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.TWENTY_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.TEN_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.FIVE_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.QUARTER);
-                change = giveChange(player, change, CurrencyType.DIME);
-                change = giveChange(player, change, CurrencyType.NICKEL);
-                giveChange(player, change, CurrencyType.PENNY);
+				change = giveChange(player, change, CurrencyType.THOUSAND_DOLLAR_BILL);
+				change = giveChange(player, change, CurrencyType.HUNDRED_DOLLAR_BILL);
+				change = giveChange(player, change, CurrencyType.FIFTY_DOLLAR_BILL);
+				change = giveChange(player, change, CurrencyType.TWENTY_DOLLAR_BILL);
+				change = giveChange(player, change, CurrencyType.TEN_DOLLAR_BILL);
+				change = giveChange(player, change, CurrencyType.FIVE_DOLLAR_BILL);
+				change = giveChange(player, change, CurrencyType.DOLLAR_BILL);
+				change = giveChange(player, change, CurrencyType.QUARTER);
+				change = giveChange(player, change, CurrencyType.DIME);
+				change = giveChange(player, change, CurrencyType.NICKEL);
+				giveChange(player, change, CurrencyType.PENNY);
 
-                WalletItem.setBalance(itemStack, capacity);
-                return capacity;
-            }
-            return balance;
-        }
-        return null;
-    }
-    public static double giveChange(Player player, double amount, CurrencyType currencyType) {
-        double worth = currencyType.worth.doubleValue();
-        double count = Math.floor(amount / worth);
-        double itemsLeft = count;
+				WalletItem.setBalance(itemStack, capacity);
+				return capacity;
+			}
+			return balance;
+		}
+		return null;
+	}
+	public static double giveChange(Player player, double amount, CurrencyType currencyType) {
+		double worth = currencyType.worth.doubleValue();
+		double count = Math.floor(amount / worth);
+		double itemsLeft = count;
 
-        while (itemsLeft > 0) {
-            int items = (int) Math.min(64, count);
-            ItemStack itemStack = new ItemStack(currencyType.item, items);
+		while (itemsLeft > 0) {
+			int items = (int) Math.min(64, count);
+			ItemStack itemStack = new ItemStack(currencyType.item, items);
 
-            //if (!player.getInventory().add(itemStack)) {
-                ItemEntity itemEntity = new ItemEntity(player.level(), player.getX(), player.getY(), player.getZ(), itemStack);
-                player.level().addFreshEntity(itemEntity);
-            //}
+			//if (!player.getInventory().add(itemStack)) {
+			ItemEntity itemEntity = new ItemEntity(player.level(), player.getX(), player.getY(), player.getZ(), itemStack);
+			player.level().addFreshEntity(itemEntity);
+			//}
 
-            itemsLeft -= items;
-        }
+			itemsLeft -= items;
+		}
 
-        return amount - (count * worth);
-    }
+		return amount - (count * worth);
+	}
 
-    // 1.0 -> $1.00
-    public static String format(double value) {
-        return DecimalFormat.getCurrencyInstance(Locale.US).format(value);
-    }
+	// 1.0 -> $1.00
+	public static String format(double value) {
+		return DecimalFormat.getCurrencyInstance(Locale.US).format(value);
+	}
 
-    public static String formatShortened(BigDecimal bigDecimal) {
-        String sign = (bigDecimal.compareTo(BigDecimal.ZERO) < 0) ? "-" : "";
-        BigDecimal bigDecimalAbs = bigDecimal.abs();
+	public static String formatShortened(BigDecimal bigDecimal) {
+		String sign = (bigDecimal.compareTo(BigDecimal.ZERO) < 0) ? "-" : "";
+		BigDecimal bigDecimalAbs = bigDecimal.abs();
 
-        if (bigDecimalAbs.compareTo(TRILLION) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(TRILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "T";
-        } else if (bigDecimalAbs.compareTo(BILLION) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(BILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "B";
-        } else if (bigDecimalAbs.compareTo(MILLION) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(MILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "M";
-        } else if (bigDecimalAbs.compareTo(THOUSAND) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(THOUSAND, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "K";
-        }
-        return format(bigDecimal);
-    }
+		if (bigDecimalAbs.compareTo(TRILLION) >= 0) {
+			return "$" + sign + bigDecimalAbs.divide(TRILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "T";
+		} else if (bigDecimalAbs.compareTo(BILLION) >= 0) {
+			return "$" + sign + bigDecimalAbs.divide(BILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "B";
+		} else if (bigDecimalAbs.compareTo(MILLION) >= 0) {
+			return "$" + sign + bigDecimalAbs.divide(MILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "M";
+		} else if (bigDecimalAbs.compareTo(THOUSAND) >= 0) {
+			return "$" + sign + bigDecimalAbs.divide(THOUSAND, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "K";
+		}
+		return format(bigDecimal);
+	}
 
-    public static String format(BigDecimal bigDecimal) {
-        return format(bigDecimal.doubleValue());
-    }
+	public static String format(BigDecimal bigDecimal) {
+		return format(bigDecimal.doubleValue());
+	}
 }
+

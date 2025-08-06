@@ -1,31 +1,28 @@
 package me.khajiitos.jackseconomy.util;
 
+import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.init.ComponentReg;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
 import me.khajiitos.jackseconomy.item.OIMWalletItem;
-import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class OIMWalletCapabilityWrapper implements IItemHandlerModifiable, ICapabilityProvider {
-    private final ItemStack stack;
-    private final LazyOptional<IItemHandler> holder = LazyOptional.of(() -> this);
+public class OIMWalletCapabilityWrapper implements IItemHandlerModifiable {
+    private final ItemStack walletStack;
+    private final NonNullList<ItemStack> stacks;
 
-    private NonNullList<ItemStack> slots;
-    private CompoundTag cachedTag;
+    private OIMWalletCapabilityWrapper(ItemStack walletStack) {
+        this.walletStack = walletStack;
+        this.stacks = NonNullList.withSize(15, ItemStack.EMPTY);
 
-    private OIMWalletCapabilityWrapper(ItemStack itemStack) {
-        this.stack = itemStack;
+        CompoundTag data = walletStack.get(ComponentReg.OIM_WALLET_BALANCE);
+        if (data == null) return;
+
+        ContainerHelper.loadAllItems(data, stacks, JacksEconomy.server.registryAccess());
     }
 
     public static OIMWalletCapabilityWrapper create(ItemStack itemStack) {
@@ -35,150 +32,143 @@ public class OIMWalletCapabilityWrapper implements IItemHandlerModifiable, ICapa
         return null;
     }
 
-    @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        return ForgeCapabilities.ITEM_HANDLER.orEmpty(cap, holder);
+    public void save() {
+        CompoundTag data = new CompoundTag();
+        ContainerHelper.saveAllItems(data, stacks, false, JacksEconomy.server.registryAccess());
+        walletStack.set(ComponentReg.OIM_WALLET_BALANCE, data);
     }
 
+    /**
+     * Sets the ItemStack in the specified slot. Replaces any existing stack.
+     *
+     * @param slot The index of the target slot.
+     * @param stack The ItemStack to insert into the slot.
+     */
+    @Override
+    public void setStackInSlot(int slot, @NotNull ItemStack stack) {
+        if (!isItemValid(slot, stack)) return;
+
+        stacks.set(slot, stack);
+        save();
+    }
+
+    /**
+     * @return The total number of available slots.
+     */
     @Override
     public int getSlots() {
         return 15;
     }
 
+    /**
+     * Retrieves the current stack in the specified slot.
+     *
+     * @param slot The index of the slot to access.
+     * @return The ItemStack in the given slot (may be empty).
+     */
     @Override
-    @NotNull
-    public ItemStack getStackInSlot(int slot) {
-        validateSlotIndex(slot);
-        return getItemList().get(slot);
+    public @NotNull ItemStack getStackInSlot(int slot) {
+        return stacks.get(slot);
     }
 
+    /**
+     * Attempts to insert an ItemStack into a specific slot.
+     *
+     * @param slot The target slot index.
+     * @param stack The ItemStack to insert.
+     * @param simulate If true, doesn't actually insert—just checks what would happen.
+     * @return The remaining ItemStack that couldn't be inserted.
+     */
     @Override
-    @NotNull
-    public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-        if (stack.isEmpty())
-            return ItemStack.EMPTY;
-
-        if (!isItemValid(slot, stack))
+    public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+        if (stack.isEmpty() || slot < 0 || slot >= getSlots() || !isItemValid(slot, stack))
             return stack;
 
-        validateSlotIndex(slot);
+        ItemStack existing = stacks.get(slot);
+        int maxStackSize = Math.min(stack.getMaxStackSize(), getSlotLimit(slot));
 
-        NonNullList<ItemStack> itemStacks = getItemList();
-
-        ItemStack existing = itemStacks.get(slot);
-
-        int limit = Math.min(getSlotLimit(slot), stack.getMaxStackSize());
-
-        if (!existing.isEmpty()) {
-            if (!ItemHandlerHelper.canItemStacksStack(stack, existing))
-                return stack;
-
-            limit -= existing.getCount();
+        if (existing.isEmpty()) {
+            if (!simulate) {
+                ItemStack toInsert = stack.copy();
+                toInsert.setCount(Math.min(stack.getCount(), maxStackSize));
+                stacks.set(slot, toInsert);
+                save();
+            }
+            ItemStack remaining = stack.copy();
+            remaining.setCount(Math.max(0, stack.getCount() - maxStackSize));
+            return remaining;
         }
 
-        if (limit <= 0)
+        if (!ItemStack.isSameItemSameComponents(stack, existing))
             return stack;
 
-        boolean reachedLimit = stack.getCount() > limit;
+        int spaceAvailable = maxStackSize - existing.getCount();
+        int toTransfer = Math.min(stack.getCount(), spaceAvailable);
+
+        if (toTransfer <= 0)
+            return stack;
 
         if (!simulate) {
-            if (existing.isEmpty())
-            {
-                itemStacks.set(slot, reachedLimit ? ItemHandlerHelper.copyStackWithSize(stack, limit) : stack);
-            }
-            else
-            {
-                existing.grow(reachedLimit ? limit : stack.getCount());
-            }
-            setItemList(itemStacks);
+            existing.grow(toTransfer);
+            save();
         }
 
-        return reachedLimit ? ItemHandlerHelper.copyStackWithSize(stack, stack.getCount()- limit) : ItemStack.EMPTY;
+        ItemStack remainder = stack.copy();
+        remainder.setCount(stack.getCount() - toTransfer);
+        return remainder;
     }
 
+    /**
+     * Extracts items from a specific slot.
+     *
+     * @param slot The source slot index.
+     * @param amount Maximum number of items to extract.
+     * @param simulate If true, doesn't actually extract—just checks what would happen.
+     * @return The extracted ItemStack.
+     */
     @Override
-    @NotNull
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        NonNullList<ItemStack> itemStacks = getItemList();
-        if (amount == 0)
+    public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
+        if (amount <= 0 || slot < 0 || slot >= getSlots())
             return ItemStack.EMPTY;
 
-        validateSlotIndex(slot);
-
-        ItemStack existing = itemStacks.get(slot);
-
+        ItemStack existing = stacks.get(slot);
         if (existing.isEmpty())
             return ItemStack.EMPTY;
 
-        int toExtract = Math.min(amount, existing.getMaxStackSize());
+        int extractAmount = Math.min(amount, existing.getCount());
+        ItemStack extracted = existing.copy();
+        extracted.setCount(extractAmount);
 
-        if (existing.getCount() <= toExtract)
-        {
-            if (!simulate)
-            {
-                itemStacks.set(slot, ItemStack.EMPTY);
-                setItemList(itemStacks);
-                return existing;
+        if (!simulate) {
+            if (extractAmount == existing.getCount()) {
+                stacks.set(slot, ItemStack.EMPTY);
+            } else {
+                existing.shrink(extractAmount);
             }
-            else
-            {
-                return existing.copy();
-            }
+            save();
         }
-        else
-        {
-            if (!simulate)
-            {
-                itemStacks.set(slot, ItemHandlerHelper.copyStackWithSize(existing, existing.getCount() - toExtract));
-                setItemList(itemStacks);
-            }
 
-            return ItemHandlerHelper.copyStackWithSize(existing, toExtract);
-        }
+        return extracted;
     }
 
-    private void validateSlotIndex(int slot) {
-        if (slot < 0 || slot >= getSlots())
-            throw new RuntimeException("Slot " + slot + " not in valid range - [0," + getSlots() + ")");
-    }
-
+    /**
+     * @param slot The slot index.
+     * @return The maximum number of items that can be stored in this slot.
+     */
     @Override
     public int getSlotLimit(int slot) {
-        return ItemBlockReg.DOLLAR_BILL_ITEM.get().getMaxStackSize();
+        return ItemBlockReg.DOLLAR_BILL_ITEM.get().getDefaultMaxStackSize();
     }
 
+    /**
+     * Checks if a stack can be inserted into a given slot.
+     *
+     * @param slot The target slot index.
+     * @param stack The ItemStack to validate.
+     * @return True if the item can be inserted, false otherwise.
+     */
     @Override
     public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-        return stack.getItem().canFitInsideContainerItems();
-    }
-
-    @Override
-    public void setStackInSlot(int slot, @NotNull ItemStack stack) {
-        validateSlotIndex(slot);
-        if (!isItemValid(slot, stack)) throw new RuntimeException("Invalid stack " + stack + " for slot " + slot + ")");
-        NonNullList<ItemStack> itemStacks = getItemList();
-        itemStacks.set(slot, stack);
-        setItemList(itemStacks);
-    }
-
-    private NonNullList<ItemStack> getItemList() {
-        CompoundTag rootTag = this.stack.getTag();
-        if (cachedTag == null || !cachedTag.equals(rootTag))
-            slots = refreshItemList(rootTag);
-        return slots;
-    }
-
-    private NonNullList<ItemStack> refreshItemList(CompoundTag rootTag) {
-        NonNullList<ItemStack> itemStacks = NonNullList.withSize(getSlots(), ItemStack.EMPTY);
-        if (rootTag != null && rootTag.contains("Items", CompoundTag.TAG_LIST)) {
-            ContainerHelper.loadAllItems(rootTag, itemStacks);
-        }
-        cachedTag = rootTag;
-        return itemStacks;
-    }
-
-    private void setItemList(NonNullList<ItemStack> itemStacks) {
-        CompoundTag existing = this.stack.getOrCreateTag();
-        cachedTag = ContainerHelper.saveAllItems(existing, itemStacks);
+        return stack.is(ItemBlockReg.DOLLAR_BILL_ITEM.get());
     }
 }

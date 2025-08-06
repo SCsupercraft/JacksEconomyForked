@@ -7,12 +7,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
-
-import java.util.Optional;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
 
 public class OIMWalletMenu extends AbstractContainerMenu {
     private final ItemStack itemStack;
@@ -22,16 +19,12 @@ public class OIMWalletMenu extends AbstractContainerMenu {
 
         this.itemStack = itemStack;
 
-        LazyOptional<IItemHandler> cap = itemStack.getCapability(ForgeCapabilities.ITEM_HANDLER);
-        if (cap.isPresent()) {
-            Optional<IItemHandler> capOptional = cap.resolve();
-
-            if (capOptional.isPresent()) {
-                for (int i = 0; i < 15; i++) {
-                    int row = i / 3;
-                    int col = i % 3;
-                    this.addSlot(new SlotItemHandler(capOptional.get(), i, 8 + col * 18, 17 + row * 18));
-                }
+        IItemHandler itemHandler = itemStack.getCapability(Capabilities.ItemHandler.ITEM);
+        if (itemHandler != null) {
+            for (int i = 0; i < 15; i++) {
+                int row = i / 3;
+                int col = i % 3;
+                this.addSlot(new SlotItemHandler(itemHandler, i, 8 + col * 18, 17 + row * 18));
             }
         }
 

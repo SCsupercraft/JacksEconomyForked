@@ -11,21 +11,16 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public class UpdateAdminShopHandler {
-    public static void handle(UpdateAdminShopPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ServerPlayer sender = ctx.get().getSender();
-
-        if (sender == null) {
-            return;
-        }
+    public static void handle(UpdateAdminShopPacket msg, final IPayloadContext context) {
+        ServerPlayer sender = (ServerPlayer) context.player();
 
         if (!sender.hasPermissions(4) || !sender.isCreative()) {
             return;
@@ -41,7 +36,7 @@ public class UpdateAdminShopHandler {
         List<PriceManager.Category> toRemove = new ArrayList<>();
 
         categories.forEach((category, unused) -> {
-            if (Objects.equals(category.adminShopName(), msg.adminShopName())) toRemove.add(category);
+            if (Objects.equals(category.adminShopName(), msg.adminShopName().orElse(null))) toRemove.add(category);
         });
         toRemove.forEach(categories::remove);
 
@@ -55,14 +50,14 @@ public class UpdateAdminShopHandler {
             entry.adminShopStage = null;
         }*/
         // Whatever, let's just remove them all... what's the worst that could happen?
-        PriceManager.getItemPriceInfos().removeIf(itemPriceEntry -> itemPriceEntry.itemPriceInfo() instanceof AdminShopItemPriceInfo info && Objects.equals(info.adminShopName, msg.adminShopName()));
+        PriceManager.getItemPriceInfos().removeIf(itemPriceEntry -> itemPriceEntry.itemPriceInfo() instanceof AdminShopItemPriceInfo info && Objects.equals(info.adminShopName, msg.adminShopName().orElse(null)));
 
         categoriesTag.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
                 String name = compoundTag.getString("name");
                 ItemDescription itemDescription = ItemDescription.fromNbt(compoundTag.getCompound("item"));
 
-                PriceManager.Category category = new PriceManager.Category(name, itemDescription, msg.adminShopName());
+                PriceManager.Category category = new PriceManager.Category(name, itemDescription, msg.adminShopName().orElse(null));
                 ArrayList<PriceManager.Category> innerCategories = new ArrayList<>();
 
                 ListTag innerCategoriesTag = compoundTag.getList("categories", Tag.TAG_COMPOUND);
@@ -82,7 +77,7 @@ public class UpdateAdminShopHandler {
         });
 
         PriceManager.getItemPriceInfos().forEach(itemPriceEntry -> {
-            if (itemPriceEntry.itemPriceInfo() instanceof PricesItemPriceInfo priceInfo && Objects.equals(priceInfo.adminShopName, msg.adminShopName())) {
+            if (itemPriceEntry.itemPriceInfo() instanceof PricesItemPriceInfo priceInfo && Objects.equals(priceInfo.adminShopName, msg.adminShopName().orElse(null))) {
                 // Will be brought back later if not removed
                 priceInfo.adminShopSellPrice = -1.0;
                 priceInfo.adminShopSellStage = null;
@@ -101,13 +96,13 @@ public class UpdateAdminShopHandler {
                 String sellStage = compoundTag.contains("adminShopSellStage") ? compoundTag.getString("adminShopSellStage") : null;
 
                 if (sellPrice > 0) {
-                    PricesItemPriceInfo pricesItemPriceInfo = PriceManager.getPricesInfo(itemDescription, msg.adminShopName());
+                    PricesItemPriceInfo pricesItemPriceInfo = PriceManager.getPricesInfo(itemDescription, msg.adminShopName().orElse(null));
 
                     if (pricesItemPriceInfo != null) {
                         pricesItemPriceInfo.adminShopSellPrice = sellPrice;
                         pricesItemPriceInfo.adminShopSellStage = sellStage;
                     } else {
-                        PriceManager.addPriceInfo(itemDescription, new PricesItemPriceInfo(-1, sellPrice, -1, sellStage, msg.adminShopName()));
+                        PriceManager.addPriceInfo(itemDescription, new PricesItemPriceInfo(-1, sellPrice, -1, sellStage, msg.adminShopName().orElse(null)));
                     }
 
                     // Sell price/stage entries and admin shop entries are separate
@@ -120,7 +115,7 @@ public class UpdateAdminShopHandler {
                 String customName = compoundTag.contains("customAdminShopName") ? compoundTag.getString("customAdminShopName") : null;
                 String stage = compoundTag.contains("adminShopStage") ? compoundTag.getString("adminShopStage") : null;
 
-                PriceManager.addPriceInfo(itemDescription, new AdminShopItemPriceInfo(buyPrice, category, slot, customName, stage, msg.adminShopName()));
+                PriceManager.addPriceInfo(itemDescription, new AdminShopItemPriceInfo(buyPrice, category, slot, customName, stage, msg.adminShopName().orElse(null)));
             }
         });
 

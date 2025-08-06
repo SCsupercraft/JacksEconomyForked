@@ -1,55 +1,41 @@
 package me.khajiitos.jackseconomy.init;
 
-import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.packet.*;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
-
-import java.util.Optional;
+import me.khajiitos.jackseconomy.packet.handler.*;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class Packets {
-    private static int packetCount;
-
     private static final String PROTOCOL_VERSION = "1";
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(JacksEconomy.MOD_ID, "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
 
-    public static void init() {
-        INSTANCE.registerMessage(packetCount++, ChangeSpeedPacket.class, ChangeSpeedPacket::encode, ChangeSpeedPacket::decode, ChangeSpeedPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, ChangeRedstoneTogglePacket.class, ChangeRedstoneTogglePacket::encode, ChangeRedstoneTogglePacket::decode, ChangeRedstoneTogglePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, PricesInfoPacket.class, PricesInfoPacket::encode, PricesInfoPacket::decode, PricesInfoPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        INSTANCE.registerMessage(packetCount++, CreateCheckPacket.class, CreateCheckPacket::encode, CreateCheckPacket::decode, CreateCheckPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, UpdateWalletBalancePacket.class, UpdateWalletBalancePacket::encode, UpdateWalletBalancePacket::decode, UpdateWalletBalancePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        INSTANCE.registerMessage(packetCount++, WalletBalanceDifPacket.class, WalletBalanceDifPacket::encode, WalletBalanceDifPacket::decode, WalletBalanceDifPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        INSTANCE.registerMessage(packetCount++, WithdrawBalanceSpecificPacket.class, WithdrawBalanceSpecificPacket::encode, WithdrawBalanceSpecificPacket::decode, WithdrawBalanceSpecificPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, OpenCuriosWalletPacket.class, OpenCuriosWalletPacket::encode, OpenCuriosWalletPacket::decode, OpenCuriosWalletPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, ChangeCurrencyTypePacket.class, ChangeCurrencyTypePacket::encode, ChangeCurrencyTypePacket::decode, ChangeCurrencyTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, AdminShopPurchasePacket.class, AdminShopPurchasePacket::encode, AdminShopPurchasePacket::decode, AdminShopPurchasePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, ChangeSelectedItemPacket.class, ChangeSelectedItemPacket::encode, ChangeSelectedItemPacket::decode, ChangeSelectedItemPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, ChangeSelectedFluidPacket.class, ChangeSelectedFluidPacket::encode, ChangeSelectedFluidPacket::decode, ChangeSelectedFluidPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, UpdateAdminShopPacket.class, UpdateAdminShopPacket::encode, UpdateAdminShopPacket::decode, UpdateAdminShopPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, UpdateSideConfigPacket.class, UpdateSideConfigPacket::encode, UpdateSideConfigPacket::decode, UpdateSideConfigPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, InsertToWalletPacket.class, InsertToWalletPacket::encode, InsertToWalletPacket::decode, InsertToWalletPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, DepositAllPacket.class, DepositAllPacket::encode, DepositAllPacket::decode, DepositAllPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, AcknowledgeUnlocksPacket.class, AcknowledgeUnlocksPacket::encode, AcknowledgeUnlocksPacket::decode, AcknowledgeUnlocksPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, AdminShopSchemaPacket.class, AdminShopSchemaPacket::encode, AdminShopSchemaPacket::decode, AdminShopSchemaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        INSTANCE.registerMessage(packetCount++, RequestAdminShopSchemaPacket.class, RequestAdminShopSchemaPacket::encode, RequestAdminShopSchemaPacket::decode, RequestAdminShopSchemaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        INSTANCE.registerMessage(packetCount++, AdminShopColorPacket.class, AdminShopColorPacket::encode, AdminShopColorPacket::decode, AdminShopColorPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+    public static void register(IEventBus eventBus) {
+        eventBus.addListener(Packets::registerPayloads);
     }
 
-    public static <MSG> void sendToServer(MSG packet) {
-        INSTANCE.sendToServer(packet);
-    }
+    public static void registerPayloads(final RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
 
-    public static <MSG> void sendToClient(ServerPlayer player, MSG packet) {
-        INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
+        registrar.playToServer(             ChangeSpeedPacket.TYPE,             ChangeSpeedPacket.STREAM_CODEC,             ChangeSpeedHandler::handle);
+        registrar.playToServer(    ChangeRedstoneTogglePacket.TYPE,    ChangeRedstoneTogglePacket.STREAM_CODEC,    ChangeRedstoneToggleHandler::handle);
+        registrar.playToClient(              PricesInfoPacket.TYPE,              PricesInfoPacket.STREAM_CODEC,              PricesInfoHandler::handle);
+        registrar.playToServer(             CreateCheckPacket.TYPE,             CreateCheckPacket.STREAM_CODEC,             CreateCheckHandler::handle);
+        registrar.playToClient(     UpdateWalletBalancePacket.TYPE,     UpdateWalletBalancePacket.STREAM_CODEC,     UpdateWalletBalanceHandler::handle);
+        registrar.playToClient(        WalletBalanceDifPacket.TYPE,        WalletBalanceDifPacket.STREAM_CODEC,        WalletBalanceDifHandler::handle);
+        registrar.playToServer( WithdrawBalanceSpecificPacket.TYPE, WithdrawBalanceSpecificPacket.STREAM_CODEC, WithdrawBalanceSpecificHandler::handle);
+        registrar.playToServer(        OpenCuriosWalletPacket.TYPE,        OpenCuriosWalletPacket.STREAM_CODEC,        OpenCuriosWalletHandler::handle);
+        registrar.playToServer(      ChangeCurrencyTypePacket.TYPE,      ChangeCurrencyTypePacket.STREAM_CODEC,      ChangeCurrencyTypeHandler::handle);
+        registrar.playToServer(       AdminShopPurchasePacket.TYPE,       AdminShopPurchasePacket.STREAM_CODEC,       AdminShopPurchaseHandler::handle);
+        registrar.playToServer(      ChangeSelectedItemPacket.TYPE,      ChangeSelectedItemPacket.STREAM_CODEC,      ChangeSelectedItemHandler::handle);
+        registrar.playToServer(     ChangeSelectedFluidPacket.TYPE,     ChangeSelectedFluidPacket.STREAM_CODEC,     ChangeSelectedFluidHandler::handle);
+        registrar.playToServer(         UpdateAdminShopPacket.TYPE,         UpdateAdminShopPacket.STREAM_CODEC,         UpdateAdminShopHandler::handle);
+        registrar.playToServer(        UpdateSideConfigPacket.TYPE,        UpdateSideConfigPacket.STREAM_CODEC,        UpdateSideConfigHandler::handle);
+        registrar.playToServer(          InsertToWalletPacket.TYPE,          InsertToWalletPacket.STREAM_CODEC,          InsertToWalletHandler::handle);
+        registrar.playToServer(              DepositAllPacket.TYPE,              DepositAllPacket.STREAM_CODEC,              DepositAllHandler::handle);
+        registrar.playToServer(      AcknowledgeUnlocksPacket.TYPE,      AcknowledgeUnlocksPacket.STREAM_CODEC,      AcknowledgeUnlocksHandler::handle); // TODO: Find GameStages alternative
+        registrar.playToClient(         AdminShopSchemaPacket.TYPE,         AdminShopSchemaPacket.STREAM_CODEC,         AdminShopSchemaHandler::handle);
+        registrar.playToServer(  RequestAdminShopSchemaPacket.TYPE,  RequestAdminShopSchemaPacket.STREAM_CODEC,  RequestAdminShopSchemaHandler::handle);
+        registrar.playToClient(          AdminShopColorPacket.TYPE,          AdminShopColorPacket.STREAM_CODEC,          AdminShopColorHandler::handle);
     }
 }

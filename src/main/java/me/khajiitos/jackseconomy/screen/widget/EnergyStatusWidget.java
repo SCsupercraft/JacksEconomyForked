@@ -7,10 +7,10 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 
 public class EnergyStatusWidget extends AbstractWidget {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/energy_bar.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/energy_bar.png");
     private final IEnergyStorage energyStorage;
     public EnergyStatusWidget(int pX, int pY, IEnergyStorage energyStorage) {
         super(pX, pY, 15, 65, Component.literal(""));

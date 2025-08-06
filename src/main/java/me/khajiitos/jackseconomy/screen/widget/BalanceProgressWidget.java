@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class BalanceProgressWidget extends AbstractWidget {
-    protected static final ResourceLocation BALANCE_PROGRESS = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/balance_progress.png");
+    protected static final ResourceLocation BALANCE_PROGRESS = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/balance_progress.png");
 
     private final Supplier<BigDecimal> balanceSupplier;
     private final Supplier<BigDecimal> maxBalanceSupplier;

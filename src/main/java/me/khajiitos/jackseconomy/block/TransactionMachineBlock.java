@@ -21,7 +21,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 
 public abstract class TransactionMachineBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -47,11 +46,11 @@ public abstract class TransactionMachineBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         BlockEntity var9 = level.getBlockEntity(pos);
         if (var9 instanceof TransactionMachineBlockEntity blockEntity) {
             if (!level.isClientSide()) {
-                NetworkHooks.openScreen((ServerPlayer)player, blockEntity, pos);
+                player.openMenu(blockEntity, pos);
             }
 
             return InteractionResult.SUCCESS;
