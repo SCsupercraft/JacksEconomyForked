@@ -139,5 +139,7 @@ public class ClientEventListeners {
     public void onLoggedOut(ClientPlayerNetworkEvent.LoggingOut e) {
         JacksEconomyClient.priceInfos.clear();
         JacksEconomyClient.fluidPriceInfos.clear();
+        JacksEconomyClient.adminShopColors.clear();
+        JacksEconomyClient.defaultAdminShopColor = -1;
     }
 }
