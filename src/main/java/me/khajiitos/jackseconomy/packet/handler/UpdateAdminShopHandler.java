@@ -1,9 +1,12 @@
 package me.khajiitos.jackseconomy.packet.handler;
 
+import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.AdminShopItemPriceInfo;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
+import me.khajiitos.jackseconomy.packet.AdminShopSchemaPacket;
 import me.khajiitos.jackseconomy.packet.UpdateAdminShopPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -11,12 +14,10 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class UpdateAdminShopHandler {
     public static void handle(UpdateAdminShopPacket msg, final IPayloadContext context) {
@@ -120,7 +121,11 @@ public class UpdateAdminShopHandler {
         });
 
         PriceManager.save();
-        PriceManager.sendDataToPlayers();
+        PriceManager.sendDataToPlayers(false);
+        JacksEconomy.server.getPlayerList().getPlayers().forEach(player -> {
+            CompoundTag tag = PriceManager.toAdminShopSchemaCompound(player, msg.adminShopName().orElse(null));
+            PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(tag, Optional.ofNullable(msg.adminShopName().orElse(null)), Config.oneItemCurrencyMode.get()));
+        });
 
         sender.sendSystemMessage(Component.translatable("jackseconomy.admin_shop_saved").withStyle(ChatFormatting.GREEN));
     }

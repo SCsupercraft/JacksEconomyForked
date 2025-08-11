@@ -6,9 +6,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 import java.math.BigDecimal;
-import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
-import java.util.function.IntUnaryOperator;
 
 public class Utils {
     public static final Codec<BigDecimal> BIG_DECIMAL_CODEC = Codec.STRING.xmap(BigDecimal::new, BigDecimal::toPlainString);

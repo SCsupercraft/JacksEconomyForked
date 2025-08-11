@@ -48,7 +48,7 @@ public class OtherEventListeners {
     @SubscribeEvent
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent e) {
         if (e.getEntity() instanceof ServerPlayer serverPlayer) {
-            PacketDistributor.sendToPlayer(serverPlayer, new PricesInfoPacket(PriceManager.toTag(false), PriceManager.toTag(true)));
+            PriceManager.sendDataToPlayer(serverPlayer, true);
             AdminShopColorManager.updatePlayer(serverPlayer);
         }
     }

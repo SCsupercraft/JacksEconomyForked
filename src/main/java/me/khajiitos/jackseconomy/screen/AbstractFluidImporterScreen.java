@@ -5,7 +5,6 @@ import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.blockentity.IFluidImporterBlockEntity;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.item.FluidImporterTicketItem;
 import me.khajiitos.jackseconomy.item.FluidTicketItem;
 import me.khajiitos.jackseconomy.menu.IBlockEntityContainer;

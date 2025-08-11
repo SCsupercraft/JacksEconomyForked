@@ -188,11 +188,6 @@ public abstract class TransactionKineticMachineBlockEntity extends KineticBlockE
         this.read(tag, provider, true);
     }
 
-    @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
-    }
-
     public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         this.write(tag, provider, true);

@@ -3,7 +3,6 @@ package me.khajiitos.jackseconomy.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Pair;
 import me.khajiitos.jackseconomy.gamestages.GameStagesCheck;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.menu.AdminShopMenu;
 import me.khajiitos.jackseconomy.packet.UpdateAdminShopPacket;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;

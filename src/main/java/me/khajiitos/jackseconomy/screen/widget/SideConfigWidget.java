@@ -3,7 +3,6 @@ package me.khajiitos.jackseconomy.screen.widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import me.khajiitos.jackseconomy.JacksEconomy;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.packet.UpdateSideConfigPacket;
 import me.khajiitos.jackseconomy.util.SideConfig;
 import net.minecraft.ChatFormatting;

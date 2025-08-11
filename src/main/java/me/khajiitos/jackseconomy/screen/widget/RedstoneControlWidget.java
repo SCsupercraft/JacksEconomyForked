@@ -3,7 +3,6 @@ package me.khajiitos.jackseconomy.screen.widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.blockentity.ITransactionMachineBlockEntity;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.packet.ChangeRedstoneTogglePacket;
 import me.khajiitos.jackseconomy.util.RedstoneToggle;
 import net.minecraft.client.Minecraft;

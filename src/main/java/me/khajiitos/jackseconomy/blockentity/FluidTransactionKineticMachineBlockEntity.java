@@ -210,11 +210,6 @@ public abstract class FluidTransactionKineticMachineBlockEntity extends KineticB
     }
 
     @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-    @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         this.write(tag, provider, true);

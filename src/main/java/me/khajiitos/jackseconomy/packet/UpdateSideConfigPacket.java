@@ -3,13 +3,9 @@ package me.khajiitos.jackseconomy.packet;
 import io.netty.buffer.ByteBuf;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.util.Utils;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public record UpdateSideConfigPacket(int[] sideConfigInts) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<UpdateSideConfigPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "update_side_config"));

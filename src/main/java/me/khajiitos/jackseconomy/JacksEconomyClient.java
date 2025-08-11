@@ -15,6 +15,7 @@ import me.khajiitos.jackseconomy.init.ItemBlockReg;
 import me.khajiitos.jackseconomy.listener.ClientEventListeners;
 import me.khajiitos.jackseconomy.listener.ClientRenderEventListeners;
 import me.khajiitos.jackseconomy.screen.*;
+import me.khajiitos.jackseconomy.util.NewShopUnlocks;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
@@ -36,10 +37,14 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 @Mod(value = JacksEconomy.MOD_ID, dist = Dist.CLIENT)
 @EventBusSubscriber(modid = JacksEconomy.MOD_ID, value = Dist.CLIENT)
@@ -48,6 +53,8 @@ public class JacksEconomyClient {
     public static HashMap<ItemDescription, PricesItemPriceInfo> priceInfos = new HashMap<>();
     public static HashMap<FluidDescription, PricesFluidPriceInfo> fluidPriceInfos = new HashMap<>();
     public static HashMap<String, Integer> adminShopColors = new HashMap<>();
+    public static HashMap<String, AdminShopData> adminShopData = new HashMap<>();
+    public static AdminShopData defaultAdminShopData = null;
     public static Integer defaultAdminShopColor = -1;
     public static BigDecimal balanceDifPopup = null;
     public static long balanceDifPopupStartMillis = -1;
@@ -61,6 +68,28 @@ public class JacksEconomyClient {
         if (CreateCheck.isInstalled()) {
             CreatePonder.init();
         }
+    }
+
+    public static @Nullable AdminShopData getAdminShopData(@Nullable String name) {
+        return name != null ? adminShopData.get(name) : defaultAdminShopData;
+    }
+
+    public static AdminShopData getOrComputeAdminShopData(@Nullable String name) {
+        if (name == null) {
+            if (defaultAdminShopData == null) defaultAdminShopData = new AdminShopData(new LinkedHashMap<>(), new HashMap<>());
+            return defaultAdminShopData;
+        }
+        return adminShopData.computeIfAbsent(
+                name, unused -> new AdminShopData(new LinkedHashMap<>(), new HashMap<>()));
+    }
+
+    public static void removeEmptyAdminShopData() {
+        if (defaultAdminShopData != null && defaultAdminShopData.shopItems.isEmpty() && defaultAdminShopData.sellPrices.isEmpty()) defaultAdminShopData = null;
+        List<String> toRemove = new ArrayList<>();
+        adminShopData.forEach((name, adminShopData) -> {
+            if (adminShopData.shopItems.isEmpty() && adminShopData.sellPrices.isEmpty()) toRemove.add(name);
+        });
+        toRemove.forEach(adminShopData::remove);
     }
 
     @SubscribeEvent
@@ -143,4 +172,9 @@ public class JacksEconomyClient {
         };
         registry.register(adminShopColor, ItemBlockReg.ADMIN_SHOP_ITEM.get());
     }
+
+    public record AdminShopData(
+            LinkedHashMap<AdminShopScreen.Category, LinkedHashMap<AdminShopScreen.InnerCategory, List<AdminShopScreen.ShopItem>>> shopItems,
+            HashMap<ItemDescription, AdminShopScreen.ItemSellabilityInfo> sellPrices
+    ) {}
 }

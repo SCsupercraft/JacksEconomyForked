@@ -1,7 +1,6 @@
 package me.khajiitos.jackseconomy.init;
 
 import com.mojang.serialization.Codec;
-import io.netty.buffer.ByteBuf;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
@@ -10,7 +9,6 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;

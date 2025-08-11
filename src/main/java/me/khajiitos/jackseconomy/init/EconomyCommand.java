@@ -147,7 +147,7 @@ public class EconomyCommand {
 			}
 
 			PriceManager.save();
-			PriceManager.sendDataToPlayers();
+			PriceManager.sendDataToPlayers(false);
 
 			return 0;
 		}
@@ -184,7 +184,7 @@ public class EconomyCommand {
 			}
 
 			PriceManager.save();
-			PriceManager.sendDataToPlayers();
+			PriceManager.sendDataToPlayers(false);
 
 			return 0;
 		}
@@ -228,7 +228,7 @@ public class EconomyCommand {
 			}
 
 			PriceManager.save();
-			PriceManager.sendDataToPlayers();
+			PriceManager.sendDataToPlayers(false);
 
 			return 0;
 		}
@@ -272,7 +272,7 @@ public class EconomyCommand {
 			}
 
 			PriceManager.save();
-			PriceManager.sendDataToPlayers();
+			PriceManager.sendDataToPlayers(false);
 
 			return 0;
 		}

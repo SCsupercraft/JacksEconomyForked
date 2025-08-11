@@ -1,0 +1,151 @@
+package me.khajiitos.jackseconomy.jei;
+
+import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.JacksEconomyClient;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.init.BlockEntityReg;
+import me.khajiitos.jackseconomy.init.ItemBlockReg;
+import me.khajiitos.jackseconomy.item.CurrencyItem;
+import me.khajiitos.jackseconomy.util.CurrencyHelper;
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.ingredients.ITypedIngredient;
+import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.advanced.ISimpleRecipeManagerPlugin;
+import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public class AdminShopSellingCategory implements IRecipeCategory<AdminShopSellingCategory.Details> {
+	public static final RecipeType<Details> RECIPE_TYPE = RecipeType.create(JacksEconomy.MOD_ID, "selling", Details.class);
+	private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/jei.png");
+	protected final IJeiHelpers helpers;
+
+	AdminShopSellingCategory(IJeiHelpers helpers) {
+		this.helpers = helpers;
+	}
+
+	@Override
+	public @NotNull RecipeType<Details> getRecipeType() {
+		return RECIPE_TYPE;
+	}
+
+	@Override
+	public @NotNull Component getTitle() {
+		return Component.literal("Selling");
+	}
+
+	@Override
+	public @Nullable IDrawable getIcon() {
+		return helpers.getGuiHelper().createDrawableItemLike(ItemBlockReg.ADMIN_SHOP);
+	}
+
+	@Override
+	public int getWidth() {
+		return 150;
+	}
+
+	@Override
+	public int getHeight() {
+		return 50;
+	}
+
+	@Override
+	public void setRecipe(@NotNull IRecipeLayoutBuilder builder, @NotNull Details details, @NotNull IFocusGroup focuses) {
+		if (details.description == null && Objects.equals(details.price, BigDecimal.ZERO)) return;
+
+		ItemStack adminShopStack = new ItemStack(ItemBlockReg.ADMIN_SHOP);
+		CompoundTag tag = new CompoundTag();
+		if (details.adminShopName != null) tag.putString("adminShopName", details.adminShopName);
+		BlockItem.setBlockEntityData(adminShopStack, BlockEntityReg.ADMIN_SHOP.get(), tag);
+
+		ItemStack moneyStack = new ItemStack((ItemLike) ItemBlockReg.DOLLAR_BILL_ITEM);
+
+		builder.addSlot(RecipeIngredientRole.CATALYST, 42, 5).addItemStack(adminShopStack);
+		builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 100, 29).addItemStack(moneyStack).addRichTooltipCallback((recipeSlotView, tooltip) -> {
+			tooltip.clear();
+			tooltip.add(Component.literal(CurrencyHelper.format(details.price)).withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.YELLOW)));
+		});
+		builder.addInputSlot(34, 29).addItemStack(details.description().createItemStack());
+	}
+
+	@Override
+	public void draw(Details details, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+		if (details.description == null || Objects.equals(details.price, BigDecimal.ZERO)) {
+			Font font = Minecraft.getInstance().font;
+			guiGraphics.drawCenteredString(font, Component.translatable("jackseconomy.jei_placeholder_wallet_required"), getWidth() / 2, getHeight() / 2 - (font.lineHeight / 2), -1);
+			return;
+		}
+		guiGraphics.blit(BACKGROUND, 25, 0, 0, 0, 100, 50, 100, 50);
+	}
+
+	public record Details(@Nullable String adminShopName, BigDecimal price, ItemDescription description) {}
+
+	public static class RecipeManager implements ISimpleRecipeManagerPlugin<Details> {
+		@Override
+		public boolean isHandledInput(@NotNull ITypedIngredient<?> input) {
+			return !getRecipesForInput(input).isEmpty();
+		}
+
+		@Override
+		public boolean isHandledOutput(@NotNull ITypedIngredient<?> output) {
+			return !getRecipesForOutput(output).isEmpty();
+		}
+
+		@Override
+		public @NotNull List<Details> getRecipesForInput(ITypedIngredient<?> input) {
+			Optional<ItemStack> stack = input.getItemStack();
+			if (stack.isEmpty() || stack.get().isEmpty()) return List.of();
+
+			List<Details> list = getAllRecipes().stream().filter(details -> ItemStack.isSameItemSameComponents(stack.get(), details.description.createItemStack())).collect(Collectors.toList());
+			if (stack.get().is(ItemBlockReg.ADMIN_SHOP.asItem())) {
+				CompoundTag tag = stack.get().getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).copyTag();
+				String name = tag.contains("adminShopName") ? tag.getString("adminShopName") : null;
+				JacksEconomyClient.AdminShopData data = JacksEconomyClient.getAdminShopData(name);
+				if (data != null) addAllRecipes(list, name, data);
+			}
+			return list;
+		}
+
+		@Override
+		public @NotNull List<Details> getRecipesForOutput(ITypedIngredient<?> output) {
+			return output.getItemStack().filter(stack -> stack.getItem() instanceof CurrencyItem).isPresent() ? getAllRecipes() : List.of();
+		}
+
+		@Override
+		public @NotNull List<Details> getAllRecipes() {
+			List<Details> list = new ArrayList<>();
+			if (JacksEconomyClient.defaultAdminShopData != null) addAllRecipes(list, null, JacksEconomyClient.defaultAdminShopData);
+			JacksEconomyClient.adminShopData.forEach((name, data) -> addAllRecipes(list, name, data));
+			return list;
+		}
+
+		protected void addAllRecipes(List<Details> list, @Nullable String name, JacksEconomyClient.AdminShopData data) {
+			data.sellPrices().forEach((description, sellabilityInfo) -> list.add(new Details(name, BigDecimal.valueOf(sellabilityInfo.worth()), description)));
+		}
+	}
+}

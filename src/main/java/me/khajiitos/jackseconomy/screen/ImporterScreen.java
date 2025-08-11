@@ -2,7 +2,6 @@ package me.khajiitos.jackseconomy.screen;
 
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.blockentity.ImporterBlockEntity;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.menu.ImporterMenu;
 import me.khajiitos.jackseconomy.packet.ChangeSpeedPacket;
 import me.khajiitos.jackseconomy.screen.widget.EnergyStatusWidget;

@@ -1,5 +1,6 @@
 package me.khajiitos.jackseconomy.packet.handler;
 
+import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.packet.AdminShopSchemaPacket;
 import me.khajiitos.jackseconomy.packet.RequestAdminShopSchemaPacket;
@@ -14,6 +15,6 @@ public class RequestAdminShopSchemaHandler {
         if (!sender.hasPermissions(4)) return;
 
         CompoundTag compoundTag = PriceManager.toAdminShopSchemaCompound(sender, msg.adminShopName().orElse(null));
-        PacketDistributor.sendToPlayer(sender, new AdminShopSchemaPacket(compoundTag, msg.adminShopName()));
+        PacketDistributor.sendToPlayer(sender, new AdminShopSchemaPacket(compoundTag, msg.adminShopName(), Config.oneItemCurrencyMode.get()));
     }
 }

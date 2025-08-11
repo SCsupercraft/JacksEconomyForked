@@ -86,7 +86,7 @@ public class AdminShopCommand {
 
 			CompoundTag compoundTag = PriceManager.toAdminShopSchemaCompound(player, name);
 			player.openMenu(new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new AdminShopMenu(pContainerId, pPlayerInventory), Component.empty()));
-			PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(compoundTag, Optional.ofNullable(name)));
+			PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(compoundTag, Optional.ofNullable(name), Config.oneItemCurrencyMode.get()));
 		}
 
 		return 0;
@@ -98,7 +98,7 @@ public class AdminShopCommand {
 		if (player != null) {
 			CompoundTag compoundTag = PriceManager.toAdminShopSchemaCompound(player, null);
 			player.openMenu(new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new AdminShopMenu(pContainerId, pPlayerInventory), Component.empty()));
-			PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(compoundTag, Optional.empty()));
+			PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(compoundTag, Optional.empty(), Config.oneItemCurrencyMode.get()));
 		}
 
 		return 0;
@@ -112,7 +112,7 @@ public class AdminShopCommand {
 
 			CompoundTag compoundTag = PriceManager.toAdminShopSchemaCompound(player, name);
 			player.openMenu(new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new AdminShopMenu(pContainerId, pPlayerInventory), Component.empty()));
-			PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(compoundTag, Optional.ofNullable(name)));
+			PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(compoundTag, Optional.ofNullable(name), Config.oneItemCurrencyMode.get()));
 		}
 
 		return 0;

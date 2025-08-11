@@ -1,0 +1,90 @@
+package me.khajiitos.jackseconomy.jei;
+
+import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.create.CreateCheck;
+import me.khajiitos.jackseconomy.init.ItemBlockReg;
+import mezz.jei.api.IModPlugin;
+import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.UidContext;
+import mezz.jei.api.registration.*;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import org.jetbrains.annotations.NotNull;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+@JeiPlugin
+public class JeiIntegration implements IModPlugin {
+	@Override
+	public @NotNull ResourceLocation getPluginUid() {
+		return ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "jei_plugin");
+	}
+
+	@Override
+	public void registerCategories(IRecipeCategoryRegistration registration) {
+		registration.addRecipeCategories(new AdminShopBuyingCategory(registration.getJeiHelpers()));
+		registration.addRecipeCategories(new AdminShopSellingCategory(registration.getJeiHelpers()));
+		registration.addRecipeCategories(new ImportingCategory(registration.getJeiHelpers()));
+		registration.addRecipeCategories(new ExportingCategory(registration.getJeiHelpers()));
+		registration.addRecipeCategories(new FluidImportingCategory(registration.getJeiHelpers()));
+		registration.addRecipeCategories(new FluidExportingCategory(registration.getJeiHelpers()));
+	}
+
+	@Override
+	public void registerRecipes(IRecipeRegistration registration) {
+		registration.addRecipes(AdminShopBuyingCategory.RECIPE_TYPE, List.of(new AdminShopBuyingCategory.Details(null, BigDecimal.ZERO, null)));
+		registration.addRecipes(AdminShopSellingCategory.RECIPE_TYPE, List.of(new AdminShopSellingCategory.Details(null, BigDecimal.ZERO, null)));
+		registration.addRecipes(ImportingCategory.RECIPE_TYPE, List.of(new ImportingCategory.Details(BigDecimal.ZERO, null)));
+		registration.addRecipes(ExportingCategory.RECIPE_TYPE, List.of(new ExportingCategory.Details(BigDecimal.ZERO, null)));
+		registration.addRecipes(FluidImportingCategory.RECIPE_TYPE, List.of(new FluidImportingCategory.Details(BigDecimal.ZERO, null)));
+		registration.addRecipes(FluidExportingCategory.RECIPE_TYPE, List.of(new FluidExportingCategory.Details(BigDecimal.ZERO, null)));
+	}
+
+	@Override
+	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+		registration.addRecipeCatalyst(ItemBlockReg.IMPORTER, ImportingCategory.RECIPE_TYPE);
+		registration.addRecipeCatalyst(ItemBlockReg.EXPORTER, ExportingCategory.RECIPE_TYPE);
+		registration.addRecipeCatalyst(ItemBlockReg.FLUID_IMPORTER, FluidImportingCategory.RECIPE_TYPE);
+		registration.addRecipeCatalyst(ItemBlockReg.FLUID_EXPORTER, FluidExportingCategory.RECIPE_TYPE);
+
+		if (!CreateCheck.isInstalled()) return;
+
+		registration.addRecipeCatalyst(ItemBlockReg.MECHANICAL_IMPORTER, ImportingCategory.RECIPE_TYPE);
+		registration.addRecipeCatalyst(ItemBlockReg.MECHANICAL_EXPORTER, ExportingCategory.RECIPE_TYPE);
+		registration.addRecipeCatalyst(ItemBlockReg.MECHANICAL_FLUID_IMPORTER, FluidImportingCategory.RECIPE_TYPE);
+		registration.addRecipeCatalyst(ItemBlockReg.MECHANICAL_FLUID_EXPORTER, FluidExportingCategory.RECIPE_TYPE);
+	}
+
+	@Override
+	public void registerItemSubtypes(ISubtypeRegistration registration) {
+		registration.registerSubtypeInterpreter(ItemBlockReg.ADMIN_SHOP.asItem(), new ISubtypeInterpreter<>() {
+			@Override
+			public @NotNull Object getSubtypeData(@NotNull ItemStack ingredient, @NotNull UidContext context) {
+				return getLegacyStringSubtypeInfo(ingredient, context);
+			}
+
+			@Override
+			public @NotNull String getLegacyStringSubtypeInfo(ItemStack ingredient, @NotNull UidContext context) {
+				CompoundTag tag = ingredient.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).copyTag();
+				return tag.contains("adminShopName") ? tag.getString("adminShopName") : "";
+			}
+		});
+	}
+
+	@Override
+	public void registerAdvanced(IAdvancedRegistration registration) {
+		registration.addTypedRecipeManagerPlugin(AdminShopBuyingCategory.RECIPE_TYPE, new AdminShopBuyingCategory.RecipeManager());
+		registration.addTypedRecipeManagerPlugin(AdminShopSellingCategory.RECIPE_TYPE, new AdminShopSellingCategory.RecipeManager());
+		registration.addTypedRecipeManagerPlugin(ExportingCategory.RECIPE_TYPE, new ExportingCategory.RecipeManager());
+		registration.addTypedRecipeManagerPlugin(ImportingCategory.RECIPE_TYPE, new ImportingCategory.RecipeManager());
+		registration.addTypedRecipeManagerPlugin(FluidExportingCategory.RECIPE_TYPE, new FluidExportingCategory.RecipeManager());
+		registration.addTypedRecipeManagerPlugin(FluidImportingCategory.RECIPE_TYPE, new FluidImportingCategory.RecipeManager());
+	}
+}

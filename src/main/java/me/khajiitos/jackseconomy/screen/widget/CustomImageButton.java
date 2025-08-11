@@ -7,10 +7,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 public class CustomImageButton extends Button {
     protected final ResourceLocation resourceLocation;
     protected final int xTexStart;

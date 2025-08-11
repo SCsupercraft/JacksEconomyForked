@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.blockentity.IImporterBlockEntity;
 import me.khajiitos.jackseconomy.config.Config;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.item.ImporterTicketItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.menu.IBlockEntityContainer;

@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
 
-public record AdminShopSchemaPacket(CompoundTag data, Optional<String> adminShopName) implements CustomPacketPayload {
+public record AdminShopSchemaPacket(CompoundTag data, Optional<String> adminShopName, boolean oneItemCurrencyMode) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<AdminShopSchemaPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "admin_shop_schema"));
 
     public static final StreamCodec<ByteBuf, AdminShopSchemaPacket> STREAM_CODEC = StreamCodec.composite(
@@ -18,6 +18,8 @@ public record AdminShopSchemaPacket(CompoundTag data, Optional<String> adminShop
             AdminShopSchemaPacket::data,
             ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8),
             AdminShopSchemaPacket::adminShopName,
+            ByteBufCodecs.BOOL,
+            AdminShopSchemaPacket::oneItemCurrencyMode,
             AdminShopSchemaPacket::new
     );
 

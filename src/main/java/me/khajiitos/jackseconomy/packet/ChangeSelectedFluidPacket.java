@@ -3,7 +3,6 @@ package me.khajiitos.jackseconomy.packet;
 import io.netty.buffer.ByteBuf;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;

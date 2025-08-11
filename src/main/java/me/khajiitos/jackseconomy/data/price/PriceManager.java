@@ -4,13 +4,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.DataHandler;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
-import me.khajiitos.jackseconomy.init.Packets;
+import me.khajiitos.jackseconomy.packet.AdminShopSchemaPacket;
 import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
 import me.khajiitos.jackseconomy.util.NewShopUnlocks;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -21,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PriceManager {
     private static final List<ItemPriceEntry> itemPriceInfos = new ArrayList<>();
@@ -387,8 +390,21 @@ public class PriceManager {
         addPriceInfo(FluidDescription.ofFluid(fluidStack), priceInfo);
     }
 
-    public static void sendDataToPlayers() {
-        JacksEconomy.server.getPlayerList().getPlayers().forEach(serverPlayer -> PacketDistributor.sendToPlayer(serverPlayer, new PricesInfoPacket(toTag(false), toTag(true))));
+    public static void sendDataToPlayers(boolean includeAdminShops) {
+        JacksEconomy.server.getPlayerList().getPlayers().forEach(player -> sendDataToPlayer(player, includeAdminShops));
+    }
+
+    public static void sendDataToPlayer(ServerPlayer serverPlayer, boolean includeAdminShops) {
+        PacketDistributor.sendToPlayer(serverPlayer, new PricesInfoPacket(toTag(false), toTag(true)));
+
+        if (includeAdminShops) {
+            Set<String> names = getCategories().keySet().stream().map(PriceManager.Category::adminShopName).filter(Objects::nonNull).collect(Collectors.toSet());
+
+            for (String name: names) {
+                PacketDistributor.sendToPlayer(serverPlayer, new AdminShopSchemaPacket(PriceManager.toAdminShopSchemaCompound(serverPlayer, name), Optional.of(name), Config.oneItemCurrencyMode.get()));
+            }
+            PacketDistributor.sendToPlayer(serverPlayer, new AdminShopSchemaPacket(PriceManager.toAdminShopSchemaCompound(serverPlayer, null), Optional.empty(), Config.oneItemCurrencyMode.get()));
+        }
     }
 
     private static JsonObject merge(JsonObject object1, JsonObject object2) {

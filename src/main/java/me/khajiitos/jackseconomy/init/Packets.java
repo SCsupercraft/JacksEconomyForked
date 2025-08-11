@@ -3,7 +3,6 @@ package me.khajiitos.jackseconomy.init;
 import me.khajiitos.jackseconomy.packet.*;
 import me.khajiitos.jackseconomy.packet.handler.*;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 

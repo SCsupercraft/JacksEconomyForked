@@ -3,14 +3,8 @@ package me.khajiitos.jackseconomy.listener;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.ClientConfig;
 import me.khajiitos.jackseconomy.config.Config;
-import me.khajiitos.jackseconomy.data.AdminShopColorManager;
-import me.khajiitos.jackseconomy.data.PurchaseManager;
-import me.khajiitos.jackseconomy.data.StockMarketManager;
-import me.khajiitos.jackseconomy.data.price.PriceManager;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 public class ConfigEventListeners {
     @SubscribeEvent

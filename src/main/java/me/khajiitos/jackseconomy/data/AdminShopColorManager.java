@@ -1,7 +1,6 @@
 package me.khajiitos.jackseconomy.data;
 
 import me.khajiitos.jackseconomy.JacksEconomy;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.packet.AdminShopColorPacket;
 import me.khajiitos.jackseconomy.util.Utils;
 import net.minecraft.nbt.CompoundTag;
