@@ -78,6 +78,6 @@ public class AdminShopBlockEntity extends BlockEntity {
 
 		BlockState newState = blockState.setValue(AdminShopBlock.COLORED, color != -1);
 		level.setBlockAndUpdate(blockPos, newState);
-		level.sendBlockUpdated(blockPos, blockState, newState, Block.UPDATE_CLIENTS & Block.UPDATE_IMMEDIATE);
+		level.sendBlockUpdated(blockPos, blockState, newState, Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
 	}
 }
