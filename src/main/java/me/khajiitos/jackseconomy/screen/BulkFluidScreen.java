@@ -96,7 +96,7 @@ public class BulkFluidScreen extends FluidSelectionScreen<BulkFluidScreen.Menu> 
 				}
 
 				PriceManager.save();
-				PriceManager.sendDataToPlayers();
+				PriceManager.sendDataToPlayers(false);
 			} catch (NumberFormatException ignored) {}
 			this.removeWidget(this.floatingEditBox);
 			this.floatingEditBox = null;
@@ -121,7 +121,7 @@ public class BulkFluidScreen extends FluidSelectionScreen<BulkFluidScreen.Menu> 
 				}
 
 				PriceManager.save();
-				PriceManager.sendDataToPlayers();
+				PriceManager.sendDataToPlayers(false);
 			} catch (NumberFormatException ignored) {}
 			this.removeWidget(this.floatingEditBox);
 			this.floatingEditBox = null;
@@ -140,7 +140,7 @@ public class BulkFluidScreen extends FluidSelectionScreen<BulkFluidScreen.Menu> 
 		}
 
 		PriceManager.save();
-		PriceManager.sendDataToPlayers();
+		PriceManager.sendDataToPlayers(false);
 	}
 
 	private void removeImporter(Slot slot) {
@@ -154,7 +154,7 @@ public class BulkFluidScreen extends FluidSelectionScreen<BulkFluidScreen.Menu> 
 		}
 
 		PriceManager.save();
-		PriceManager.sendDataToPlayers();
+		PriceManager.sendDataToPlayers(false);
 	}
 
 	public static class Menu extends ItemPickerMenu {

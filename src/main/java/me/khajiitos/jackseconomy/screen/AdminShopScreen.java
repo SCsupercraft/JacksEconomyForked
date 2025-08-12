@@ -1192,5 +1192,5 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
     }
 
     public record ItemSellabilityInfo(double worth, String stage) { }
-    record UnpreparedShopItem(@NotNull ItemDescription itemDescription, double price, @Nullable String customName, @Nullable String stage) { }
+    public record UnpreparedShopItem(@NotNull ItemDescription itemDescription, double price, @Nullable String customName, @Nullable String stage) { }
 }

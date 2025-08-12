@@ -15,8 +15,9 @@ public class Packets {
     private static int packetCount;
 
     private static final String PROTOCOL_VERSION = "1";
+    public static final ResourceLocation CHANNEL_NAME = new ResourceLocation(JacksEconomy.MOD_ID, "main");
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(JacksEconomy.MOD_ID, "main"),
+            CHANNEL_NAME,
             () -> PROTOCOL_VERSION,
             PROTOCOL_VERSION::equals,
             PROTOCOL_VERSION::equals

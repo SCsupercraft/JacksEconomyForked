@@ -1,9 +1,13 @@
 package me.khajiitos.jackseconomy.packet.handler;
 
+import me.khajiitos.jackseconomy.JacksEconomy;
+import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.AdminShopItemPriceInfo;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
+import me.khajiitos.jackseconomy.init.Packets;
+import me.khajiitos.jackseconomy.packet.AdminShopSchemaPacket;
 import me.khajiitos.jackseconomy.packet.UpdateAdminShopPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -125,7 +129,10 @@ public class UpdateAdminShopHandler {
         });
 
         PriceManager.save();
-        PriceManager.sendDataToPlayers();
+        PriceManager.sendDataToPlayers(false);
+
+        JacksEconomy.server.getPlayerList().getPlayers().forEach(serverPlayer ->
+                Packets.sendToClient(serverPlayer, new AdminShopSchemaPacket(PriceManager.toAdminShopSchemaCompound(serverPlayer, msg.adminShopName()), msg.adminShopName(), Config.oneItemCurrencyMode.get())));
 
         sender.sendSystemMessage(Component.translatable("jackseconomy.admin_shop_saved").withStyle(ChatFormatting.GREEN));
     }

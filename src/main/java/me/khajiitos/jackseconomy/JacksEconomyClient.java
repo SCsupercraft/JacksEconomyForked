@@ -33,16 +33,22 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class JacksEconomyClient {
     public static final KeyMapping OPEN_WALLET = new KeyMapping("key.jackseconomy.open_wallet", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, "key.categories.jackseconomy");
     public static HashMap<ItemDescription, PricesItemPriceInfo> priceInfos = new HashMap<>();
     public static HashMap<FluidDescription, PricesFluidPriceInfo> fluidPriceInfos = new HashMap<>();
     public static HashMap<String, Integer> adminShopColors = new HashMap<>();
+    public static HashMap<String, AdminShopData> adminShopData = new HashMap<>();
+    public static @Nullable AdminShopData defaultAdminShopData;
     public static Integer defaultAdminShopColor = -1;
     public static BigDecimal balanceDifPopup = null;
     public static long balanceDifPopupStartMillis = -1;
@@ -62,6 +68,28 @@ public class JacksEconomyClient {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(ClientConfigScreen::new));
 
         if (CreateCheck.isInstalled()) { CreatePonder.init(); }
+    }
+
+    public static @Nullable AdminShopData getAdminShopData(@Nullable String name) {
+        return name != null ? adminShopData.get(name) : defaultAdminShopData;
+    }
+
+    public static AdminShopData getOrComputeAdminShopData(@Nullable String name) {
+        if (name == null) {
+            if (defaultAdminShopData == null) defaultAdminShopData = new AdminShopData(new LinkedHashMap<>(), new HashMap<>());
+            return defaultAdminShopData;
+        }
+        return adminShopData.computeIfAbsent(
+                name, unused -> new AdminShopData(new LinkedHashMap<>(), new HashMap<>()));
+    }
+
+    public static void removeEmptyAdminShopData() {
+        if (defaultAdminShopData != null && defaultAdminShopData.shopItems.isEmpty() && defaultAdminShopData.sellPrices.isEmpty()) defaultAdminShopData = null;
+        List<String> toRemove = new ArrayList<>();
+        adminShopData.forEach((name, adminShopData) -> {
+            if (adminShopData.shopItems.isEmpty() && adminShopData.sellPrices.isEmpty()) toRemove.add(name);
+        });
+        toRemove.forEach(adminShopData::remove);
     }
 
     public static void onClientSetup(FMLClientSetupEvent e) {
@@ -134,4 +162,9 @@ public class JacksEconomyClient {
         };
         registry.register(adminShopColor, ItemBlockReg.ADMIN_SHOP_ITEM.get());
     }
+
+    public record AdminShopData(
+            LinkedHashMap<AdminShopScreen.Category, LinkedHashMap<AdminShopScreen.InnerCategory, List<AdminShopScreen.ShopItem>>> shopItems,
+            HashMap<ItemDescription, AdminShopScreen.ItemSellabilityInfo> sellPrices
+    ) {}
 }

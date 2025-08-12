@@ -7,6 +7,17 @@
   - This allows us the start working on the stock market
 - Gui improvements
 
+## 1.2.2-1.6.0
+
+### Added
+
+- **[JEI](https://www.curseforge.com/minecraft/mc-mods/jei) Support**: You can now use **JEI** to view exporting, importing, fluid exporting, fluid importing, admin shop buying, and admin shop selling recipes
+- **Golden Wallet**: The golden wallet has infinite money, allowing you to buy anything you want
+
+### Fixed
+
+- **Fixed a Crash on Dedicated Servers**: The admin shop would cause a crash when loaded [(Issue #2)](https://github.com/SCsupercraft/JacksEconomyForked/issues/2)
+
 ## 1.2.2-1.5.0
 
 ### Added

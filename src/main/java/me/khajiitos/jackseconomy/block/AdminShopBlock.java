@@ -1,6 +1,7 @@
 package me.khajiitos.jackseconomy.block;
 
 import me.khajiitos.jackseconomy.blockentity.AdminShopBlockEntity;
+import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.AdminShopColorManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
@@ -83,7 +84,7 @@ public class AdminShopBlock extends BaseEntityBlock implements NameableBlockItem
         if (!pLevel.isClientSide && player instanceof ServerPlayer serverPlayer && pLevel.getBlockEntity(pPos) instanceof AdminShopBlockEntity entity) {
             CompoundTag compoundTag = PriceManager.toAdminShopSchemaCompound(serverPlayer, entity.getName());
             NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new AdminShopMenu(pContainerId, pPlayerInventory), Component.empty()));
-            Packets.sendToClient(serverPlayer, new AdminShopSchemaPacket(compoundTag, entity.getName()));
+            Packets.sendToClient(serverPlayer, new AdminShopSchemaPacket(compoundTag, entity.getName(), Config.oneItemCurrencyMode.get()));
         }
 
         return InteractionResult.SUCCESS;

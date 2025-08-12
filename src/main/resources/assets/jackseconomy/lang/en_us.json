@@ -310,5 +310,7 @@
   "jackseconomy.bulk_remove_buy_price": "L-CTRL + Middle-click to remove buy price",
   "jackseconomy.bulk_remove_buy_stage": "L-CTRL + L-Shift + Middle-click to remove buy stage",
   "jackseconomy.bulk_remove_sell_price": "Middle-click to remove sell price",
-  "jackseconomy.bulk_remove_sell_stage": "L-Shift + Middle-click to remove sell stage"
+  "jackseconomy.bulk_remove_sell_stage": "L-Shift + Middle-click to remove sell stage",
+
+  "jackseconomy.jei_placeholder_manifest_required": "Manifest Required!"
 }
