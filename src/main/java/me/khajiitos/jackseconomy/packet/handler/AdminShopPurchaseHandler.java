@@ -5,6 +5,7 @@ import me.khajiitos.jackseconomy.curios.CuriosWallet;
 import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
+import me.khajiitos.jackseconomy.item.GoldenWalletItem;
 import me.khajiitos.jackseconomy.item.OIMWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.packet.AdminShopPurchasePacket;
@@ -78,14 +79,14 @@ public class AdminShopPurchaseHandler {
             long valueLong = value.longValue();
             long totalDollars = OIMWalletItem.getTotalDollars(wallet, sender);
 
-            if (totalDollars < valueLong) {
+            if (totalDollars < valueLong && totalDollars != -1) {
                 // u broke
                 return;
             }
         } else {
             BigDecimal walletBalance = WalletItem.getBalance(wallet);
 
-            if (walletBalance.compareTo(value) < 0) {
+            if (walletBalance.compareTo(value) < 0 && !walletBalance.equals(BigDecimal.valueOf(-1))) {
                 // Can't afford
                 return;
             }
@@ -128,102 +129,104 @@ public class AdminShopPurchaseHandler {
             }
         }
 
-        if (Config.oneItemCurrencyMode.get()) {
-            long valueLong = value.longValue();
-            //long totalDollars = OIMWalletItem.getTotalDollars(wallet, sender);
+        if (!(wallet.getItem() instanceof GoldenWalletItem)) {
+            if (Config.oneItemCurrencyMode.get()) {
+                long valueLong = value.longValue();
+                //long totalDollars = OIMWalletItem.getTotalDollars(wallet, sender);
 
-            if (valueLong < 0) {
-                // Should only be $1 bills
-                List<ItemStack> items = CurrencyHelper.getCurrencyItems(BigDecimal.valueOf(-valueLong));
-                Optional<IItemHandler> handlerOptional = wallet.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
-
-                items.forEach(itemStack -> {
-                    ItemStack left = itemStack;
-                    if (handlerOptional.isPresent()) {
-                        IItemHandler itemHandler = handlerOptional.get();
-                        for (int i = 0; i < itemHandler.getSlots(); i++) {
-                            left = itemHandler.insertItem(i, left, false);
-
-                            if (left.isEmpty()) {
-                                return;
-                            }
-                        }
-                    }
-
-                    if (!sender.getInventory().add(left)) {
-                        ItemHelper.dropItem(left, sender.level(), sender.blockPosition());
-                    }
-                });
-            } else {
-                long left = valueLong;
-
-                for (ItemStack itemStack : sender.getInventory().items) {
-
-                    if (itemStack.getItem() instanceof CurrencyItem currencyItem && !currencyItem.isDisabled()) {
-                        int toTake = Math.min(itemStack.getCount(), (int)Math.ceil(left / currencyItem.value.doubleValue()));
-                        left -= toTake * currencyItem.value.doubleValue();
-                        itemStack.shrink(toTake);
-
-                        if (left <= 0) {
-                            break;
-                        }
-                    }
-                }
-                // money not in the inventory, take from wallet
-                if (left > 0) {
+                if (valueLong < 0) {
+                    // Should only be $1 bills
+                    List<ItemStack> items = CurrencyHelper.getCurrencyItems(BigDecimal.valueOf(-valueLong));
                     Optional<IItemHandler> handlerOptional = wallet.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
-                    if (handlerOptional.isPresent()) {
-                        IItemHandler handler = handlerOptional.get();
 
-                        for (int i = 0; i < handler.getSlots(); i++) {
-                            ItemStack itemStack = handler.getStackInSlot(i);
+                    items.forEach(itemStack -> {
+                        ItemStack left = itemStack;
+                        if (handlerOptional.isPresent()) {
+                            IItemHandler itemHandler = handlerOptional.get();
+                            for (int i = 0; i < itemHandler.getSlots(); i++) {
+                                left = itemHandler.insertItem(i, left, false);
 
-                            if (itemStack.getItem() instanceof CurrencyItem currencyItem && !currencyItem.isDisabled()) {
-                                int toTake = Math.min(itemStack.getCount(), (int)Math.ceil(left / currencyItem.value.doubleValue()));
-                                left -= toTake * currencyItem.value.doubleValue();
-                                handler.extractItem(i, toTake, false);
-
-                                if (left <= 0) {
-                                    break;
+                                if (left.isEmpty()) {
+                                    return;
                                 }
+                            }
+                        }
 
+                        if (!sender.getInventory().add(left)) {
+                            ItemHelper.dropItem(left, sender.level(), sender.blockPosition());
+                        }
+                    });
+                } else {
+                    long left = valueLong;
+
+                    for (ItemStack itemStack: sender.getInventory().items) {
+
+                        if (itemStack.getItem() instanceof CurrencyItem currencyItem && !currencyItem.isDisabled()) {
+                            int toTake = Math.min(itemStack.getCount(), (int) Math.ceil(left / currencyItem.value.doubleValue()));
+                            left -= toTake * currencyItem.value.doubleValue();
+                            itemStack.shrink(toTake);
+
+                            if (left <= 0) {
+                                break;
+                            }
+                        }
+                    }
+                    // money not in the inventory, take from wallet
+                    if (left > 0) {
+                        Optional<IItemHandler> handlerOptional = wallet.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
+                        if (handlerOptional.isPresent()) {
+                            IItemHandler handler = handlerOptional.get();
+
+                            for (int i = 0; i < handler.getSlots(); i++) {
+                                ItemStack itemStack = handler.getStackInSlot(i);
+
+                                if (itemStack.getItem() instanceof CurrencyItem currencyItem && !currencyItem.isDisabled()) {
+                                    int toTake = Math.min(itemStack.getCount(), (int) Math.ceil(left / currencyItem.value.doubleValue()));
+                                    left -= toTake * currencyItem.value.doubleValue();
+                                    handler.extractItem(i, toTake, false);
+
+                                    if (left <= 0) {
+                                        break;
+                                    }
+
+                                }
                             }
                         }
                     }
                 }
-            }
-        } else {
-            BigDecimal walletBalance = WalletItem.getBalance(wallet);
+            } else {
+                BigDecimal walletBalance = WalletItem.getBalance(wallet);
 
-            if (value.compareTo(BigDecimal.ZERO) < 0 && wallet.getItem() instanceof WalletItem walletItem) {
-                BigDecimal toGive = value.negate();
-                BigDecimal capacity = BigDecimal.valueOf(walletItem.getCapacity());
+                if (value.compareTo(BigDecimal.ZERO) < 0 && wallet.getItem() instanceof WalletItem walletItem) {
+                    BigDecimal toGive = value.negate();
+                    BigDecimal capacity = BigDecimal.valueOf(walletItem.getCapacity());
 
-                if (walletBalance.compareTo(capacity) < 0) { // Check if the wallet is not full
-                    BigDecimal spaceInWallet = capacity.subtract(walletBalance);
-                    if (toGive.compareTo(spaceInWallet) <= 0) {
-                        // The wallet can hold the entire amount
-                        WalletItem.setBalance(wallet, walletBalance.add(toGive));
+                    if (walletBalance.compareTo(capacity) < 0) { // Check if the wallet is not full
+                        BigDecimal spaceInWallet = capacity.subtract(walletBalance);
+                        if (toGive.compareTo(spaceInWallet) <= 0) {
+                            // The wallet can hold the entire amount
+                            WalletItem.setBalance(wallet, walletBalance.add(toGive));
+                        } else {
+                            // The wallet is not enough to hold the entire amount
+                            WalletItem.setBalance(wallet, capacity); // Fill the wallet to its capacity
+                            BigDecimal remainingAmount = toGive.subtract(spaceInWallet);
+                            CurrencyHelper.getCurrencyItems(remainingAmount).forEach(itemStack -> {
+                                if (!sender.addItem(itemStack)) {
+                                    ItemHelper.dropItem(itemStack, sender.level(), sender.blockPosition());
+                                }
+                            });
+                        }
                     } else {
-                        // The wallet is not enough to hold the entire amount
-                        WalletItem.setBalance(wallet, capacity); // Fill the wallet to its capacity
-                        BigDecimal remainingAmount = toGive.subtract(spaceInWallet);
-                        CurrencyHelper.getCurrencyItems(remainingAmount).forEach(itemStack -> {
+                        // Wallet is already full, give the remaining amount to the player as items
+                        CurrencyHelper.getCurrencyItems(toGive).forEach(itemStack -> {
                             if (!sender.addItem(itemStack)) {
                                 ItemHelper.dropItem(itemStack, sender.level(), sender.blockPosition());
                             }
                         });
                     }
                 } else {
-                    // Wallet is already full, give the remaining amount to the player as items
-                    CurrencyHelper.getCurrencyItems(toGive).forEach(itemStack -> {
-                        if (!sender.addItem(itemStack)) {
-                            ItemHelper.dropItem(itemStack, sender.level(), sender.blockPosition());
-                        }
-                    });
+                    WalletItem.setBalance(wallet, walletBalance.subtract(value));
                 }
-            } else {
-                WalletItem.setBalance(wallet, walletBalance.subtract(value));
             }
         }
 

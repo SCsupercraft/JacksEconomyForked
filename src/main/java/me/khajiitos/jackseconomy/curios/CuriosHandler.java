@@ -15,6 +15,8 @@ import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 
 import java.util.Map;
 
+// FIXME: Fix before release of 1.2.2-1.6.0
+//  Refer to our 1.21.1 branch and Curios' documentation
 public class CuriosHandler {
 
     // FIXME: EVERYTHING is deprecated...

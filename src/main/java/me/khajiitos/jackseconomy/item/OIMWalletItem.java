@@ -54,6 +54,7 @@ public class OIMWalletItem extends Item implements IDisablable {
         long total = 0;
 
         if (itemStack != null) {
+            if (itemStack.getItem() instanceof GoldenWalletItem) return -1;
             total += getDollars(itemStack);
         }
 
