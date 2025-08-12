@@ -2,6 +2,7 @@ package me.khajiitos.jackseconomy.blockentity;
 
 import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.block.AdminShopBlock;
+import me.khajiitos.jackseconomy.data.AdminShopColorManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -66,9 +67,9 @@ public class AdminShopBlockEntity extends BlockEntity {
 	}
 
 	public static void tick(Level level, BlockPos blockPos, BlockState blockState, AdminShopBlockEntity blockEntity) {
-		int color = JacksEconomyClient.adminShopColors.containsKey(blockEntity.name)
-				? JacksEconomyClient.adminShopColors.get(blockEntity.name)
-				: JacksEconomyClient.defaultAdminShopColor;
+		int color = AdminShopColorManager.adminShopColors.containsKey(blockEntity.name)
+				? AdminShopColorManager.adminShopColors.get(blockEntity.name)
+				: AdminShopColorManager.defaultAdminShopColor;
 		int actualColor = blockEntity.color;
 		if (color == actualColor) return;
 
@@ -76,6 +77,6 @@ public class AdminShopBlockEntity extends BlockEntity {
 
 		BlockState newState = blockState.setValue(AdminShopBlock.COLORED, color != -1);
 		level.setBlockAndUpdate(blockPos, newState);
-		level.sendBlockUpdated(blockPos, blockState, newState, Block.UPDATE_CLIENTS & Block.UPDATE_IMMEDIATE);
+		level.sendBlockUpdated(blockPos, blockState, newState, Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
 	}
 }
