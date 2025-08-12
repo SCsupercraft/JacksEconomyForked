@@ -16,12 +16,12 @@ public class Packets {
     public static void registerPayloads(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
 
+        registrar.commonToClient(            PricesInfoPacket.TYPE,              PricesInfoPacket.STREAM_CODEC,              PricesInfoHandler::handle);
+        registrar.commonToClient(       AdminShopSchemaPacket.TYPE,         AdminShopSchemaPacket.STREAM_CODEC,         AdminShopSchemaHandler::handle);
+        registrar.commonToClient(        AdminShopColorPacket.TYPE,          AdminShopColorPacket.STREAM_CODEC,          AdminShopColorHandler::handle);
         registrar.playToServer(             ChangeSpeedPacket.TYPE,             ChangeSpeedPacket.STREAM_CODEC,             ChangeSpeedHandler::handle);
         registrar.playToServer(    ChangeRedstoneTogglePacket.TYPE,    ChangeRedstoneTogglePacket.STREAM_CODEC,    ChangeRedstoneToggleHandler::handle);
-        registrar.playToClient(              PricesInfoPacket.TYPE,              PricesInfoPacket.STREAM_CODEC,              PricesInfoHandler::handle);
         registrar.playToServer(             CreateCheckPacket.TYPE,             CreateCheckPacket.STREAM_CODEC,             CreateCheckHandler::handle);
-        registrar.playToClient(     UpdateWalletBalancePacket.TYPE,     UpdateWalletBalancePacket.STREAM_CODEC,     UpdateWalletBalanceHandler::handle);
-        registrar.playToClient(        WalletBalanceDifPacket.TYPE,        WalletBalanceDifPacket.STREAM_CODEC,        WalletBalanceDifHandler::handle);
         registrar.playToServer( WithdrawBalanceSpecificPacket.TYPE, WithdrawBalanceSpecificPacket.STREAM_CODEC, WithdrawBalanceSpecificHandler::handle);
         registrar.playToServer(        OpenCuriosWalletPacket.TYPE,        OpenCuriosWalletPacket.STREAM_CODEC,        OpenCuriosWalletHandler::handle);
         registrar.playToServer(      ChangeCurrencyTypePacket.TYPE,      ChangeCurrencyTypePacket.STREAM_CODEC,      ChangeCurrencyTypeHandler::handle);
@@ -33,8 +33,8 @@ public class Packets {
         registrar.playToServer(          InsertToWalletPacket.TYPE,          InsertToWalletPacket.STREAM_CODEC,          InsertToWalletHandler::handle);
         registrar.playToServer(              DepositAllPacket.TYPE,              DepositAllPacket.STREAM_CODEC,              DepositAllHandler::handle);
         registrar.playToServer(      AcknowledgeUnlocksPacket.TYPE,      AcknowledgeUnlocksPacket.STREAM_CODEC,      AcknowledgeUnlocksHandler::handle); // TODO: Find GameStages alternative
-        registrar.playToClient(         AdminShopSchemaPacket.TYPE,         AdminShopSchemaPacket.STREAM_CODEC,         AdminShopSchemaHandler::handle);
         registrar.playToServer(  RequestAdminShopSchemaPacket.TYPE,  RequestAdminShopSchemaPacket.STREAM_CODEC,  RequestAdminShopSchemaHandler::handle);
-        registrar.playToClient(          AdminShopColorPacket.TYPE,          AdminShopColorPacket.STREAM_CODEC,          AdminShopColorHandler::handle);
+        registrar.playToClient(     UpdateWalletBalancePacket.TYPE,     UpdateWalletBalancePacket.STREAM_CODEC,     UpdateWalletBalanceHandler::handle);
+        registrar.playToClient(        WalletBalanceDifPacket.TYPE,        WalletBalanceDifPacket.STREAM_CODEC,        WalletBalanceDifHandler::handle);
     }
 }
