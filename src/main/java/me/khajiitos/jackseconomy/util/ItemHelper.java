@@ -22,7 +22,7 @@ public class ItemHelper {
     public static @Nullable Item getItem(String name) {
         try {
             ResourceLocation resourceLocation = ResourceLocation.tryParse(name);
-            Item item = JacksEconomy.server.registryAccess().registryOrThrow(Registries.ITEM).get(resourceLocation);
+            Item item = JacksEconomy.registryAccess().registryOrThrow(Registries.ITEM).get(resourceLocation);
 
             if (item == null) {
                 JacksEconomy.LOGGER.info("Invalid item: " + name);
@@ -37,7 +37,7 @@ public class ItemHelper {
     }
 
     public static @Nullable ResourceLocation getItemResourceLocation(Item item) {
-        return JacksEconomy.server.registryAccess().registryOrThrow(Registries.ITEM).getKey(item);
+        return JacksEconomy.registryAccess().registryOrThrow(Registries.ITEM).getKey(item);
     }
 
     public static String getItemName(Item item) {
@@ -46,6 +46,6 @@ public class ItemHelper {
     }
 
     public static Holder<Item> getHolder(Item item) {
-        return JacksEconomy.server.registryAccess().registryOrThrow(Registries.ITEM).getHolder(getItemResourceLocation(item)).orElseThrow();
+        return JacksEconomy.registryAccess().registryOrThrow(Registries.ITEM).getHolder(getItemResourceLocation(item)).orElseThrow();
     }
 }

@@ -123,7 +123,6 @@ public class ClientEventListeners {
         } else {
             e.getToolTip().add(Component.translatable("jackseconomy.view_prices", Component.translatable("jackseconomy.lalt").withStyle(ChatFormatting.AQUA)).withStyle(ChatFormatting.GRAY));
         }
-
     }
 
     @SubscribeEvent

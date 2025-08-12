@@ -19,6 +19,7 @@ import net.neoforged.neoforge.network.IContainerFactory;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -69,7 +70,7 @@ public class ContainerReg {
     public interface ItemMenuFactory<M extends AbstractContainerMenu> extends IContainerFactory<M> {
         default M create(int windowId, Inventory inv, RegistryFriendlyByteBuf data) {
             CompoundTag tag = data.readNbt();
-            Optional<ItemStack> stack = ItemStack.parse(JacksEconomy.server.registryAccess(), tag);
+            Optional<ItemStack> stack = ItemStack.parse(Objects.requireNonNull(JacksEconomy.registryAccess()), tag);
             if (stack.isEmpty()) {
                 JacksEconomy.LOGGER.error("Error finding item stack in tag {}", tag);
                 return null;

@@ -53,11 +53,11 @@ public record ItemDescription(Holder<Item> item, @NotNull DataComponentPatch com
     }
 
     public CompoundTag toNbt() {
-        return (CompoundTag) createItemStack().save(JacksEconomy.server.registryAccess());
+        return (CompoundTag) createItemStack().save(Objects.requireNonNull(JacksEconomy.registryAccess()));
     }
 
     public static @Nullable ItemDescription fromNbt(Tag tag) {
-        ItemStack stack = ItemStack.parse(JacksEconomy.server.registryAccess(), tag).orElse(null);
+        ItemStack stack = ItemStack.parse(Objects.requireNonNull(JacksEconomy.registryAccess()), tag).orElse(null);
         return stack != null ? ofItem(stack) : null;
     }
 

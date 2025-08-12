@@ -19,6 +19,7 @@ public class Packets {
         registrar.commonToClient(            PricesInfoPacket.TYPE,              PricesInfoPacket.STREAM_CODEC,              PricesInfoHandler::handle);
         registrar.commonToClient(       AdminShopSchemaPacket.TYPE,         AdminShopSchemaPacket.STREAM_CODEC,         AdminShopSchemaHandler::handle);
         registrar.commonToClient(        AdminShopColorPacket.TYPE,          AdminShopColorPacket.STREAM_CODEC,          AdminShopColorHandler::handle);
+
         registrar.playToServer(             ChangeSpeedPacket.TYPE,             ChangeSpeedPacket.STREAM_CODEC,             ChangeSpeedHandler::handle);
         registrar.playToServer(    ChangeRedstoneTogglePacket.TYPE,    ChangeRedstoneTogglePacket.STREAM_CODEC,    ChangeRedstoneToggleHandler::handle);
         registrar.playToServer(             CreateCheckPacket.TYPE,             CreateCheckPacket.STREAM_CODEC,             CreateCheckHandler::handle);

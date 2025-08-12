@@ -16,17 +16,22 @@ import me.khajiitos.jackseconomy.util.IEnergyCapable;
 import me.khajiitos.jackseconomy.util.IFluidCapable;
 import me.khajiitos.jackseconomy.util.IItemCapable;
 import me.khajiitos.jackseconomy.util.OIMWalletCapabilityWrapper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.util.thread.EffectiveSide;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 @Mod(JacksEconomy.MOD_ID)
@@ -64,6 +69,12 @@ public class JacksEconomy {
         }
 
         GameStagesManager.init();
+    }
+
+    public static @Nullable RegistryAccess.Frozen registryAccess() {
+        if (server != null) return server.registryAccess();
+        if (EffectiveSide.get().isClient() && Minecraft.getInstance().getConnection() != null) return Minecraft.getInstance().getConnection().registryAccess();
+        return null;
     }
 
     @SubscribeEvent

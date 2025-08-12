@@ -20,6 +20,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 public record FluidDescription(Holder<Fluid> fluid, DataComponentPatch components) {
     public static final Codec<FluidDescription> CODEC = CompoundTag.CODEC.xmap(FluidDescription::fromNbt, FluidDescription::toNbt);
@@ -54,11 +55,11 @@ public record FluidDescription(Holder<Fluid> fluid, DataComponentPatch component
     }
 
     public CompoundTag toNbt() {
-        return (CompoundTag) createFluidStack().save(JacksEconomy.server.registryAccess());
+        return (CompoundTag) createFluidStack().save(Objects.requireNonNull(JacksEconomy.registryAccess()));
     }
 
     public static @Nullable FluidDescription fromNbt(Tag tag) {
-        FluidStack stack = FluidStack.parse(JacksEconomy.server.registryAccess(), tag).orElse(null);
+        FluidStack stack = FluidStack.parse(Objects.requireNonNull(JacksEconomy.registryAccess()), tag).orElse(null);
         return stack != null ? ofFluid(stack) : null;
     }
 

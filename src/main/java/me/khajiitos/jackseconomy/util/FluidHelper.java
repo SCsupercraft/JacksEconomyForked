@@ -13,7 +13,7 @@ public class FluidHelper {
     public static @Nullable Fluid getFluid(String name) {
         try {
             ResourceLocation resourceLocation = ResourceLocation.tryParse(name);
-            Fluid fluid = JacksEconomy.server.registryAccess().registryOrThrow(Registries.FLUID).get(resourceLocation);
+            Fluid fluid = JacksEconomy.registryAccess().registryOrThrow(Registries.FLUID).get(resourceLocation);
 
             if (fluid == null) {
                 JacksEconomy.LOGGER.info("Invalid fluid: " + name);
@@ -28,7 +28,7 @@ public class FluidHelper {
     }
 
     public static @Nullable ResourceLocation getFluidResourceLocation(Fluid fluid) {
-        return JacksEconomy.server.registryAccess().registryOrThrow(Registries.FLUID).getKey(fluid);
+        return JacksEconomy.registryAccess().registryOrThrow(Registries.FLUID).getKey(fluid);
     }
 
     public static String getItemName(Fluid fluid) {
@@ -37,6 +37,6 @@ public class FluidHelper {
     }
 
     public static Holder<Fluid> getHolder(Fluid fluid) {
-        return JacksEconomy.server.registryAccess().registryOrThrow(Registries.FLUID).getHolder(getFluidResourceLocation(fluid)).orElseThrow();
+        return JacksEconomy.registryAccess().registryOrThrow(Registries.FLUID).getHolder(getFluidResourceLocation(fluid)).orElseThrow();
     }
 }

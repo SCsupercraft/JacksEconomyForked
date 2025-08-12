@@ -77,7 +77,7 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 		this.imageHeight = 136;
 		this.imageWidth = 195;
 		this.displayOperatorCreativeTab = false;
-		CreativeModeTabs.tryRebuildTabContents(JacksEconomy.server.overworld().enabledFeatures(), this.hasPermissions(inventory.player), inventory.player.level().registryAccess());
+		CreativeModeTabs.tryRebuildTabContents(Minecraft.getInstance().getConnection().enabledFeatures(), this.hasPermissions(inventory.player), inventory.player.level().registryAccess());
 	}
 
 	protected List<ItemStack> onlyFluidContainers(Stream<ItemStack> stacks) {
