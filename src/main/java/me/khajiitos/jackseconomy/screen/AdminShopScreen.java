@@ -10,6 +10,7 @@ import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.gamestages.GameStagesCheck;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
+import me.khajiitos.jackseconomy.item.GoldenWalletItem;
 import me.khajiitos.jackseconomy.item.OIMWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.menu.AdminShopMenu;
@@ -820,7 +821,7 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
                 guiGraphics.fill(this.leftPos + 182, this.topPos + 6, this.leftPos + 182 + totalWidth, this.topPos + 26, 0xFFc6c6c6);
                 guiGraphics.renderItem(wallet != null && !wallet.isEmpty() ? wallet : new ItemStack(ItemBlockReg.WALLET_ITEM.get()), this.leftPos + 183, this.topPos + 8);
                 guiGraphics.drawString(this.font, component, this.leftPos + 203, this.topPos + 13, 0xFFFFFFFF);
-            } else {
+            } else if (wallet == null || !(wallet.getItem() instanceof GoldenWalletItem)) {
                 Component component = Component.translatable("jackseconomy.no_wallet").withStyle(ChatFormatting.DARK_RED);
                 int width = this.font.width(component);
                 guiGraphics.fill(this.leftPos + 181, this.topPos + 5, this.leftPos + 209 + width, this.topPos + 25, 0xFF4c4c4c);

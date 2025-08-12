@@ -96,6 +96,7 @@ public class ItemBlockReg {
     public static final DeferredItem<WalletItem> THE_PHAT_WALLET_ITEM = ITEMS.register("the_phat_wallet", () -> new WalletItem(() -> Config.thePhatWalletCapacity));
     public static final DeferredItem<InfiniteWalletItem> INFINITE_WALLET_ITEM = ITEMS.register("infinite_wallet", InfiniteWalletItem::new);
     public static final DeferredItem<OIMWalletItem> WALLET_ITEM = ITEMS.register("wallet", OIMWalletItem::new);
+    public static final DeferredItem<GoldenWalletItem> GOLDEN_WALLET_ITEM = ITEMS.register("golden_wallet", GoldenWalletItem::new);
 
     public static final DeferredItem<CheckItem> CHECK_ITEM = ITEMS.register("check", CheckItem::new);
     public static final DeferredItem<ImporterTicketItem> IMPORTER_TICKET_ITEM = ITEMS.register("importer_manifest", ImporterTicketItem::new);
@@ -150,6 +151,7 @@ public class ItemBlockReg {
         output.accept(ItemBlockReg.THE_PHAT_WALLET_ITEM.get());
         output.accept(ItemBlockReg.INFINITE_WALLET_ITEM.get());
         output.accept(ItemBlockReg.WALLET_ITEM.get());
+        output.accept(ItemBlockReg.GOLDEN_WALLET_ITEM.get());
         output.accept(ItemBlockReg.GOLDEN_EXPORTER_TICKET_ITEM.get());
         output.accept(ItemBlockReg.GOLDEN_FLUID_EXPORTER_TICKET_ITEM.get());
         output.accept(ItemBlockReg.EMPTY_EXPORTER_TICKET_ITEM.get());

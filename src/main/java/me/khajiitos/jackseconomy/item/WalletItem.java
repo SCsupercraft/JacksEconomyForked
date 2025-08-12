@@ -34,7 +34,7 @@ public class WalletItem extends Item implements IDisablable {
 
 	public static BigDecimal getBalance(ItemStack itemStack) {
 		try {
-			return itemStack.getOrDefault(ComponentReg.BALANCE, BigDecimal.ZERO);
+			return itemStack.getItem() instanceof GoldenWalletItem ? BigDecimal.valueOf(-1) : itemStack.getOrDefault(ComponentReg.BALANCE, BigDecimal.ZERO);
 		} catch (NumberFormatException e) {
 			return BigDecimal.ZERO;
 		}

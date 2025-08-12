@@ -39,6 +39,7 @@
   "item.jackseconomy.check": "Check",
 
   "item.jackseconomy.wallet": "Wallet",
+  "item.jackseconomy.golden_wallet": "Golden Wallet",
   "item.jackseconomy.basic_wallet": "Basic Wallet",
   "item.jackseconomy.intermediate_wallet": "Intermediate Wallet",
   "item.jackseconomy.advanced_wallet": "Advanced Wallet",
@@ -144,6 +145,7 @@
   "jackseconomy.ctrl_coins": "Ctrl Click: 10 items",
   "jackseconomy.normal_coins": "Normal Click: 1 item",
 
+  "jackseconomy.infinite_money": "Infinite Money",
   "jackseconomy.balance": "Balance: %s",
   "jackseconomy.value": "Value: %s",
   "jackseconomy.wallet_balance": "Wallet: %s",
