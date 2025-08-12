@@ -39,12 +39,12 @@ public class JeiIntegration implements IModPlugin {
 
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
-		registration.addRecipes(AdminShopBuyingCategory.RECIPE_TYPE, List.of(new AdminShopBuyingCategory.Details(null, BigDecimal.ZERO, null)));
-		registration.addRecipes(AdminShopSellingCategory.RECIPE_TYPE, List.of(new AdminShopSellingCategory.Details(null, BigDecimal.ZERO, null)));
-		registration.addRecipes(ImportingCategory.RECIPE_TYPE, List.of(new ImportingCategory.Details(BigDecimal.ZERO, null)));
-		registration.addRecipes(ExportingCategory.RECIPE_TYPE, List.of(new ExportingCategory.Details(BigDecimal.ZERO, null)));
-		registration.addRecipes(FluidImportingCategory.RECIPE_TYPE, List.of(new FluidImportingCategory.Details(BigDecimal.ZERO, null)));
-		registration.addRecipes(FluidExportingCategory.RECIPE_TYPE, List.of(new FluidExportingCategory.Details(BigDecimal.ZERO, null)));
+		// registration.addRecipes(AdminShopBuyingCategory.RECIPE_TYPE, List.of(new AdminShopBuyingCategory.Details(null, BigDecimal.ZERO, null)));
+		// registration.addRecipes(AdminShopSellingCategory.RECIPE_TYPE, List.of(new AdminShopSellingCategory.Details(null, BigDecimal.ZERO, null)));
+		// registration.addRecipes(ImportingCategory.RECIPE_TYPE, List.of(new ImportingCategory.Details(BigDecimal.ZERO, null)));
+		// registration.addRecipes(ExportingCategory.RECIPE_TYPE, List.of(new ExportingCategory.Details(BigDecimal.ZERO, null)));
+		// registration.addRecipes(FluidImportingCategory.RECIPE_TYPE, List.of(new FluidImportingCategory.Details(BigDecimal.ZERO, null)));
+		// registration.addRecipes(FluidExportingCategory.RECIPE_TYPE, List.of(new FluidExportingCategory.Details(BigDecimal.ZERO, null)));
 	}
 
 	@Override

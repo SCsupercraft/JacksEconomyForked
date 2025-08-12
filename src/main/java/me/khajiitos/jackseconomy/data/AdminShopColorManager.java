@@ -56,7 +56,8 @@ public class AdminShopColorManager {
 		});
 		return listTag;
 	}
-	private static AdminShopColorPacket toUpdatePacket() {
+
+	public static AdminShopColorPacket toUpdatePacket() {
 		return new AdminShopColorPacket(toAdminShopColorsList(), defaultAdminShopColor);
 	}
 

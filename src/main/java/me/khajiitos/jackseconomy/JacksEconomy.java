@@ -5,6 +5,7 @@ import me.khajiitos.jackseconomy.create.CreateCheck;
 import me.khajiitos.jackseconomy.create.CreateStressProvider;
 import me.khajiitos.jackseconomy.curios.CuriosCheck;
 import me.khajiitos.jackseconomy.curios.CuriosHandler;
+import me.khajiitos.jackseconomy.data.DataSyncConfigurationTask;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.init.*;
 import me.khajiitos.jackseconomy.config.ClientConfig;
@@ -25,6 +26,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
 import org.slf4j.Logger;
 
 @Mod(JacksEconomy.MOD_ID)
@@ -62,6 +64,11 @@ public class JacksEconomy {
         }
 
         GameStagesManager.init();
+    }
+
+    @SubscribeEvent
+    public void registerClientConfigurationTasks(final RegisterConfigurationTasksEvent event) {
+        event.register(new DataSyncConfigurationTask(event.getListener()));
     }
 
     @SubscribeEvent
