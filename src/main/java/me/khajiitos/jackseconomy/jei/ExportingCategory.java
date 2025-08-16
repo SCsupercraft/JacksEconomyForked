@@ -28,10 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ExportingCategory implements IRecipeCategory<ExportingCategory.Details> {
@@ -119,6 +116,8 @@ public class ExportingCategory implements IRecipeCategory<ExportingCategory.Deta
 
 		@Override
 		public @NotNull List<Details> getAllRecipes() {
+			if (!JacksEconomyClient.synced) return Collections.singletonList(new Details(BigDecimal.ZERO, null));
+
 			List<Details> list = new ArrayList<>();
 			JacksEconomyClient.priceInfos.forEach((itemDescription, itemPriceInfo) -> {
 				if (itemPriceInfo.sellPrice > 0) list.add(new Details(BigDecimal.valueOf(itemPriceInfo.sellPrice), itemDescription));

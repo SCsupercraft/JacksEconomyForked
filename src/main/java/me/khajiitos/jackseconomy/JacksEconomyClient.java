@@ -52,6 +52,7 @@ public class JacksEconomyClient {
     public static Integer defaultAdminShopColor = -1;
     public static BigDecimal balanceDifPopup = null;
     public static long balanceDifPopupStartMillis = -1;
+    public static boolean synced = false;
 
     public static void init() {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();

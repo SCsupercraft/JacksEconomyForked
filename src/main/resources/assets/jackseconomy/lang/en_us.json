@@ -314,5 +314,6 @@
   "jackseconomy.bulk_remove_sell_price": "Middle-click to remove sell price",
   "jackseconomy.bulk_remove_sell_stage": "L-Shift + Middle-click to remove sell stage",
 
-  "jackseconomy.jei_placeholder_manifest_required": "Manifest Required!"
+  "jackseconomy.jei_placeholder_manifest_required": "Manifest Required!",
+  "jackseconomy.jei_placeholder_wallet_required": "Wallet Required!"
 }

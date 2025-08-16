@@ -18,6 +18,8 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.advanced.ISimpleRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -30,9 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AdminShopSellingCategory implements IRecipeCategory<AdminShopSellingCategory.Details> {
@@ -71,6 +71,8 @@ public class AdminShopSellingCategory implements IRecipeCategory<AdminShopSellin
 
 	@Override
 	public void setRecipe(@NotNull IRecipeLayoutBuilder builder, @NotNull Details details, @NotNull IFocusGroup focuses) {
+		if (details.description == null || Objects.equals(details.price, BigDecimal.ZERO)) return;
+
 		ItemStack adminShopStack = new ItemStack(ItemBlockReg.ADMIN_SHOP.get());
 		CompoundTag tag = new CompoundTag();
 		if (details.adminShopName != null) tag.putString("adminShopName", details.adminShopName);
@@ -86,7 +88,12 @@ public class AdminShopSellingCategory implements IRecipeCategory<AdminShopSellin
 	}
 
 	@Override
-	public void draw(Details recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+	public void draw(Details details, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+		if (details.description == null || Objects.equals(details.price, BigDecimal.ZERO)) {
+			Font font = Minecraft.getInstance().font;
+			guiGraphics.drawCenteredString(font, Component.translatable("jackseconomy.jei_placeholder_wallet_required"), getWidth() / 2, getHeight() / 2 - (font.lineHeight / 2), -1);
+			return;
+		}
 		guiGraphics.blit(BACKGROUND, 25, 0, 0, 0, 100, 50, 100, 50);
 	}
 
@@ -125,6 +132,8 @@ public class AdminShopSellingCategory implements IRecipeCategory<AdminShopSellin
 
 		@Override
 		public @NotNull List<Details> getAllRecipes() {
+			if (!JacksEconomyClient.synced) return Collections.singletonList(new Details(null, BigDecimal.ZERO, null));
+
 			List<Details> list = new ArrayList<>();
 			if (JacksEconomyClient.defaultAdminShopData != null) addAllRecipes(list, null, JacksEconomyClient.defaultAdminShopData);
 			JacksEconomyClient.adminShopData.forEach((name, data) -> addAllRecipes(list, name, data));

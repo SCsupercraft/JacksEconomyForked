@@ -6,11 +6,11 @@ import me.khajiitos.jackseconomy.config.ClientConfig;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
+import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.data.price.PricesFluidPriceInfo;
+import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
 import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.packet.OpenCuriosWalletPacket;
-import me.khajiitos.jackseconomy.data.price.ItemDescription;
-import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -141,5 +141,6 @@ public class ClientEventListeners {
         JacksEconomyClient.fluidPriceInfos.clear();
         JacksEconomyClient.adminShopColors.clear();
         JacksEconomyClient.defaultAdminShopColor = -1;
+        JacksEconomyClient.synced = false;
     }
 }
