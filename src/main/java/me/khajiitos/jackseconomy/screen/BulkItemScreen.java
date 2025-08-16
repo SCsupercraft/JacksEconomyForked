@@ -3,9 +3,8 @@ package me.khajiitos.jackseconomy.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
-import me.khajiitos.jackseconomy.data.price.PriceManager;
-import me.khajiitos.jackseconomy.data.price.PricesItemPriceInfo;
 import me.khajiitos.jackseconomy.init.ContainerReg;
+import me.khajiitos.jackseconomy.packet.UpdateItemPricesPacket;
 import me.khajiitos.jackseconomy.screen.widget.FloatingEditBoxWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -15,8 +14,11 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BulkItemScreen extends ItemSelectionScreen<BulkItemScreen.Menu> {
@@ -84,21 +86,13 @@ public class BulkItemScreen extends ItemSelectionScreen<BulkItemScreen.Menu> {
 	private void setExporter(Slot slot) {
 		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, true, (value) -> {
 			try {
+				List<Pair<ItemDescription, Double>> prices = new ArrayList<>();
 				double newPrice = Double.parseDouble(value);
-
 				for (ItemStack stack : selectedItems) {
 					ItemDescription description = ItemDescription.ofItem(stack);
-					PricesItemPriceInfo existingInfo = PriceManager.getPricesInfo(description);
-
-					if (existingInfo != null) {
-						existingInfo.sellPrice = newPrice;
-					} else {
-						PriceManager.addPriceInfo(description, new PricesItemPriceInfo(newPrice, -1, -1, null, null));
-					}
+					prices.add(Pair.of(description, newPrice));
 				}
-
-				PriceManager.save();
-				PriceManager.sendDataToPlayers(false);
+				PacketDistributor.sendToServer(new UpdateItemPricesPacket(UpdateItemPricesPacket.PricesType.EXPORTER, prices));
 			} catch (NumberFormatException ignored) {}
 			this.removeWidget(this.floatingEditBox);
 			this.floatingEditBox = null;
@@ -109,21 +103,13 @@ public class BulkItemScreen extends ItemSelectionScreen<BulkItemScreen.Menu> {
 	private void setImporter(Slot slot) {
 		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, true, (value) -> {
 			try {
+				List<Pair<ItemDescription, Double>> prices = new ArrayList<>();
 				double newPrice = Double.parseDouble(value);
-
 				for (ItemStack stack : selectedItems) {
 					ItemDescription description = ItemDescription.ofItem(stack);
-					PricesItemPriceInfo existingInfo = PriceManager.getPricesInfo(description);
-
-					if (existingInfo != null) {
-						existingInfo.importerBuyPrice = newPrice;
-					} else {
-						PriceManager.addPriceInfo(description, new PricesItemPriceInfo(-1, -1, newPrice, null, null));
-					}
+					prices.add(Pair.of(description, newPrice));
 				}
-
-				PriceManager.save();
-				PriceManager.sendDataToPlayers(false);
+				PacketDistributor.sendToServer(new UpdateItemPricesPacket(UpdateItemPricesPacket.PricesType.IMPORTER, prices));
 			} catch (NumberFormatException ignored) {}
 			this.removeWidget(this.floatingEditBox);
 			this.floatingEditBox = null;
@@ -132,31 +118,21 @@ public class BulkItemScreen extends ItemSelectionScreen<BulkItemScreen.Menu> {
 	}
 
 	private void removeExporter(Slot slot) {
+		List<Pair<ItemDescription, Double>> prices = new ArrayList<>();
 		for (ItemStack stack : selectedItems) {
 			ItemDescription description = ItemDescription.ofItem(stack);
-			PricesItemPriceInfo existingInfo = PriceManager.getPricesInfo(description);
-
-			if (existingInfo == null) continue;
-
-			existingInfo.sellPrice = -1;
+			prices.add(Pair.of(description, -1d));
 		}
-
-		PriceManager.save();
-		PriceManager.sendDataToPlayers(false);
+		PacketDistributor.sendToServer(new UpdateItemPricesPacket(UpdateItemPricesPacket.PricesType.EXPORTER, prices));
 	}
 
 	private void removeImporter(Slot slot) {
+		List<Pair<ItemDescription, Double>> prices = new ArrayList<>();
 		for (ItemStack stack : selectedItems) {
 			ItemDescription description = ItemDescription.ofItem(stack);
-			PricesItemPriceInfo existingInfo = PriceManager.getPricesInfo(description);
-
-			if (existingInfo == null) continue;
-
-			existingInfo.importerBuyPrice = -1;
+			prices.add(Pair.of(description, -1d));
 		}
-
-		PriceManager.save();
-		PriceManager.sendDataToPlayers(false);
+		PacketDistributor.sendToServer(new UpdateItemPricesPacket(UpdateItemPricesPacket.PricesType.IMPORTER, prices));
 	}
 
 	public static class Menu extends ItemPickerMenu {

@@ -31,6 +31,8 @@ public class Packets {
         registrar.playToServer(              DepositAllPacket.TYPE,              DepositAllPacket.STREAM_CODEC,              DepositAllHandler::handle);
         registrar.playToServer(      AcknowledgeUnlocksPacket.TYPE,      AcknowledgeUnlocksPacket.STREAM_CODEC,      AcknowledgeUnlocksHandler::handle); // TODO: Find GameStages alternative
         registrar.playToServer(  RequestAdminShopSchemaPacket.TYPE,  RequestAdminShopSchemaPacket.STREAM_CODEC,  RequestAdminShopSchemaHandler::handle);
+        registrar.playToServer(        UpdateItemPricesPacket.TYPE,        UpdateItemPricesPacket.STREAM_CODEC,        UpdateItemPricesHandler::handle);
+        registrar.playToServer(       UpdateFluidPricesPacket.TYPE,       UpdateFluidPricesPacket.STREAM_CODEC,       UpdateFluidPricesHandler::handle);
         registrar.playToClient(              PricesInfoPacket.TYPE,              PricesInfoPacket.STREAM_CODEC,              PricesInfoHandler::handle);
         registrar.playToClient(     UpdateWalletBalancePacket.TYPE,     UpdateWalletBalancePacket.STREAM_CODEC,     UpdateWalletBalanceHandler::handle);
         registrar.playToClient(        WalletBalanceDifPacket.TYPE,        WalletBalanceDifPacket.STREAM_CODEC,        WalletBalanceDifHandler::handle);
