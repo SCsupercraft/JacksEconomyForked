@@ -40,7 +40,7 @@ public class JacksEconomy {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         if (CuriosCheck.isInstalled()) {
-            eventBus.register(CuriosHandler.class);
+            CuriosHandler.init();
         }
 
         ItemBlockReg.init(eventBus);

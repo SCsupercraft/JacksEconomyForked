@@ -141,8 +141,8 @@ dependencies {
     compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))
     runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
 
-    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.3.5+1.20.1")
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.3.5+1.20.1:api")
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.14.1+1.20.1")
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.14.1+1.20.1:api")
 
     implementation(fg.deobf("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false })
     implementation(fg.deobf("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}"))
