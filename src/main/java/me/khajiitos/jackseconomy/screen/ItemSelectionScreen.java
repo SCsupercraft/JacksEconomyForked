@@ -63,7 +63,7 @@ public abstract class ItemSelectionScreen<T extends ItemSelectionScreen.ItemPick
 		this.imageHeight = 136;
 		this.imageWidth = 195;
 		this.displayOperatorCreativeTab = true;
-		CreativeModeTabs.tryRebuildTabContents(JacksEconomy.server.overworld().enabledFeatures(), this.hasPermissions(inventory.player), inventory.player.level().registryAccess());
+		CreativeModeTabs.tryRebuildTabContents(Minecraft.getInstance().getConnection().enabledFeatures(), this.hasPermissions(inventory.player), inventory.player.level().registryAccess());
 	}
 
 	void refreshItemsWith() {

@@ -17,6 +17,7 @@
 ### Fixed
 
 - **Fixed a Crash on Dedicated Servers**: The admin shop would cause a crash when loaded [(Issue #2)](https://github.com/SCsupercraft/JacksEconomyForked/issues/2)
+- **Fixed a Crash on Dedicated Servers**: Bulk pricing screens would crash on dedicated servers
 
 ## 1.2.2-1.5.0
 
