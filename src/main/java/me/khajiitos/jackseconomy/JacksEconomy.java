@@ -1,15 +1,14 @@
 package me.khajiitos.jackseconomy;
 
 import com.mojang.logging.LogUtils;
+import me.khajiitos.jackseconomy.config.ClientConfig;
+import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.create.CreateCheck;
 import me.khajiitos.jackseconomy.create.CreateStressProvider;
 import me.khajiitos.jackseconomy.curios.CuriosCheck;
 import me.khajiitos.jackseconomy.curios.CuriosHandler;
-import me.khajiitos.jackseconomy.data.DataSyncConfigurationTask;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.init.*;
-import me.khajiitos.jackseconomy.config.ClientConfig;
-import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.listener.ConfigEventListeners;
 import me.khajiitos.jackseconomy.listener.OtherEventListeners;
 import me.khajiitos.jackseconomy.util.IEnergyCapable;
@@ -20,7 +19,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -30,7 +28,6 @@ import net.neoforged.fml.util.thread.EffectiveSide;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -75,11 +72,6 @@ public class JacksEconomy {
         if (server != null) return server.registryAccess();
         if (EffectiveSide.get().isClient() && Minecraft.getInstance().getConnection() != null) return Minecraft.getInstance().getConnection().registryAccess();
         return null;
-    }
-
-    @SubscribeEvent
-    public void registerClientConfigurationTasks(final RegisterConfigurationTasksEvent event) {
-        event.register(new DataSyncConfigurationTask(event.getListener()));
     }
 
     @SubscribeEvent

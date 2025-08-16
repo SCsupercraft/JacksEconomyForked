@@ -133,5 +133,6 @@ public class ClientEventListeners {
         JacksEconomyClient.defaultAdminShopData = null;
         JacksEconomyClient.adminShopColors.clear();
         JacksEconomyClient.defaultAdminShopColor = -1;
+        JacksEconomyClient.synced = false;
     }
 }

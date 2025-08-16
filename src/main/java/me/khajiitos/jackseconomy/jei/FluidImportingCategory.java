@@ -2,7 +2,6 @@ package me.khajiitos.jackseconomy.jei;
 
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.JacksEconomyClient;
-import me.khajiitos.jackseconomy.create.CreateCheck;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
@@ -32,10 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class FluidImportingCategory implements IRecipeCategory<FluidImportingCategory.Details> {
@@ -124,6 +120,8 @@ public class FluidImportingCategory implements IRecipeCategory<FluidImportingCat
 
 		@Override
 		public @NotNull List<Details> getAllRecipes() {
+			if (!JacksEconomyClient.synced) return Collections.singletonList(new Details(BigDecimal.ZERO, null));
+
 			List<Details> list = new ArrayList<>();
 			JacksEconomyClient.fluidPriceInfos.forEach((fluidDescription, fluidPriceInfo) -> {
 				if (fluidPriceInfo.importerBuyPrice > 0) list.add(new Details(BigDecimal.valueOf(fluidPriceInfo.importerBuyPrice), fluidDescription));

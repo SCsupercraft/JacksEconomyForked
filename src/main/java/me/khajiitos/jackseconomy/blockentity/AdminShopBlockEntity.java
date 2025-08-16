@@ -1,6 +1,5 @@
 package me.khajiitos.jackseconomy.blockentity;
 
-import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.block.AdminShopBlock;
 import me.khajiitos.jackseconomy.data.AdminShopColorManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;

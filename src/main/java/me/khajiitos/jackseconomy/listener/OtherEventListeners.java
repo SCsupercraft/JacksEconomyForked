@@ -6,14 +6,12 @@ import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.data.StockMarketManager;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.menu.WalletMenu;
-import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class OtherEventListeners {
 	@SubscribeEvent

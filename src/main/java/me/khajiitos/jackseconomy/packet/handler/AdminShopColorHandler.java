@@ -10,6 +10,7 @@ public class AdminShopColorHandler {
     public static void handle(AdminShopColorPacket msg, final IPayloadContext context) {
         JacksEconomyClient.adminShopColors.clear();
         JacksEconomyClient.defaultAdminShopColor = msg.defaultColor();
+        JacksEconomyClient.synced = true;
 
         msg.colors().forEach(tag -> {
             if (tag instanceof CompoundTag colorTag && colorTag.contains("name") && colorTag.contains("color"))

@@ -27,7 +27,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.ItemLike;
@@ -141,6 +140,8 @@ public class AdminShopBuyingCategory implements IRecipeCategory<AdminShopBuyingC
 
 		@Override
 		public @NotNull List<Details> getAllRecipes() {
+			if (!JacksEconomyClient.synced) return Collections.singletonList(new Details(null, BigDecimal.ZERO, null));
+
 			List<Details> list = new ArrayList<>();
 			if (JacksEconomyClient.defaultAdminShopData != null) addAllRecipes(list, null, JacksEconomyClient.defaultAdminShopData);
 			JacksEconomyClient.adminShopData.forEach((name, data) -> addAllRecipes(list, name, data));

@@ -15,7 +15,6 @@ import me.khajiitos.jackseconomy.init.ItemBlockReg;
 import me.khajiitos.jackseconomy.listener.ClientEventListeners;
 import me.khajiitos.jackseconomy.listener.ClientRenderEventListeners;
 import me.khajiitos.jackseconomy.screen.*;
-import me.khajiitos.jackseconomy.util.NewShopUnlocks;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
@@ -58,6 +57,7 @@ public class JacksEconomyClient {
     public static Integer defaultAdminShopColor = -1;
     public static BigDecimal balanceDifPopup = null;
     public static long balanceDifPopupStartMillis = -1;
+    public static boolean synced = false;
 
     public JacksEconomyClient(ModContainer container) {
         NeoForge.EVENT_BUS.register(new ClientEventListeners());

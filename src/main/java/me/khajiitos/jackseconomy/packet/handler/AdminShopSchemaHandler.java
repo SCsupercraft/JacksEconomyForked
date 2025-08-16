@@ -1,12 +1,10 @@
 package me.khajiitos.jackseconomy.packet.handler;
 
 import me.khajiitos.jackseconomy.JacksEconomyClient;
-import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.packet.AdminShopSchemaPacket;
 import me.khajiitos.jackseconomy.screen.AdminShopScreen;
 import me.khajiitos.jackseconomy.screen.BulkAdminShopScreen;
-import me.khajiitos.jackseconomy.util.NewShopUnlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
