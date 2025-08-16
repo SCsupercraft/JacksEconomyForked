@@ -5,6 +5,8 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.data.price.*;
 import me.khajiitos.jackseconomy.item.TicketItem;
@@ -266,9 +268,13 @@ public class EconomyCommand {
 			return 0;
 		}
 
-		private static int bulkSetAdminShopPrices(CommandContext<CommandSourceStack> ctx) {
+		private static int bulkSetAdminShopPrices(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
 			ServerPlayer player = ctx.getSource().getPlayer();
 			if (player == null) return 1;
+
+			if (!player.isCreative()) {
+				throw new SimpleCommandExceptionType(Component.translatable("jackseconomy.bulk_admin_shop_not_creative")).create();
+			}
 
 			NetworkHooks.openScreen(player, new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new BulkAdminShopScreen.Menu(pContainerId, pPlayerInventory), Component.empty()));
 			return 1;

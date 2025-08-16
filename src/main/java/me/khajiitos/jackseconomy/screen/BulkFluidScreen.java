@@ -4,6 +4,9 @@ import com.mojang.blaze3d.platform.InputConstants;
 import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.data.price.*;
 import me.khajiitos.jackseconomy.init.ContainerReg;
+import me.khajiitos.jackseconomy.init.Packets;
+import me.khajiitos.jackseconomy.packet.UpdateFluidPricesPacket;
+import me.khajiitos.jackseconomy.packet.UpdateItemPricesPacket;
 import me.khajiitos.jackseconomy.screen.widget.FloatingEditBoxWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -13,8 +16,10 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BulkFluidScreen extends FluidSelectionScreen<BulkFluidScreen.Menu> {
@@ -82,21 +87,13 @@ public class BulkFluidScreen extends FluidSelectionScreen<BulkFluidScreen.Menu> 
 	private void setExporter(Slot slot) {
 		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, true, (value) -> {
 			try {
+				List<Pair<FluidDescription, Double>> prices = new ArrayList<>();
 				double newPrice = Double.parseDouble(value);
-
 				for (ItemStack stack : selectedItems) {
 					FluidDescription description = FluidDescription.ofItem(stack);
-					PricesFluidPriceInfo existingInfo = PriceManager.getPricesInfo(description);
-
-					if (existingInfo != null) {
-						existingInfo.sellPrice = newPrice;
-					} else {
-						PriceManager.addPriceInfo(description, new PricesFluidPriceInfo(newPrice, -1));
-					}
+					prices.add(Pair.of(description, newPrice));
 				}
-
-				PriceManager.save();
-				PriceManager.sendDataToPlayers(false);
+				Packets.sendToServer(new UpdateFluidPricesPacket(UpdateFluidPricesPacket.Type.EXPORTER, prices));
 			} catch (NumberFormatException ignored) {}
 			this.removeWidget(this.floatingEditBox);
 			this.floatingEditBox = null;
@@ -107,21 +104,13 @@ public class BulkFluidScreen extends FluidSelectionScreen<BulkFluidScreen.Menu> 
 	private void setImporter(Slot slot) {
 		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, true, (value) -> {
 			try {
+				List<Pair<FluidDescription, Double>> prices = new ArrayList<>();
 				double newPrice = Double.parseDouble(value);
-
 				for (ItemStack stack : selectedItems) {
 					FluidDescription description = FluidDescription.ofItem(stack);
-					PricesFluidPriceInfo existingInfo = PriceManager.getPricesInfo(description);
-
-					if (existingInfo != null) {
-						existingInfo.importerBuyPrice = newPrice;
-					} else {
-						PriceManager.addPriceInfo(description, new PricesFluidPriceInfo(-1, newPrice));
-					}
+					prices.add(Pair.of(description, newPrice));
 				}
-
-				PriceManager.save();
-				PriceManager.sendDataToPlayers(false);
+				Packets.sendToServer(new UpdateFluidPricesPacket(UpdateFluidPricesPacket.Type.IMPORTER, prices));
 			} catch (NumberFormatException ignored) {}
 			this.removeWidget(this.floatingEditBox);
 			this.floatingEditBox = null;
@@ -130,31 +119,21 @@ public class BulkFluidScreen extends FluidSelectionScreen<BulkFluidScreen.Menu> 
 	}
 
 	private void removeExporter(Slot slot) {
+		List<Pair<FluidDescription, Double>> prices = new ArrayList<>();
 		for (ItemStack stack : selectedItems) {
 			FluidDescription description = FluidDescription.ofItem(stack);
-			PricesFluidPriceInfo existingInfo = PriceManager.getPricesInfo(description);
-
-			if (existingInfo == null) continue;
-
-			existingInfo.sellPrice = -1;
+			prices.add(Pair.of(description, -1d));
 		}
-
-		PriceManager.save();
-		PriceManager.sendDataToPlayers(false);
+		Packets.sendToServer(new UpdateFluidPricesPacket(UpdateFluidPricesPacket.Type.EXPORTER, prices));
 	}
 
 	private void removeImporter(Slot slot) {
+		List<Pair<FluidDescription, Double>> prices = new ArrayList<>();
 		for (ItemStack stack : selectedItems) {
 			FluidDescription description = FluidDescription.ofItem(stack);
-			PricesFluidPriceInfo existingInfo = PriceManager.getPricesInfo(description);
-
-			if (existingInfo == null) continue;
-
-			existingInfo.importerBuyPrice = -1;
+			prices.add(Pair.of(description, -1d));
 		}
-
-		PriceManager.save();
-		PriceManager.sendDataToPlayers(false);
+		Packets.sendToServer(new UpdateFluidPricesPacket(UpdateFluidPricesPacket.Type.IMPORTER, prices));
 	}
 
 	public static class Menu extends ItemPickerMenu {
