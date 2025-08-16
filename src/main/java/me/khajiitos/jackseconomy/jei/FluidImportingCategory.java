@@ -74,7 +74,9 @@ public class FluidImportingCategory implements IRecipeCategory<FluidImportingCat
 		ItemStack moneyStack = new ItemStack(ItemBlockReg.DOLLAR_BILL_ITEM.get());
 
 		builder.addSlot(RecipeIngredientRole.CATALYST, 42, 5).addItemLike(ItemBlockReg.FLUID_IMPORTER.get());
-		builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 34, 29).addItemStack(moneyStack).addRichTooltipCallback((recipeSlotView, tooltip) -> {
+		//noinspection removal
+		builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 34, 29).addItemStack(moneyStack).addTooltipCallback((recipeSlotView, tooltip) -> {
+			tooltip.clear();
 			tooltip.add(Component.literal(CurrencyHelper.format(details.price)).withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.YELLOW)));
 		});
 		builder.addOutputSlot(100, 29).addFluidStack(details.description.fluid(), 1000, details.description.compoundTag());

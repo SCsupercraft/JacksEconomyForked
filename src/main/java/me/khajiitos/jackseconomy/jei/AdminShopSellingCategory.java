@@ -81,7 +81,9 @@ public class AdminShopSellingCategory implements IRecipeCategory<AdminShopSellin
 		ItemStack moneyStack = new ItemStack(ItemBlockReg.DOLLAR_BILL_ITEM.get());
 
 		builder.addSlot(RecipeIngredientRole.CATALYST, 42, 5).addItemStack(adminShopStack);
-		builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 100, 29).addItemStack(moneyStack).addRichTooltipCallback((recipeSlotView, tooltip) -> {
+		//noinspection removal
+		builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 100, 29).addItemStack(moneyStack).addTooltipCallback((recipeSlotView, tooltip) -> {
+			tooltip.clear();
 			tooltip.add(Component.literal(CurrencyHelper.format(details.price)).withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.YELLOW)));
 		});
 		builder.addInputSlot(34, 29).addItemStack(details.description().createItemStack());

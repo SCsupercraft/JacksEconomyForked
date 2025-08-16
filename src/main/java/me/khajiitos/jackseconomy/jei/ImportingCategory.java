@@ -72,6 +72,7 @@ public class ImportingCategory implements IRecipeCategory<ImportingCategory.Deta
 		ItemStack moneyStack = new ItemStack(ItemBlockReg.DOLLAR_BILL_ITEM.get());
 
 		builder.addSlot(RecipeIngredientRole.CATALYST, 42, 5).addItemLike(ItemBlockReg.IMPORTER.get());
+		//noinspection removal
 		builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 34, 29).addItemStack(moneyStack).addTooltipCallback((recipeSlotView, tooltip) -> {
 			tooltip.clear();
 			tooltip.add(Component.literal(CurrencyHelper.format(details.price)).withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.YELLOW)));
