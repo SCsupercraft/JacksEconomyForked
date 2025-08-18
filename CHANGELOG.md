@@ -6,6 +6,7 @@
 - Finish purchase handler (mainly a command to view purchases, and importer/exporter support)
   - This allows us the start working on the stock market
 - Gui improvements
+- Improvements to scrollable elements (making the scroll bar draggable)
 
 ## 1.2.2-1.6.0
 
