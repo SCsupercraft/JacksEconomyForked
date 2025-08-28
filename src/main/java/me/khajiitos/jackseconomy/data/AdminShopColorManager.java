@@ -46,6 +46,12 @@ public class AdminShopColorManager {
 		dataHandler.save(tag);
 	}
 
+	public static void resetData() {
+		adminShopColors.clear();
+		defaultAdminShopColor = -1;
+		updateAll();
+	}
+
 	private static ListTag toAdminShopColorsList() {
 		ListTag listTag = new ListTag();
 		adminShopColors.forEach((name, color) -> {

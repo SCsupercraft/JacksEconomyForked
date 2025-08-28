@@ -2,6 +2,7 @@ package me.khajiitos.jackseconomy.blockentity;
 
 import me.khajiitos.jackseconomy.block.TransactionMachineBlock;
 import me.khajiitos.jackseconomy.config.Config;
+import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
@@ -218,7 +219,8 @@ public class FluidExporterBlockEntity extends FluidTransactionMachineBlockEntity
     }
 
     public boolean sellFluid() {
-        double sellPrice = PriceManager.getFluidExporterSellPrice(FluidDescription.ofFluid(fluidStorage.getFluid()), 1);
+        FluidDescription description = FluidDescription.ofFluid(fluidStorage.getFluid());
+        double sellPrice = PriceManager.getFluidExporterSellPrice(description, 1);
 
         if (sellPrice == -1.0) {
             return false;
@@ -230,6 +232,10 @@ public class FluidExporterBlockEntity extends FluidTransactionMachineBlockEntity
         this.currency = this.currency.add(BigDecimal.valueOf(sellPrice * amountSold));
 
         TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
+
+        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(PurchaseManager.PurchaseSource.FLUID_EXPORTER);
+        purchases.addPurchase(description, amountSold * -1);
+        purchases.processPurchases();
 
         return true;
     }

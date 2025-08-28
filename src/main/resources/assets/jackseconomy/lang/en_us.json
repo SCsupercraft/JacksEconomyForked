@@ -296,6 +296,8 @@
   "jackseconomy.admin_shop_saved": "Admin shop saved!",
   "jackseconomy.prices_reloaded": "Reloaded prices from file!",
   "jackseconomy.reset_all_data": "Reset all data!",
+  "jackseconomy.reset_color_data": "Reset admin shop color data!",
+  "jackseconomy.reset_prices_data": "Reset prices data!",
   "jackseconomy.reset_purchase_data": "Reset purchase data!",
 
   "jackseconomy.default": "Default",

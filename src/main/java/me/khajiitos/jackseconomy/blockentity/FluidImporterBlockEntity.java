@@ -2,6 +2,7 @@ package me.khajiitos.jackseconomy.blockentity;
 
 import me.khajiitos.jackseconomy.block.TransactionMachineBlock;
 import me.khajiitos.jackseconomy.config.Config;
+import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
@@ -197,7 +198,8 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
         ItemStack ticketItemStack = importer.items.get(slotTicket);
         List<FluidDescription> fluids = FluidTicketItem.getFluids(ticketItemStack);
 
-        Fluid fluidToBuy = Fluids.EMPTY;
+        FluidDescription selectedDescription = null;
+        FluidStack fluidToBuy = FluidStack.EMPTY;
 
         if (!fluids.isEmpty() && importer.selectedFluid == null) {
             importer.selectedFluid = fluids.get(0);
@@ -206,7 +208,8 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
         if (importer.selectedFluid != null) {
             for (FluidDescription fluidDescription : fluids) {
                 if (importer.selectedFluid.equals(fluidDescription)) {
-                    fluidToBuy = fluidDescription.fluid().value();
+                    fluidToBuy = fluidDescription.createFluidStack();
+                    selectedDescription = fluidDescription;
                     break;
                 }
             }
@@ -235,7 +238,7 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
                 importer.progress += progressPerTick;
 
                 if (importer.progress >= 1.f) {
-                    importer.buyFluid(fluidToBuy, price, ticketItemStack);
+                    importer.buyFluid(fluidToBuy, selectedDescription, price, ticketItemStack);
                     importer.progress = 0.f;
 
                     level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5f, 1.5f);
@@ -247,13 +250,12 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
         importer.markUpdated();
     }
 
-    public void buyFluid(Fluid fluidToBuy, double price, ItemStack ticketItem) {
+    public void buyFluid(FluidStack fluidStackToBuy, FluidDescription selectedDescription, double price, ItemStack ticketItem) {
         BigDecimal amountAffordable = getBalance().divide(BigDecimal.valueOf(price), RoundingMode.FLOOR);
 
         int maxProcesses = TicketItem.getMaxProcessCount(ticketItem);
 
-        FluidStack stack = new FluidStack(
-                fluidToBuy,
+        FluidStack stack = fluidStackToBuy.copyWithAmount(
                 amountAffordable
                         .min(BigDecimal.valueOf(Math.min(fluidStorage.getCapacity() - fluidStorage.getFluidAmount(), maxProcesses))).intValue()
         );
@@ -264,6 +266,10 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
         fluidStorage.fill(stack, IFluidHandler.FluidAction.EXECUTE);
 
         TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
+
+        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(PurchaseManager.PurchaseSource.FLUID_IMPORTER);
+        purchases.addPurchase(selectedDescription, stack.getAmount());
+        purchases.processPurchases();
     }
 
     @Override

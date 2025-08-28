@@ -11,6 +11,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
@@ -23,8 +24,8 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 public record FluidDescription(Holder<Fluid> fluid, DataComponentPatch components) {
-    public static final Codec<FluidDescription> CODEC = CompoundTag.CODEC.xmap(FluidDescription::fromNbt, FluidDescription::toNbt);
-    public static final StreamCodec<ByteBuf, FluidDescription> STREAM_CODEC = ByteBufCodecs.COMPOUND_TAG.map(FluidDescription::fromNbt, FluidDescription::toNbt);
+    public static final Codec<FluidDescription> CODEC = FluidStack.CODEC.xmap(FluidDescription::ofFluid, FluidDescription::createFluidStack);
+    public static final StreamCodec<RegistryFriendlyByteBuf, FluidDescription> STREAM_CODEC = FluidStack.STREAM_CODEC.map(FluidDescription::ofFluid, FluidDescription::createFluidStack);
 
     public FluidDescription(Holder<Fluid> fluid, @Nullable DataComponentPatch components) {
         this.fluid = fluid;

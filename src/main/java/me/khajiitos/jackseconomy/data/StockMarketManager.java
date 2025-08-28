@@ -1,12 +1,11 @@
 package me.khajiitos.jackseconomy.data;
 
-import com.google.gson.JsonObject;
 import me.khajiitos.jackseconomy.JacksEconomy;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.storage.LevelResource;
 
 public class StockMarketManager {
 	private static DataHandler dataHandler;
-	private static JsonObject data;
 	private static long lastUpdated;
 
 	public static void load() {
@@ -15,24 +14,22 @@ public class StockMarketManager {
 						.resolve("data/jackseconomy/stock-market.dat")
 						.toFile()
 		);
+		resetData();
 		if (dataHandler.DATA_FILE.exists()) {
-			data = dataHandler.loadAsJson();
-			lastUpdated = data.has("lastUpdated") ? data.get("lastUpdated").getAsLong() : 0;
-		} else {
-			data = new JsonObject();
-			data.addProperty("lastUpdated", 0);
-
-			lastUpdated = 0;
-
-			dataHandler.save(data);
-		}
-		JacksEconomy.server.addTickable(StockMarketManager::tick);
+			CompoundTag data = dataHandler.loadAsNbt();
+			lastUpdated = data.getLong("lastUpdated");
+		} else save();
 	}
 
 	public static void save() {
-		data.addProperty("lastUpdated", lastUpdated);
+		CompoundTag data = new CompoundTag();
+		data.putLong("lastUpdated", lastUpdated);
 
 		dataHandler.save(data);
+	}
+
+	public static void resetData() {
+		lastUpdated = 0;
 	}
 
 	public static void tick() {
@@ -40,7 +37,7 @@ public class StockMarketManager {
 
 		if (getDay() > lastUpdated) {
 			lastUpdated = getDay();
-			update();
+			tryUpdate();
 		}
 	}
 
@@ -48,12 +45,15 @@ public class StockMarketManager {
 		return JacksEconomy.server.overworld().getDayTime() / 24000;
 	}
 
-	private static void update() {
+	private static void tryUpdate() {
 		JacksEconomy.LOGGER.info("Updating stock market...");
 		try {
+			update();
 			JacksEconomy.LOGGER.info("Updated stock market!");
 		} catch (Exception ignored) {
 			JacksEconomy.LOGGER.error("Error updating stock market!");
 		}
 	}
+
+	private static void update() {}
 }

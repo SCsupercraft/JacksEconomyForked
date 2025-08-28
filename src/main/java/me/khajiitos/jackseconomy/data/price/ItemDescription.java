@@ -12,6 +12,7 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
@@ -22,8 +23,8 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 public record ItemDescription(Holder<Item> item, @NotNull DataComponentPatch components) {
-    public static final Codec<ItemDescription> CODEC = CompoundTag.CODEC.xmap(ItemDescription::fromNbt, ItemDescription::toNbt);
-    public static final StreamCodec<ByteBuf, ItemDescription> STREAM_CODEC = ByteBufCodecs.COMPOUND_TAG.map(ItemDescription::fromNbt, ItemDescription::toNbt);
+    public static final Codec<ItemDescription> CODEC = ItemStack.CODEC.xmap(ItemDescription::ofItem, ItemDescription::createItemStack);
+    public static final StreamCodec<RegistryFriendlyByteBuf, ItemDescription> STREAM_CODEC = ItemStack.STREAM_CODEC.map(ItemDescription::ofItem, ItemDescription::createItemStack);
 
     public ItemDescription(Holder<Item> item, DataComponentPatch components) {
         if (item == null) throw new NullPointerException();

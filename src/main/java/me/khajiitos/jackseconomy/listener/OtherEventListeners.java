@@ -9,6 +9,7 @@ import me.khajiitos.jackseconomy.menu.WalletMenu;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -19,10 +20,14 @@ public class OtherEventListeners {
 		JacksEconomy.server = e.getServer();
 
 		PriceManager.load();
-
 		AdminShopColorManager.load();
 		StockMarketManager.load();
 		PurchaseManager.load();
+	}
+
+	@SubscribeEvent
+	public void onServerStarted(ServerStartedEvent e) {
+		JacksEconomy.server.addTickable(StockMarketManager::tick);
 	}
 
 	@SubscribeEvent
