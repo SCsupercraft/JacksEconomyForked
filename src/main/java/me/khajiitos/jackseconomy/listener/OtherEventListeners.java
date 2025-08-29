@@ -32,7 +32,6 @@ public class OtherEventListeners {
 
 	@SubscribeEvent
 	public void onServerStopped(ServerStoppedEvent e) {
-		AdminShopColorManager.save();
 		StockMarketManager.save();
 		PurchaseManager.save();
 

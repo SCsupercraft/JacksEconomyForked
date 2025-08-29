@@ -28,11 +28,13 @@ public class AdminShopBlockEntity extends BlockEntity {
 	@Override
 	public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
 		name = tag.contains("adminShopName", Tag.TAG_STRING) ? tag.getString("adminShopName") : null;
+		color = tag.contains("color", Tag.TAG_INT) ? tag.getInt("color") : -1;
 	}
 
 	@Override
 	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
 		if (name != null) tag.putString("adminShopName", name);
+		if (color != -1) tag.putInt("color", color);
 	}
 
 	@Override
@@ -77,6 +79,6 @@ public class AdminShopBlockEntity extends BlockEntity {
 
 		BlockState newState = blockState.setValue(AdminShopBlock.COLORED, color != -1);
 		level.setBlockAndUpdate(blockPos, newState);
-		level.sendBlockUpdated(blockPos, blockState, newState, Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
+		level.sendBlockUpdated(blockPos, blockState, newState, 0); // flags apparently are not used
 	}
 }

@@ -223,6 +223,7 @@ public class AdminShopCommand {
 	}
 	static int resetAll(CommandContext<CommandSourceStack> ctx) {
 		AdminShopColorManager.resetData();
+		AdminShopColorManager.save();
 		ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.reset_color_data").withStyle(ChatFormatting.RED), true);
 		return 1;
 	}
