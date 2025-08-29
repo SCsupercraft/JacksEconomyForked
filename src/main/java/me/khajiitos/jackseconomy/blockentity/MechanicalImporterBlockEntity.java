@@ -2,6 +2,7 @@ package me.khajiitos.jackseconomy.blockentity;
 
 import me.khajiitos.jackseconomy.block.TransactionMachineBlock;
 import me.khajiitos.jackseconomy.config.Config;
+import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
@@ -204,6 +205,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
         ItemStack ticketItemStack = importer.items.get(slotTicket);
         List<ItemDescription> items = TicketItem.getItems(ticketItemStack);
 
+        ItemDescription selectedDescription = null;
         ItemStack itemStackToAdd = ItemStack.EMPTY;
 
         if (!items.isEmpty() && importer.selectedItem == null) {
@@ -214,6 +216,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
             for (ItemDescription itemDescription : items) {
                 if (importer.selectedItem.equals(itemDescription)) {
                     itemStackToAdd = itemDescription.createItemStack();
+                    selectedDescription = itemDescription;
                     break;
                 }
             }
@@ -236,7 +239,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
                 importer.progress += progressPerTick;
 
                 if (importer.progress >= 1.f) {
-                    importer.buyItems(itemStackToAdd, price, ticketItemStack);
+                    importer.buyItems(itemStackToAdd, selectedDescription, price, ticketItemStack);
                     importer.progress = 0.f;
 
                     level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5f, 1.5f);
@@ -248,7 +251,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
         importer.markUpdated();
     }
 
-    public void buyItems(ItemStack itemStackToBuy, double price, ItemStack ticketItem) {
+    public void buyItems(ItemStack itemStackToBuy, ItemDescription selectedDescription, double price, ItemStack ticketItem) {
         Supplier<Integer> availableSpaces = () -> {
             int spaces = 0;
 
@@ -271,8 +274,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
         int processCount = 0;
 
         while (processCount < maxProcesses && availableSpaces.get() > 0 && amountAffordable.get().intValue() > 0) {
-            ItemStack stack = new ItemStack(
-                    itemStackToBuy.getItem(),
+            ItemStack stack = itemStackToBuy.copyWithCount(
                     amountAffordable.get()
                             .min(BigDecimal.valueOf(Math.min(availableSpaces.get(), Math.min(maxProcesses - processCount, itemStackToBuy.getMaxStackSize())))).intValue()
             );
@@ -286,6 +288,10 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
         }
 
         TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
+
+        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(PurchaseManager.PurchaseSource.IMPORTER);
+        purchases.addPurchase(selectedDescription, processCount);
+        purchases.processPurchases();
     }
 
     @Override

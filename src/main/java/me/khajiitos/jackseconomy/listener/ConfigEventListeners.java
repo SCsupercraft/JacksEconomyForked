@@ -7,22 +7,26 @@ import me.khajiitos.jackseconomy.data.AdminShopColorManager;
 import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.data.StockMarketManager;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 public class ConfigEventListeners {
-
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent e) {
         JacksEconomy.server = e.getServer();
 
         PriceManager.load();
-
         AdminShopColorManager.load();
         StockMarketManager.load();
         PurchaseManager.load();
+    }
+
+    @SubscribeEvent
+    public void onServerStarted(ServerStartedEvent e) {
+        JacksEconomy.server.addTickable(StockMarketManager::tick);
     }
 
     @SubscribeEvent
@@ -47,7 +51,6 @@ public class ConfigEventListeners {
 
     @SubscribeEvent
     public void onServerStopped(ServerStoppedEvent e) {
-        AdminShopColorManager.save();
         StockMarketManager.save();
         PurchaseManager.save();
 

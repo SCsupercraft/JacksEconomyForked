@@ -30,26 +30,20 @@ public class EconomyCommand {
 	// TODO: Purchases command + reset prices
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("economy").requires(stack -> stack.hasPermission(4))
-						.then(ManifestCommand.command)
-						.then(PriceCommand.command)
-						// .then(PurchasesCommand.command)
-
-						// .then(Commands.literal("reset_all")
-						// 		 .executes(EconomyCommand::resetAll)
-						// )
+				.then(ManifestCommand.command)
+				.then(PriceCommand.command)
+				.then(PurchasesCommand.command)
+				.then(Commands.literal("reset_all").executes(EconomyCommand::resetAll))
 		);
 	}
 
-	/*
-
 	private static int resetAll(CommandContext<CommandSourceStack> ctx) {
-		PriceCommand.resetData(ctx)
-		PurchasesCommand.resetData(ctx);
-		ctx.getSource().sendSystemMessage(Component.translatable("jackseconomy.reset_all_data").withStyle(ChatFormatting.GREEN));
+		AdminShopCommand.resetAll(ctx);
+		PriceCommand.resetPrices(ctx);
+		PurchasesCommand.resetPurchases(ctx);
+		ctx.getSource().sendSystemMessage(Component.translatable("jackseconomy.reset_all_data").withStyle(ChatFormatting.RED));
 		return 1;
 	}
-
-	 */
 
 	private static class PriceCommand {
 		public static LiteralArgumentBuilder<CommandSourceStack> command =
@@ -67,8 +61,16 @@ public class EconomyCommand {
 						)
 						.then(Commands.literal("reload")
 								.executes(PriceCommand::reloadPrices)
+						)
+						.then(Commands.literal("reset")
+								.executes(PriceCommand::resetPrices)
 						);
 
+		private static int resetPrices(CommandContext<CommandSourceStack> ctx) {
+			PriceManager.resetData();
+			ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.reset_prices_data").withStyle(ChatFormatting.RED), true);
+			return 1;
+		}
 		private static int reloadPrices(CommandContext<CommandSourceStack> ctx) {
 			PriceManager.load();
 			ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.prices_reloaded").withStyle(ChatFormatting.GREEN), true);
@@ -299,11 +301,11 @@ public class EconomyCommand {
 	private static class PurchasesCommand {
 		public static LiteralArgumentBuilder<CommandSourceStack> command =
 				Commands.literal("purchases")
-						.then(Commands.literal("reset").executes(PurchasesCommand::resetData));
+						.then(Commands.literal("reset").executes(PurchasesCommand::resetPurchases));
 
-		private static int resetData(CommandContext<CommandSourceStack> ctx) {
+		private static int resetPurchases(CommandContext<CommandSourceStack> ctx) {
 			PurchaseManager.resetData();
-			ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.reset_purchase_data").withStyle(ChatFormatting.GREEN), true);
+			ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.reset_purchase_data").withStyle(ChatFormatting.RED), true);
 			return 1;
 		}
 	}

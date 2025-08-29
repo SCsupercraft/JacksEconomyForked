@@ -2,6 +2,7 @@ package me.khajiitos.jackseconomy.blockentity;
 
 import me.khajiitos.jackseconomy.block.TransactionMachineBlock;
 import me.khajiitos.jackseconomy.config.Config;
+import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.item.ExporterTicketItem;
@@ -265,6 +266,8 @@ public class ExporterBlockEntity extends TransactionMachineBlockEntity implement
         AtomicInteger processCount = new AtomicInteger();
         int maxProcesses = TicketItem.getMaxProcessCount(ticketItem);
 
+        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(PurchaseManager.PurchaseSource.EXPORTER);
+
         itemStacks.forEach((itemStack -> {
             double sellPrice = PriceManager.getExporterSellPrice(ItemDescription.ofItem(itemStack), 1);
             if (sellPrice == -1.0 || !success.get()) {
@@ -278,9 +281,14 @@ public class ExporterBlockEntity extends TransactionMachineBlockEntity implement
             this.currency = this.currency.add(BigDecimal.valueOf(sellPrice * sellCount));
             itemStack.shrink(sellCount);
             processCount.addAndGet(sellCount);
+
+            purchases.addPurchase(ItemDescription.ofItem(itemStack), sellCount * -1);
         }));
 
-        if (success.get()) TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
+        if (success.get()) {
+            TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
+            purchases.processPurchases();
+        }
         return success.get();
     }
 

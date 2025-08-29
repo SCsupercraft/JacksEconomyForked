@@ -8,6 +8,17 @@
 - Gui improvements
 - Improvements to scrollable elements (making the scroll bar draggable)
 
+## 1.2.2-1.7.0
+
+### Added
+
+- **Added a Purchase Tracker**: Purchases are now tracked and stored in the purchases.dat file found in a world's data folder
+- **Data Reset Commands**: Data can be reset through commands.
+  - **Reset All**: `/economy reset_all`
+  - **Reset Admin Shop Colors**: `/adminshop color reset_all`
+  - **Reset Prices**: `/economy price reset`
+  - **Reset Purchases**: `/economy purchases reset`
+
 ## 1.2.2-1.6.0
 
 ### Added

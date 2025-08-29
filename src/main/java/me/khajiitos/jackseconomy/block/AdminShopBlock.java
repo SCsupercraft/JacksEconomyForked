@@ -61,11 +61,7 @@ public class AdminShopBlock extends BaseEntityBlock implements NameableBlockItem
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        CompoundTag tag = BlockItem.getBlockEntityData(pContext.getItemInHand());
-        String name = tag != null && tag.contains("adminShopName") ? tag.getString("adminShopName") : null;
-        boolean isColored = AdminShopColorManager.getColor(name) != -1;
-
-        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite()).setValue(COLORED, isColored);
+        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite()).setValue(COLORED, false);
     }
 
     @Override

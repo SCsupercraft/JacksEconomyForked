@@ -11,22 +11,20 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.HashMap;
 
 public class AdminShopColorManager {
-	private static DataHandler dataHandler;
 	public static final HashMap<String, Integer> adminShopColors = new HashMap<>();
 	public static Integer defaultAdminShopColor = -1;
+	private static final DataHandler DATA_HANDLER = new DataHandler.NBTDataHandler(
+			new File("config/jackseconomy_adminshop_colors.dat")
+	);
 
 	public static void load() {
-		dataHandler = new DataHandler.NBTDataHandler(
-				JacksEconomy.server.getWorldPath(LevelResource.ROOT)
-						.resolve("data/jackseconomy/admin-shop-colors.dat")
-						.toFile()
-		);
-		if (dataHandler.DATA_FILE.exists()) {
-			CompoundTag data = dataHandler.loadAsNbt();
-			adminShopColors.clear();
+		resetData();
+		if (DATA_HANDLER.DATA_FILE.exists()) {
+			CompoundTag data = DATA_HANDLER.loadAsNbt();
 
 			if (data.contains("colors")) {
 				ListTag listTag = data.getList("colors", Tag.TAG_COMPOUND);
@@ -43,7 +41,13 @@ public class AdminShopColorManager {
 		CompoundTag tag = new CompoundTag();
 		tag.putInt("default", defaultAdminShopColor);
 		tag.put("colors", toAdminShopColorsList());
-		dataHandler.save(tag);
+		DATA_HANDLER.save(tag);
+	}
+
+	public static void resetData() {
+		adminShopColors.clear();
+		defaultAdminShopColor = -1;
+		updateAll();
 	}
 
 	private static ListTag toAdminShopColorsList() {
@@ -72,6 +76,7 @@ public class AdminShopColorManager {
 		else defaultAdminShopColor = color;
 
 		updateAll();
+		save();
 	}
 	public static void setColorFromHex(@Nullable String name, String color) {
 		setColor(name, Utils.hexToMinecraftColor(color));
@@ -81,6 +86,7 @@ public class AdminShopColorManager {
 		else defaultAdminShopColor = -1;
 
 		updateAll();
+		save();
 	}
 
 	public static int getColor(@Nullable String name) {

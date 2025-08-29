@@ -58,6 +58,7 @@ public class AdminShopCommand {
                 )
                 .then(Commands.literal("color")
                         .requires(stack -> stack.hasPermission(4))
+                        .then(Commands.literal("reset_all").executes(AdminShopCommand::resetAll))
                         .then(Commands.argument("color", ColorArgument.color())
                                 .then(Commands.argument("admin_shop_name", AdminShopArgument.greedyString())
                                         .executes(ctx -> setColor(ctx, false))
@@ -215,6 +216,12 @@ public class AdminShopCommand {
                 ).withStyle(ChatFormatting.GREEN),
                 false
         );
+        return 1;
+    }
+    static int resetAll(CommandContext<CommandSourceStack> ctx) {
+        AdminShopColorManager.resetData();
+        AdminShopColorManager.save();
+        ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.reset_color_data").withStyle(ChatFormatting.RED), true);
         return 1;
     }
 }

@@ -2,6 +2,7 @@ package me.khajiitos.jackseconomy.data.price;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
 import me.khajiitos.jackseconomy.util.FluidHelper;
 import me.khajiitos.jackseconomy.util.NBTUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -15,6 +16,8 @@ import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import javax.annotation.Nullable;
 
 public record FluidDescription(Fluid fluid, CompoundTag compoundTag) {
+    public static final Codec<FluidDescription> CODEC = FluidStack.CODEC.xmap(FluidDescription::ofFluid, FluidDescription::createFluidStack);
+
     public FluidDescription(Fluid fluid, @Nullable CompoundTag compoundTag) {
         this.fluid = fluid;
 

@@ -2,6 +2,7 @@ package me.khajiitos.jackseconomy.data.price;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
 import me.khajiitos.jackseconomy.util.ItemHelper;
 import me.khajiitos.jackseconomy.util.NBTUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -13,6 +14,8 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 public record ItemDescription(Item item, CompoundTag compoundTag) {
+    public static final Codec<ItemDescription> CODEC = ItemStack.CODEC.xmap(ItemDescription::ofItem, ItemDescription::createItemStack);
+
     public ItemDescription(Item item, @Nullable CompoundTag compoundTag) {
         if (item == null) throw new NullPointerException();
         this.item = item;

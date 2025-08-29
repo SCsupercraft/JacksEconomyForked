@@ -241,6 +241,14 @@ public class PriceManager {
         DATA_HANDLER.save(object);
     }
 
+    public static void resetData() {
+        itemPriceInfos.clear();
+        fluidPriceInfos.clear();
+        categories.clear();
+        save();
+        sendDataToPlayers(true);
+    }
+
     public static ListTag toTag(boolean fluid) {
         if (fluid) {
             ListTag listTag = new ListTag();
