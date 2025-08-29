@@ -11,6 +11,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -73,12 +74,12 @@ public class AdminShopBlockEntity extends BlockEntity {
 				? AdminShopColorManager.adminShopColors.get(blockEntity.name)
 				: AdminShopColorManager.defaultAdminShopColor;
 		int actualColor = blockEntity.color;
-		if (color == actualColor) return;
+		if (color == actualColor || !(level instanceof ServerLevel serverLevel)) return;
 
 		blockEntity.color = color;
 
 		BlockState newState = blockState.setValue(AdminShopBlock.COLORED, color != -1);
-		level.setBlockAndUpdate(blockPos, newState);
-		level.sendBlockUpdated(blockPos, blockState, newState, 0); // flags apparently are not used
+		serverLevel.setBlockAndUpdate(blockPos, newState);
+		serverLevel.sendBlockUpdated(blockPos, blockState, newState, 0); // flags apparently are not used
 	}
 }
