@@ -7,10 +7,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.event.PurchaseEvent;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.*;
-import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraftforge.common.MinecraftForge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,30 +65,41 @@ public class PurchaseManager {
 	}
 
 	public static class Purchases {
-		private final UUID buyer;
+		private final ServerPlayer buyer;
+		private final BlockPos pos;
+		private final ServerLevel level;
 		private final PurchaseSource source;
 		private final List<Purchase> purchases = new ArrayList<>();
 		private final long timestamp = JacksEconomy.server.overworld().getGameTime();
 
-		public Purchases(PurchaseSource source) {
-			this(null, source);
-		}
-
-		public Purchases(@Nullable UUID buyer, PurchaseSource source) {
+		public Purchases(ServerPlayer buyer, PurchaseSource source) {
 			this.buyer = buyer;
+			this.pos = null;
+			this.level = null;
 			this.source = source;
 		}
 
-		public void addPurchase(@NotNull ItemDescription description, int quantity) {
-			addPurchase(Purchase.of(description, buyer, quantity, timestamp, source));
+		public Purchases(BlockPos pos, ServerLevel level, PurchaseSource source) {
+			this.buyer = null;
+			this.pos = pos;
+			this.level = level;
+			this.source = source;
 		}
-		public void addPurchase(@NotNull FluidDescription description, int quantity) {
-			addPurchase(Purchase.of(description, buyer, quantity, timestamp, source));
+
+		public void addPurchase(@NotNull ItemDescription description, int quantity, double totalCost) {
+			addPurchase(Purchase.of(description, getBuyerUuid(), quantity, totalCost, timestamp, source));
+		}
+		public void addPurchase(@NotNull FluidDescription description, int quantity, double totalCost) {
+			addPurchase(Purchase.of(description, getBuyerUuid(), quantity, totalCost, timestamp, source));
 		}
 
 		private void addPurchase(@NotNull Purchase purchase) {
 			purchase.assertValid();
 			purchases.add(purchase);
+		}
+
+		private UUID getBuyerUuid() {
+			return buyer == null ? null : buyer.getUUID();
 		}
 
 		public void processPurchases() {
@@ -95,16 +110,21 @@ public class PurchaseManager {
 					Purchase current = mergedPurchases.get(purchase.description);
 
 					mergedPurchases.put(purchase.description, new Purchase(
-							purchase.description, purchase.buyer, purchase.quantity + current.quantity, timestamp, source
+							purchase.description, purchase.buyer, purchase.quantity + current.quantity, purchase.totalCost + current.totalCost, timestamp, source
 					));
 				} else mergedPurchases.put(purchase.description, purchase);
 			});
+
+			PurchaseEvent event = this.buyer != null
+					? new PurchaseEvent.Player(List.copyOf(mergedPurchases.values()), this.buyer)
+					: new PurchaseEvent.Block(List.copyOf(mergedPurchases.values()), this.pos, this.level);
+			MinecraftForge.EVENT_BUS.post(event);
 
 			PurchaseManager.purchases.addAll(mergedPurchases.values());
 		}
 	}
 
-	record Purchase(Either<ItemDescription, FluidDescription> description, Optional<UUID> buyer, int quantity, long timestamp, PurchaseSource source) {
+	public record Purchase(Either<ItemDescription, FluidDescription> description, Optional<UUID> buyer, int quantity, double totalCost, long timestamp, PurchaseSource source) {
 		public static final Codec<Purchase> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.either(ItemDescription.CODEC, FluidDescription.CODEC)
 						.fieldOf("description")
@@ -113,34 +133,38 @@ public class PurchaseManager {
 						.forGetter(Purchase::buyer),
 				Codec.INT.fieldOf("quantity")
 						.forGetter(Purchase::quantity),
+				Codec.DOUBLE.fieldOf("total_cost")
+						.forGetter(Purchase::totalCost),
 				Codec.LONG.fieldOf("timestamp")
 						.forGetter(Purchase::timestamp),
 				PurchaseSource.CODEC.fieldOf("source")
 						.forGetter(Purchase::source)
 		).apply(instance, Purchase::new));
 
-		public static Purchase of(@NotNull ItemDescription description, int quantity, long timestamp, @NotNull PurchaseSource source) {
-			return of(description, null, quantity, timestamp, source);
+		private static Purchase of(@NotNull ItemDescription description, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+			return of(description, null, quantity, totalCost, timestamp, source);
 		}
-		public static Purchase of(@NotNull ItemDescription description, @Nullable UUID buyer, int quantity, long timestamp, @NotNull PurchaseSource source) {
-			return new Purchase(Either.left(description), Optional.ofNullable(buyer), quantity, timestamp, source);
-		}
-
-		public static Purchase of(@NotNull FluidDescription description, int quantity, long timestamp, @NotNull PurchaseSource source) {
-			return of(description, null, quantity, timestamp, source);
-		}
-		public static Purchase of(@NotNull FluidDescription description, @Nullable UUID buyer, int quantity, long timestamp, @NotNull PurchaseSource source) {
-			return new Purchase(Either.right(description), Optional.ofNullable(buyer), quantity, timestamp, source);
+		private static Purchase of(@NotNull ItemDescription description, @Nullable UUID buyer, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+			return new Purchase(Either.left(description), Optional.ofNullable(buyer), quantity, totalCost, timestamp, source);
 		}
 
-		public void assertValid() {
+		private static Purchase of(@NotNull FluidDescription description, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+			return of(description, null, quantity, totalCost, timestamp, source);
+		}
+		private static Purchase of(@NotNull FluidDescription description, @Nullable UUID buyer, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+			return new Purchase(Either.right(description), Optional.ofNullable(buyer), quantity, totalCost, timestamp, source);
+		}
+
+		private void assertValid() {
+			if (totalCost <= 0) throw new IllegalStateException("Purchases must have a valid unit cost! (greater than zero)");
 			source.assertValid(this);
 		}
 
-		public boolean isValid() {
+		private boolean isValid() {
 			return source.isValid(this);
 		}
 	}
+
 	public enum PurchaseSource {
 		ADMIN_SHOP(true, Type.ITEM),
 		IMPORTER(false, Type.ITEM),

@@ -4,7 +4,7 @@ Automatable economy mod for modpacks or servers with an (optional) create integr
 
 ## Downloads
 
-[Curseforge](https://www.curseforge.com/minecraft/mc-mods/flapjacks-economy-forked/)
+[Curseforge](https://www.curseforge.com/minecraft/mc-mods/flapjacks-economy-forked/)\
 [Modrinth](https://modrinth.com/mod/flapjacks-economy-forked/)
 
 ## Supported Versions

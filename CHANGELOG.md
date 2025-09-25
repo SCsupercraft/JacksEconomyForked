@@ -12,7 +12,8 @@
 
 ### Added
 
-- **Added a Purchase Tracker**: Purchases are now tracked and stored in the purchases.dat file found in a world's data folder
+- **Purchase Events**: Events are fired after a purchase, to be used by addon mods.
+- **Added a Purchase Tracker**: Purchases are now tracked and stored in the purchases.dat file found in a world's data folder.
 - **Data Reset Commands**: Data can be reset through commands.
   - **Reset All**: `/economy reset_all`
   - **Reset Admin Shop Colors**: `/adminshop color reset_all`

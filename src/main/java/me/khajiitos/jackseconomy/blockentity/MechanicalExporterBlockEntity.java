@@ -270,7 +270,7 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
         AtomicInteger processCount = new AtomicInteger();
         int maxProcesses = TicketItem.getMaxProcessCount(ticketItem);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(PurchaseManager.PurchaseSource.EXPORTER);
+        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(this.worldPosition, (ServerLevel) this.level, PurchaseManager.PurchaseSource.EXPORTER);
 
         itemStacks.forEach((itemStack -> {
             double sellPrice = PriceManager.getExporterSellPrice(ItemDescription.ofItem(itemStack), 1);
@@ -286,7 +286,7 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
             itemStack.shrink(sellCount);
             processCount.addAndGet(sellCount);
 
-            purchases.addPurchase(ItemDescription.ofItem(itemStack), sellCount * -1);
+            purchases.addPurchase(ItemDescription.ofItem(itemStack), sellCount * -1, sellPrice * sellCount);
         }));
 
         if (success.get()) {

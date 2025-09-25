@@ -250,8 +250,8 @@ public class FluidExporterBlockEntity extends FluidTransactionMachineBlockEntity
 
         TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(PurchaseManager.PurchaseSource.FLUID_EXPORTER);
-        purchases.addPurchase(description, amountSold * -1);
+        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(this.worldPosition, (ServerLevel) this.level, PurchaseManager.PurchaseSource.FLUID_EXPORTER);
+        purchases.addPurchase(description, amountSold * -1, sellPrice * amountSold);
         purchases.processPurchases();
 
         return true;
