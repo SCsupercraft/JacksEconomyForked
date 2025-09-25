@@ -27,7 +27,7 @@ public class AdminShopPurchaseHandler {
         ServerPlayer sender = (ServerPlayer) context.player();
         ItemStack wallet = CuriosWallet.get(sender);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(sender.getUUID(), PurchaseManager.PurchaseSource.ADMIN_SHOP);
+        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(sender, PurchaseManager.PurchaseSource.ADMIN_SHOP);
 
         BigDecimal value = BigDecimal.ZERO;
         for (Map.Entry<AdminShopPurchasePacket.ShopItemDescription, Integer> entry : msg.shoppingCart().entrySet()) {
@@ -37,7 +37,7 @@ public class AdminShopPurchaseHandler {
                 return;
             }
 
-            purchases.addPurchase(description, entry.getValue());
+            purchases.addPurchase(description, entry.getValue(), price);
 
             if (Config.oneItemCurrencyMode.get()) {
                 value = value.add(BigDecimal.valueOf(Math.round(price)));
@@ -60,7 +60,7 @@ public class AdminShopPurchaseHandler {
                     return;
                 }
 
-                purchases.addPurchase(entry.getKey(), entry.getValue() * -1);
+                purchases.addPurchase(entry.getKey(), entry.getValue() * -1, price);
 
                 if (Config.oneItemCurrencyMode.get()) {
                     value = value.subtract(BigDecimal.valueOf(Math.round(price)));
