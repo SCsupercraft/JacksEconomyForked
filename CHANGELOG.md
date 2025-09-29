@@ -6,17 +6,21 @@
 - Gui improvements
 - Improvements to scrollable elements (making the scroll bar draggable)
 
-## 1.2.2-1.7.0
+## 1.2.2-1.6.1
 
 ### Added
 
 - **Purchase Events**: Events are fired after a purchase, to be used by addon mods.
-- **Added a Purchase Tracker**: Purchases are now tracked and stored in the purchases.dat file found in a world's data folder.
+- **Purchase Tracking**: Purchases are now tracked and stored in the purchases.dat file found in a world's data folder.
 - **Data Reset Commands**: Data can be reset through commands.
   - **Reset All**: `/economy reset_all`
   - **Reset Admin Shop Colors**: `/adminshop color reset_all`
   - **Reset Prices**: `/economy price reset`
   - **Reset Purchases**: `/economy purchases reset`
+
+### Changed
+
+- **Admin Shop Colors**: Admin shop colors are now saved per instance instead of per save, so that colors are the same across all saves.
 
 ## 1.2.2-1.6.0
 
