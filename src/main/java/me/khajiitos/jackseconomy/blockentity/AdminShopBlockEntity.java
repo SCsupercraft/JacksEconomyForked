@@ -1,6 +1,5 @@
 package me.khajiitos.jackseconomy.blockentity;
 
-import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.block.AdminShopBlock;
 import me.khajiitos.jackseconomy.data.AdminShopColorManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
@@ -13,14 +12,13 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class AdminShopBlockEntity extends BlockEntity {
 	private @Nullable String name;
-	private int color = -1;
 
 	public AdminShopBlockEntity(BlockPos pPos, BlockState pBlockState) {
 		super(BlockEntityReg.ADMIN_SHOP.get(), pPos, pBlockState);
@@ -29,13 +27,11 @@ public class AdminShopBlockEntity extends BlockEntity {
 	@Override
 	public void load(CompoundTag tag) {
 		name = tag.contains("adminShopName", Tag.TAG_STRING) ? tag.getString("adminShopName") : null;
-		color = tag.contains("color", Tag.TAG_INT) ? tag.getInt("color") : -1;
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag) {
+	protected void saveAdditional(@NotNull CompoundTag tag) {
 		if (name != null) tag.putString("adminShopName", name);
-		if (color != -1) tag.putInt("color", color);
 	}
 
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
@@ -55,7 +51,7 @@ public class AdminShopBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
+	public @NotNull CompoundTag getUpdateTag() {
 		CompoundTag tag = new CompoundTag();
 		this.saveAdditional(tag);
 		return tag;
@@ -70,15 +66,9 @@ public class AdminShopBlockEntity extends BlockEntity {
 	}
 
 	public static void tick(Level level, BlockPos blockPos, BlockState blockState, AdminShopBlockEntity blockEntity) {
-		int color = AdminShopColorManager.adminShopColors.containsKey(blockEntity.name)
-				? AdminShopColorManager.adminShopColors.get(blockEntity.name)
-				: AdminShopColorManager.defaultAdminShopColor;
-		int actualColor = blockEntity.color;
-		if (color == actualColor || !(level instanceof ServerLevel serverLevel)) return;
-
-		blockEntity.color = color;
-
-		BlockState newState = blockState.setValue(AdminShopBlock.COLORED, color != -1);
+		boolean colored = AdminShopColorManager.getColor(blockEntity.name) != -1;
+		if (colored == blockState.getValue(AdminShopBlock.COLORED) || !(level instanceof ServerLevel serverLevel)) return;
+		BlockState newState = blockState.setValue(AdminShopBlock.COLORED, colored);
 		serverLevel.setBlockAndUpdate(blockPos, newState);
 		serverLevel.sendBlockUpdated(blockPos, blockState, newState, 0); // flags apparently are not used
 	}
