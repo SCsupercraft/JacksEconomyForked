@@ -1,12 +1,8 @@
 package me.khajiitos.jackseconomy.data.price;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import me.khajiitos.jackseconomy.util.ItemHelper;
-import me.khajiitos.jackseconomy.util.NBTUtil;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -84,25 +80,5 @@ public record ItemDescription(Item item, CompoundTag compoundTag) {
         }
 
         return itemStack;
-    }
-
-    public JsonObject toJson() {
-        JsonElement jsonElement = NBTUtil.nbtToJson(this.toNbt());
-
-        if (jsonElement instanceof JsonObject object) {
-            return object;
-        } else {
-            return new JsonObject();
-        }
-    }
-
-    public static @Nullable ItemDescription fromJson(JsonObject json) {
-        Tag tag = NBTUtil.jsonToNbt(json);
-
-        if (tag instanceof CompoundTag compoundTag) {
-            return ItemDescription.fromNbt(compoundTag);
-        } else {
-            return null;
-        }
     }
 }

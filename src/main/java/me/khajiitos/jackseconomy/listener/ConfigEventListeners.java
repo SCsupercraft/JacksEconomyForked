@@ -12,6 +12,7 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 public class ConfigEventListeners {
     @SubscribeEvent
@@ -26,7 +27,8 @@ public class ConfigEventListeners {
 
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent e) {
-        JacksEconomy.server.addTickable(StockMarketManager::tick);
+        // Work in progress, only enable in a development environment.
+        if (!FMLEnvironment.production) JacksEconomy.server.addTickable(StockMarketManager::tick);
     }
 
     @SubscribeEvent

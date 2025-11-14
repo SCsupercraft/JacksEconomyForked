@@ -1,8 +1,5 @@
 package me.khajiitos.jackseconomy.data.price;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.DataHandler;
@@ -13,6 +10,7 @@ import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
 import me.khajiitos.jackseconomy.util.NewShopUnlocks;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,8 +27,9 @@ public class PriceManager {
     private static final List<ItemPriceEntry> itemPriceInfos = new ArrayList<>();
     private static final List<FluidPriceEntry> fluidPriceInfos = new ArrayList<>();
     private static final LinkedHashMap<Category, List<Category>> categories = new LinkedHashMap<>();
-    private static final DataHandler DATA_HANDLER = new DataHandler.JSONDataHandler(
-            new File("config/jackseconomy_prices.json")
+    private static final DataHandler DATA_HANDLER = new DataHandler(
+            new File("config/jackseconomy_prices.dat"),
+			new File("config/jackseconomy_prices.json")
     );
 
     static {
@@ -118,50 +117,46 @@ public class PriceManager {
         return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof AdminShopItemPriceInfo info && Objects.equals(info.adminShopName, adminShopName) && info.adminShopSlot == slot && Objects.equals(info.category, category)).map(entry -> ((AdminShopItemPriceInfo)entry.itemPriceInfo).adminShopBuyPrice * count).findFirst().orElse(-1.0);
     }
 
-    private static @Nullable ItemDescription itemDescriptionFromJson(JsonObject element) {
-        try {
-            return element.get("item").isJsonObject() ? ItemDescription.fromJson(element.get("item").getAsJsonObject()) :
-                    ItemDescription.fromJson(element);
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
     public static void load() {
-        final File file = DATA_HANDLER.DATA_FILE;
-        if (file.exists()) {
+        if (DATA_HANDLER.fileExists()) {
             itemPriceInfos.clear();
             fluidPriceInfos.clear();
             categories.clear();
 
             try {
-                JsonObject pricesObj = DATA_HANDLER.loadAsJson();
-                JsonArray itemsArray = pricesObj.has("items") ? pricesObj.getAsJsonArray("items") : new JsonArray();
-                JsonArray fluidsArray = pricesObj.has("fluids") ? pricesObj.getAsJsonArray("fluids") : new JsonArray();
-                JsonArray categoriesArray = pricesObj.has("categories") ? pricesObj.getAsJsonArray("categories") : new JsonArray();
+                CompoundTag pricesTag = DATA_HANDLER.load();
+                ListTag itemsArray = pricesTag.contains("items")
+						? pricesTag.getList("items", Tag.TAG_COMPOUND)
+						: new ListTag();
+                ListTag fluidsArray = pricesTag.contains("fluids")
+						? pricesTag.getList("fluids", Tag.TAG_COMPOUND)
+						: new ListTag();
+                ListTag categoriesArray = pricesTag.contains("categories")
+						? pricesTag.getList("categories", Tag.TAG_COMPOUND)
+						: new ListTag();
 
-                categoriesArray.forEach(jsonElement -> {
-                    JsonObject object = jsonElement.getAsJsonObject();
-                    String categoryName = object.get("name").getAsString();
+                categoriesArray.forEach(tag -> {
+                    CompoundTag compoundTag = ((CompoundTag) tag);
+                    String categoryName = compoundTag.getString("name");
 
-                    String adminShopName = object.has("adminShopName") ? object.get("adminShopName").getAsString() : null;
+                    String adminShopName = compoundTag.contains("adminShopName") ? compoundTag.getString("adminShopName") : null;
                     if (adminShopName != null && adminShopName.length() > 32) return;
 
-                    ItemDescription itemDescription = itemDescriptionFromJson(object);
+                    ItemDescription itemDescription = ItemDescription.fromNbt(compoundTag);
                     if (itemDescription == null) return;
 
-                    JsonArray categoriesList = object.getAsJsonArray("categories");
+                    ListTag categoriesList = compoundTag.getList("categories", Tag.TAG_COMPOUND);
 
-                    if (categoriesList != null) {
+                    if (!categoriesList.isEmpty()) {
                         Category category = new Category(categoryName, itemDescription, adminShopName);
                         ArrayList<Category> innerCategories = new ArrayList<>();
                         categories.put(category, innerCategories);
 
-                        categoriesList.forEach(jsonElementInner -> {
-                            if (jsonElementInner instanceof JsonObject categoryObject) {
-                                String categoryNameInner = categoryObject.get("name").getAsString();
+                        categoriesList.forEach(tagInner -> {
+                            if (tagInner instanceof CompoundTag categoryTag) {
+                                String categoryNameInner = categoryTag.getString("name");
 
-                                ItemDescription innerItemDescription = itemDescriptionFromJson(categoryObject);
+                                ItemDescription innerItemDescription = ItemDescription.fromNbt(categoryTag);
                                 if (innerItemDescription == null) return;
 
                                 innerCategories.add(new Category(categoryNameInner, innerItemDescription, null));
@@ -170,11 +165,11 @@ public class PriceManager {
                     }
                 });
 
-                itemsArray.forEach(jsonElement -> {
-                    JsonObject object = jsonElement.getAsJsonObject();
+                itemsArray.forEach(tag -> {
+                    CompoundTag object = ((CompoundTag) tag);
 
-                    ItemDescription itemDescription = ItemDescription.fromJson(object);
-                    ItemPriceInfo priceInfo = ItemPriceInfo.fromJson(object);
+                    ItemDescription itemDescription = ItemDescription.fromNbt(object);
+                    ItemPriceInfo priceInfo = ItemPriceInfo.fromNbt(object);
 
                     if (itemDescription != null && priceInfo != null)
                         itemPriceInfos.add(new ItemPriceEntry(itemDescription, priceInfo));
@@ -182,63 +177,61 @@ public class PriceManager {
                         JacksEconomy.LOGGER.warn("Invalid item price info!");
                 });
 
-                fluidsArray.forEach(jsonElement -> {
-                    JsonObject object = jsonElement.getAsJsonObject();
+                fluidsArray.forEach(tag -> {
+                    CompoundTag compoundTag = ((CompoundTag) tag);
 
-                    FluidDescription fluidDescription = FluidDescription.fromJson(object);
-                    FluidPriceInfo priceInfo = FluidPriceInfo.fromJson(object);
+                    FluidDescription fluidDescription = FluidDescription.fromNbt(compoundTag);
+                    FluidPriceInfo priceInfo = FluidPriceInfo.fromNbt(compoundTag);
 
                     if (fluidDescription != null && priceInfo != null)
                         fluidPriceInfos.add(new FluidPriceEntry(fluidDescription, priceInfo));
                     else
                         JacksEconomy.LOGGER.warn("Invalid fluid price info!");
                 });
-            } catch (JsonSyntaxException | ClassCastException e) {
+            } catch (ClassCastException e) {
                 JacksEconomy.LOGGER.error("Failed to load prices", e);
             }
-        } else if (file.getParentFile().isDirectory() || file.getParentFile().mkdirs()) {
-            save();
         }
+		save();
     }
 
     public static void save() {
-        JsonObject object = new JsonObject();
-        JsonArray itemsArray = new JsonArray();
-        JsonArray fluidsArray = new JsonArray();
-        JsonArray categoriesArray = new JsonArray();
+        CompoundTag tag = new CompoundTag();
+        ListTag itemsArray = new ListTag();
+        ListTag fluidsArray = new ListTag();
+        ListTag categoriesArray = new ListTag();
 
-        itemPriceInfos.forEach((entry) -> {
-            itemsArray.add(merge(entry.itemDescription.toJson(), entry.itemPriceInfo.toJson()));
-        });
-
-        fluidPriceInfos.forEach((entry) -> {
-            fluidsArray.add(merge(entry.fluidDescription.toJson(), entry.fluidPriceInfo.toJson()));
-        });
+        itemPriceInfos.forEach((entry) ->
+				itemsArray.add(entry.itemDescription.toNbt().merge(entry.itemPriceInfo.toNbt()))
+		);
+        fluidPriceInfos.forEach((entry) ->
+				fluidsArray.add(entry.fluidDescription.toNbt().merge(entry.fluidPriceInfo.toNbt()))
+		);
 
         categories.forEach((category, categories) -> {
-            JsonObject categoryObj = category.icon.toJson();
-            categoryObj.addProperty("name", category.name);
+            CompoundTag categoryTag = category.icon.toNbt();
+            categoryTag.putString("name", category.name);
 
-            if (category.adminShopName != null) categoryObj.addProperty("adminShopName", category.adminShopName);
+            if (category.adminShopName != null) categoryTag.putString("adminShopName", category.adminShopName);
 
-            JsonArray innerCategories = new JsonArray();
+            ListTag innerCategories = new ListTag();
 
             categories.forEach(categoryInner -> {
-                JsonObject categoryInnerObj = categoryInner.icon().toJson();
+                CompoundTag categoryInnerTag = categoryInner.icon().toNbt();
 
-                categoryInnerObj.addProperty("name", categoryInner.name);
-                innerCategories.add(categoryInnerObj);
+                categoryInnerTag.putString("name", categoryInner.name);
+                innerCategories.add(categoryInnerTag);
             });
 
-            categoryObj.add("categories", innerCategories);
-            categoriesArray.add(categoryObj);
+            categoryTag.put("categories", innerCategories);
+            categoriesArray.add(categoryTag);
         });
 
-        object.add("items", itemsArray);
-        object.add("fluids", fluidsArray);
-        object.add("categories", categoriesArray);
+        tag.put("items", itemsArray);
+        tag.put("fluids", fluidsArray);
+        tag.put("categories", categoriesArray);
 
-        DATA_HANDLER.save(object);
+        DATA_HANDLER.save(tag);
     }
 
     public static void resetData() {
@@ -405,20 +398,13 @@ public class PriceManager {
         Packets.sendToClient(serverPlayer, new PricesInfoPacket(toTag(false), toTag(true)));
 
         if (includeAdminShops) {
-            Set<String> names = getCategories().keySet().stream().map(PriceManager.Category::adminShopName).filter(Objects::nonNull).collect(Collectors.toSet());
+            Set<String> names = getCategories().keySet().stream().map(Category::adminShopName).filter(Objects::nonNull).collect(Collectors.toSet());
 
             for (String name: names) {
                 Packets.sendToClient(serverPlayer, new AdminShopSchemaPacket(PriceManager.toAdminShopSchemaCompound(serverPlayer, name), name, Config.oneItemCurrencyMode.get()));
             }
             Packets.sendToClient(serverPlayer, new AdminShopSchemaPacket(PriceManager.toAdminShopSchemaCompound(serverPlayer, null), null, Config.oneItemCurrencyMode.get()));
         }
-    }
-
-    private static JsonObject merge(JsonObject object1, JsonObject object2) {
-        JsonObject object = new JsonObject();
-        object1.keySet().forEach(name -> object.add(name, object1.get(name)));
-        object2.keySet().forEach(name -> object.add(name, object2.get(name)));
-        return object;
     }
 
     public record Category(String name, ItemDescription icon, @Nullable String adminShopName) {}

@@ -1,17 +1,17 @@
 package me.khajiitos.jackseconomy.data.price;
 
-import com.google.gson.JsonObject;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class ItemPriceInfo {
 
-    public static @Nullable ItemPriceInfo fromJson(JsonObject jsonObject) {
+    public static @Nullable ItemPriceInfo fromNbt(CompoundTag compoundTag) {
         try {
             ItemPriceInfo info = null;
 
-            switch (jsonObject.get("type").getAsString()) {
-                case "adminshop" -> info = AdminShopItemPriceInfo.fromJsonOrNull(jsonObject);
-                case "prices" -> info = PricesItemPriceInfo.fromJsonOrNull(jsonObject);
+            switch (compoundTag.getString("type")) {
+                case "adminshop" -> info = AdminShopItemPriceInfo.fromNbtOrNull(compoundTag);
+                case "prices" -> info = PricesItemPriceInfo.fromNbtOrNull(compoundTag);
             }
 
             return info;
@@ -20,9 +20,9 @@ public abstract class ItemPriceInfo {
         }
     }
 
-    protected static boolean hasAny(JsonObject object, Iterable<String> strings) {
+    protected static boolean hasAny(CompoundTag compoundTag, Iterable<String> strings) {
         for (String string : strings) {
-            if (object.has(string)) {
+            if (compoundTag.contains(string)) {
                 return true;
             }
         }
@@ -30,5 +30,5 @@ public abstract class ItemPriceInfo {
         return false;
     }
 
-    public abstract JsonObject toJson();
+    public abstract CompoundTag toNbt();
 }

@@ -1,6 +1,6 @@
 package me.khajiitos.jackseconomy.data.price;
 
-import com.google.gson.JsonObject;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,15 +22,15 @@ public class AdminShopItemPriceInfo extends ItemPriceInfo {
         this.adminShopName = adminShopName;
     }
 
-    protected static @Nullable ItemPriceInfo fromJsonOrNull(JsonObject jsonObject) {
+    protected static @Nullable ItemPriceInfo fromNbtOrNull(CompoundTag compoundTag) {
         try {
-            if (hasAny(jsonObject, List.of("adminShopBuyPrice", "category", "adminShopSlot", "adminShopStage", "customAdminShopName"))) {
-                double adminShopBuyPrice = jsonObject.has("adminShopBuyPrice") ? jsonObject.get("adminShopBuyPrice").getAsDouble() : -1;
-                String category = jsonObject.has("category") ? jsonObject.get("category").getAsString() : null;
-                int adminShopSlot = jsonObject.has("adminShopSlot") ? jsonObject.get("adminShopSlot").getAsInt() : -1;
-                String customAdminShopName = jsonObject.has("customAdminShopName") ? jsonObject.get("customAdminShopName").getAsString() : null;
-                String adminShopStage = jsonObject.has("adminShopStage") ? jsonObject.get("adminShopStage").getAsString() : null;
-                String adminShopName = jsonObject.has("adminShopName") ? jsonObject.get("adminShopName").getAsString() : null;
+            if (hasAny(compoundTag, List.of("adminShopBuyPrice", "category", "adminShopSlot", "adminShopStage", "customAdminShopName"))) {
+                double adminShopBuyPrice = compoundTag.contains("adminShopBuyPrice") ? compoundTag.getDouble("adminShopBuyPrice") : -1;
+                String category = compoundTag.contains("category") ? compoundTag.getString("category") : null;
+                int adminShopSlot = compoundTag.contains("adminShopSlot") ? compoundTag.getInt("adminShopSlot") : -1;
+                String customAdminShopName = compoundTag.contains("customAdminShopName") ? compoundTag.getString("customAdminShopName") : null;
+                String adminShopStage = compoundTag.contains("adminShopStage") ? compoundTag.getString("adminShopStage") : null;
+                String adminShopName = compoundTag.contains("adminShopName") ? compoundTag.getString("adminShopName") : null;
                 if (adminShopName != null && adminShopName.length() > 32) return null;
 
                 return new AdminShopItemPriceInfo(adminShopBuyPrice, category, adminShopSlot, customAdminShopName, adminShopStage, adminShopName);
@@ -41,34 +41,34 @@ public class AdminShopItemPriceInfo extends ItemPriceInfo {
     }
 
     @Override
-    public JsonObject toJson() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "adminshop");
+    public CompoundTag toNbt() {
+        CompoundTag compoundTag = new CompoundTag();
+        compoundTag.putString("type", "adminshop");
 
         if (this.adminShopBuyPrice != -1) {
-            jsonObject.addProperty("adminShopBuyPrice", this.adminShopBuyPrice);
+            compoundTag.putDouble("adminShopBuyPrice", this.adminShopBuyPrice);
         }
 
         if (this.category != null) {
-            jsonObject.addProperty("category", this.category);
+            compoundTag.putString("category", this.category);
         }
 
         if (this.adminShopSlot != -1) {
-            jsonObject.addProperty("adminShopSlot", this.adminShopSlot);
+            compoundTag.putInt("adminShopSlot", this.adminShopSlot);
         }
 
         if (this.customAdminShopName != null) {
-            jsonObject.addProperty("customAdminShopName", this.customAdminShopName);
+            compoundTag.putString("customAdminShopName", this.customAdminShopName);
         }
 
         if (this.adminShopStage != null) {
-            jsonObject.addProperty("adminShopStage", this.adminShopStage);
+            compoundTag.putString("adminShopStage", this.adminShopStage);
         }
 
         if (this.adminShopName != null) {
-            jsonObject.addProperty("adminShopName", this.adminShopName);
+            compoundTag.putString("adminShopName", this.adminShopName);
         }
 
-        return jsonObject;
+        return compoundTag;
     }
 }

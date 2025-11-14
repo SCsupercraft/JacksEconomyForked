@@ -7,147 +7,73 @@ import me.khajiitos.jackseconomy.util.NBTUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 
+import javax.annotation.Nullable;
 import java.io.*;
 
-public abstract class DataHandler {
-	public final File DATA_FILE;
-	DataHandler(final File file) {
-		this.DATA_FILE = file;
+public final class DataHandler {
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+	private final File nbtFile;
+	@Nullable
+	private final File legacyJsonFile;
+
+	public DataHandler(final File nbtFile) {
+		this(nbtFile, null);
 	}
-	public abstract void save(JsonObject object);
-	public abstract void save(CompoundTag compoundTag);
-	public abstract JsonObject loadAsJson();
-	public abstract CompoundTag loadAsNbt();
 
-	public static class NBTDataHandler extends DataHandler {
-
-		public NBTDataHandler(File file) {
-			super(file);
-		}
-
-		@Override
-		public void save(JsonObject object) {
-			JacksEconomy.LOGGER.info("Save: {}", DATA_FILE.getName());
-			if (!DATA_FILE.getParentFile().isDirectory() && !DATA_FILE.getParentFile().mkdirs()) { return; }
-
-			try {
-				CompoundTag nbt = (CompoundTag) NBTUtil.jsonToNbt(object);
-				if (nbt == null) { return; }
-
-				NbtIo.write(nbt, DATA_FILE);
-			} catch (IOException e) {
-				JacksEconomy.LOGGER.error("Failed to save data", e);
-			}
-		}
-		@Override
-		public void save(CompoundTag compoundTag) {
-			JacksEconomy.LOGGER.info("Save: {}", DATA_FILE.getName());
-			if (!DATA_FILE.getParentFile().isDirectory() && !DATA_FILE.getParentFile().mkdirs()) { return; }
-
-			try {
-				NbtIo.write(compoundTag, DATA_FILE);
-			} catch (IOException e) {
-				JacksEconomy.LOGGER.error("Failed to save data", e);
-			}
-		}
-
-		@Override
-		public JsonObject loadAsJson() {
-			JacksEconomy.LOGGER.info("Load: {}", DATA_FILE.getName());
-			if (DATA_FILE.exists()) {
-				try {
-					return NBTUtil.nbtToJson(NbtIo.read(DATA_FILE)).getAsJsonObject();
-				} catch (IOException e) {
-					JacksEconomy.LOGGER.error("Failed to load data", e);
-				}
-			} else {
-				JacksEconomy.LOGGER.error("Data file not found!");
-			}
-			return null;
-		}
-		@Override
-		public CompoundTag loadAsNbt() {
-			JacksEconomy.LOGGER.info("Load: {}", DATA_FILE.getName());
-			if (DATA_FILE.exists()) {
-				try {
-					return NbtIo.read(DATA_FILE);
-				} catch (IOException e) {
-					JacksEconomy.LOGGER.error("Failed to load data", e);
-				}
-			} else {
-				JacksEconomy.LOGGER.error("Data file not found!");
-			}
-			return null;
-		}
+	public DataHandler(final File nbtFile, @Nullable final File legacyJsonFile) {
+		this.nbtFile = nbtFile;
+		this.legacyJsonFile = legacyJsonFile;
 	}
-	public static class JSONDataHandler extends DataHandler {
 
-		private final Gson GSON;
-		public JSONDataHandler(File file) {
-			super(file);
+	public boolean fileExists() {
+		return nbtFile.exists() || (legacyJsonFile != null && legacyJsonFile.exists());
+	}
 
-			GSON = new GsonBuilder().setPrettyPrinting().create();
+	public boolean save(CompoundTag compoundTag) {
+		if (!nbtFile.getParentFile().isDirectory() && !nbtFile.getParentFile().mkdirs()) { return false; }
+
+		try {
+			NbtIo.write(compoundTag, nbtFile);
+		} catch (IOException e) {
+			JacksEconomy.LOGGER.error("Failed to save data", e);
+			return false;
 		}
-		public JSONDataHandler(File file, boolean usePrettyPrint) {
-			super(file);
+		return true;
+	}
 
-			if (usePrettyPrint) {
-				GSON = new GsonBuilder().setPrettyPrinting().create();
-			} else {
-				GSON = new GsonBuilder().create();
-			}
-		}
-
-		@Override
-		public void save(JsonObject object) {
-			JacksEconomy.LOGGER.info("Save: {}", DATA_FILE.getName());
-			if (!DATA_FILE.getParentFile().isDirectory() && !DATA_FILE.getParentFile().mkdirs()) { return; }
-
-			try (FileWriter fileWriter = new FileWriter(DATA_FILE)) {
-				fileWriter.write(GSON.toJson(object));
+	public @Nullable CompoundTag load() {
+		if (nbtFile.exists()) {
+			try {
+				return NbtIo.read(nbtFile);
 			} catch (IOException e) {
-				JacksEconomy.LOGGER.error("Failed to save data", e);
+				JacksEconomy.LOGGER.error("Failed to load data", e);
 			}
-		}
-		@Override
-		public void save(CompoundTag compoundTag) {
-			JacksEconomy.LOGGER.info("Save: {}", DATA_FILE.getName());
-			if (!DATA_FILE.getParentFile().isDirectory() && !DATA_FILE.getParentFile().mkdirs()) { return; }
-
-			try (FileWriter fileWriter = new FileWriter(DATA_FILE)) {
-				fileWriter.write(GSON.toJson(NBTUtil.nbtToJson(compoundTag)));
-			} catch (IOException e) {
-				JacksEconomy.LOGGER.error("Failed to save data", e);
-			}
-		}
-
-		@Override
-		public JsonObject loadAsJson() {
-			JacksEconomy.LOGGER.info("Load: {}", DATA_FILE.getName());
-			if (DATA_FILE.exists()) {
-				try (FileReader fileReader = new FileReader(DATA_FILE)) {
-					return GSON.fromJson(fileReader, JsonObject.class);
+		} else if (legacyJsonFile != null) {
+			if (legacyJsonFile.exists()) {
+				JacksEconomy.LOGGER.warn("Attempting to load data from legacy json file! Converting '{}' --> '{}'", legacyJsonFile, nbtFile);
+				CompoundTag tag = null;
+				try (FileReader fileReader = new FileReader(legacyJsonFile)) {
+					tag = (CompoundTag) NBTUtil.jsonToNbt(GSON.fromJson(fileReader, JsonObject.class));
 				} catch (JsonSyntaxException | ClassCastException | IOException e) {
 					JacksEconomy.LOGGER.error("Failed to load data", e);
 				}
-			} else {
-				JacksEconomy.LOGGER.error("Data file not found!");
-			}
-			return null;
-		}
-		@Override
-		public CompoundTag loadAsNbt() {
-			JacksEconomy.LOGGER.info("Load: {}", DATA_FILE.getName());
-			if (DATA_FILE.exists()) {
-				try (FileReader fileReader = new FileReader(DATA_FILE)) {
-					return (CompoundTag) NBTUtil.jsonToNbt(GSON.fromJson(fileReader, JsonObject.class));
-				} catch (JsonSyntaxException | ClassCastException | IOException e) {
-					JacksEconomy.LOGGER.error("Failed to load data", e);
+				if (tag == null) return null;
+
+				// Save data to new file. If successfully saved, delete legacy file.
+				if (save(tag)) {
+					JacksEconomy.LOGGER.info("Successfully converted to nbt data! Deleting legacy json file");
+					if (!legacyJsonFile.delete()) {
+						JacksEconomy.LOGGER.warn("Failed to delete legacy json file: {}", legacyJsonFile);
+					}
 				}
+				return tag;
 			} else {
-				JacksEconomy.LOGGER.error("Data file not found!");
+				JacksEconomy.LOGGER.error("Failed to load data: missing file '{}', '{}'", nbtFile, legacyJsonFile);
 			}
-			return null;
+		} else {
+			JacksEconomy.LOGGER.error("Failed to load data: missing file '{}'", nbtFile);
 		}
+		return null;
 	}
 }

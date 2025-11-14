@@ -1,12 +1,8 @@
 package me.khajiitos.jackseconomy.data.price;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import me.khajiitos.jackseconomy.util.FluidHelper;
-import me.khajiitos.jackseconomy.util.NBTUtil;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -87,25 +83,5 @@ public record FluidDescription(Fluid fluid, CompoundTag compoundTag) {
         }
 
         return fluidStack;
-    }
-
-    public JsonObject toJson() {
-        JsonElement jsonElement = NBTUtil.nbtToJson(this.toNbt());
-
-        if (jsonElement instanceof JsonObject object) {
-            return object;
-        } else {
-            return new JsonObject();
-        }
-    }
-
-    public static @Nullable FluidDescription fromJson(JsonObject json) {
-        Tag tag = NBTUtil.jsonToNbt(json);
-
-        if (tag instanceof CompoundTag compoundTag) {
-            return FluidDescription.fromNbt(compoundTag);
-        } else {
-            return null;
-        }
     }
 }
