@@ -13,9 +13,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-
-// FIXME: Need to sync data BEFORE clients join the game
-//  Not sure how
 @JeiPlugin
 public class JeiIntegration implements IModPlugin {
 	@Override
