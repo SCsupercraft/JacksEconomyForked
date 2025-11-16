@@ -797,7 +797,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 					setupCategoryPanel();
 					updateOpts();
 				}
-			}, () -> this.category == category, () -> this.categoryHovered = true));
+			}, () -> this.category == category, () -> this.categoryHovered = true, this.categoryPanel));
 		}
 	}
 
@@ -858,7 +858,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 					setupInnerCategoryPanel();
 					updateOpts();
 				}
-			}, () -> this.innerCategory == category, () -> this.categoryHovered = true));
+			}, () -> this.innerCategory == category, () -> this.categoryHovered = true, this.categoryPanel));
 		}
 	}
 

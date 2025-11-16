@@ -23,6 +23,7 @@ import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -136,7 +137,7 @@ public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
                 parent.shoppingCart.remove(shoppingCartEntry.getKey());
                 this.clearWidgets();
                 this.init();
-            }));
+            }, this.shoppingCartPanel));
         }
 
         if (!parent.itemsToSell.isEmpty()) {
@@ -153,7 +154,13 @@ public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
                 parent.itemsToSell.remove(itemToSell.getKey());
                 this.clearWidgets();
                 this.init();
-            }));
+            }, this.shoppingCartPanel));
+        }
+
+        if (shoppingCartPanel.isScrollbarDisplayed()) {
+            for (AbstractWidget child: shoppingCartPanel.children) {
+                child.setWidth(156);
+            }
         }
 
         this.addPurchaseButton();
@@ -367,5 +374,11 @@ public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
         assert this.minecraft != null;
         this.minecraft.screen = parent;
         this.minecraft.screen.init(this.minecraft, this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight());
+    }
+
+    @Override
+    public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
+        return this.shoppingCartPanel.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY)
+                || super.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
     }
 }

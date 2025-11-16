@@ -87,4 +87,9 @@ public class BetterScrollPanel extends ScrollPanel {
             this.applyScrollLimits();
         }
     }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return isMouseOver(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, button);
+    }
 }

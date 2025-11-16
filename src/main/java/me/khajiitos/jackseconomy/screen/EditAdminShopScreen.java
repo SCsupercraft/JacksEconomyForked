@@ -115,7 +115,7 @@ public class EditAdminShopScreen extends AdminShopScreen {
 
                     this.initCategoryPanel();
                 }
-            }, () -> this.selectedBigCategory == category, () -> tooltip = List.of(Component.translatable("jackseconomy.right_click_to_rename").withStyle(ChatFormatting.AQUA), Component.translatable("jackseconomy.middle_click_to_remove_category").withStyle(ChatFormatting.RED))));
+            }, () -> this.selectedBigCategory == category, () -> tooltip = List.of(Component.translatable("jackseconomy.right_click_to_rename").withStyle(ChatFormatting.AQUA), Component.translatable("jackseconomy.middle_click_to_remove_category").withStyle(ChatFormatting.RED)), this.categoryPanel));
         }
 
         this.categoryPanel.children.add(new EditCategoryEntry(0, 0, 75, 25, null, (categoryEntry, button) -> {
@@ -125,7 +125,13 @@ public class EditAdminShopScreen extends AdminShopScreen {
                 this.initCategoryPanel();
                 this.itemOnCursor = null;
             }
-        }, () -> false, () -> tooltip = List.of(Component.translatable("jackseconomy.drop_item_to_create_category"))));
+        }, () -> false, () -> tooltip = List.of(Component.translatable("jackseconomy.drop_item_to_create_category")), this.categoryPanel));
+
+        if (categoryPanel.isScrollbarDisplayed()) {
+            for (AbstractWidget widget: categoryPanel.children) {
+                widget.setWidth(67);
+            }
+        }
 
         // Makes the list not scroll all the way up when adding new categories
         if (oldPanel != null) {
