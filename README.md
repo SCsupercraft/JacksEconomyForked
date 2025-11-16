@@ -10,10 +10,9 @@ Automatable economy mod for modpacks or servers with an (optional) create integr
 ## Supported Versions
 
 | Version                   | Support                     |
-| ------------------------- | --------------------------- |
+|---------------------------|-----------------------------|
 | Minecraft Neoforge 1.21.1 | Latest support and features |
 | Minecraft Forge 1.20.1    | Latest support and features |
-| Minecraft Forge 1.19.2    | Currently unsupported       |
 
 ## About
 

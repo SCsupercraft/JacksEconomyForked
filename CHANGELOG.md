@@ -4,7 +4,23 @@
 
 - Stock Market
 - Gui improvements
-- Improvements to scrollable elements (making the scroll bar draggable)
+
+## 1.2.2-1.6.2 (WIP)
+
+### Changed
+
+- **Prices File Format**: Prices are now saved as NBT instead of JSON, old files will be converted and then deleted.
+  - **What This Means**: This should fix many NBT issues in the admin shop including the inability to save tools and such!
+  - **File Editing**: To view or edit the file, consider using a program like NBTExplorer.
+  - **Backups**: Consider backing up your old prices file in case the mod fails to convert the file. This shouldn't be necessary but can't hurt.
+- **JEI Integration**: Locked prices are now hidden from JEI.
+
+### Fixed
+
+- **Sizing Issues**: Categories in the admin shop's category panel are now sized correctly when the scrollbar is visible.
+- **Scrollbars**: Scroll bars in the admin shop are now draggable.
+- **Clicking Off-Screen Elements**: You can no longer click scrollbar elements that are off-screen. 
+  - **What This Means**: This should fix issues with not being able to press the purchase button when not scrolled all the way down.
 
 ## 1.2.2-1.6.1
 
