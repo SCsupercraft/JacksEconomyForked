@@ -17,8 +17,8 @@
 
 ### Fixed
 
-- **Sizing Issues**: Categories in the admin shop's category panel are now sized correctly when the scrollbar is visible.
-- **Scrollbars**: Scroll bars in the admin shop are now draggable.
+- **Sizing Issues**: Scrollbar elements are now sized correctly when the scrollbar is visible.
+- **Undraggable Scrollbars**: Scrollbars in the admin shop are now draggable.
 - **Clicking Off-Screen Elements**: You can no longer click scrollbar elements that are off-screen. 
   - **What This Means**: This should fix issues with not being able to press the purchase button when not scrolled all the way down.
 
