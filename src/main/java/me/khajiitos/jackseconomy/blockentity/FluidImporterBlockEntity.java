@@ -280,9 +280,13 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
 
         TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(this.worldPosition, (ServerLevel) this.level, PurchaseManager.PurchaseSource.FLUID_IMPORTER);
-        purchases.addPurchase(selectedDescription, stack.getAmount(), totalPrice.doubleValue());
-        purchases.processPurchases();
+        PurchaseManager.addPurchase(PurchaseManager.Purchase.of(
+                selectedDescription,
+                stack.getAmount(),
+                totalPrice.doubleValue(),
+                PurchaseManager.timestamp(),
+                PurchaseManager.PurchaseSource.FLUID_IMPORTER
+        ), this.worldPosition, (ServerLevel) this.level);
     }
 
     @Override

@@ -266,34 +266,36 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
     }
 
     public boolean sellFromItemstacks(ArrayList<ItemStack> itemStacks, ItemStack ticketItem) {
-        AtomicBoolean success = new AtomicBoolean(true);
-        AtomicInteger processCount = new AtomicInteger();
-        int maxProcesses = TicketItem.getMaxProcessCount(ticketItem);
+        boolean success = false;
+        int processes = TicketItem.getMaxProcessCount(ticketItem);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(this.worldPosition, (ServerLevel) this.level, PurchaseManager.PurchaseSource.EXPORTER);
+        PurchaseManager.Purchases purchases = PurchaseManager.block(
+                PurchaseManager.PurchaseSource.EXPORTER,
+                this.worldPosition,
+                (ServerLevel) this.level
+        );
 
-        itemStacks.forEach((itemStack -> {
+        for (ItemStack itemStack : itemStacks) {
+            if (processes == 0) break;
+
             double sellPrice = PriceManager.getExporterSellPrice(ItemDescription.ofItem(itemStack), 1);
-            if (sellPrice == -1.0 || !success.get()) {
-                success.set(false);
-                return;
-            }
+            if (sellPrice == -1.0) continue;
 
-            int count = itemStack.getCount();
-            int sellCount = Math.min(maxProcesses - processCount.get(), count);
+            int sellCount = Math.min(processes, itemStack.getCount());
 
             this.currency = this.currency.add(BigDecimal.valueOf(sellPrice * sellCount));
             itemStack.shrink(sellCount);
-            processCount.addAndGet(sellCount);
+            processes -= sellCount;
 
             purchases.addPurchase(ItemDescription.ofItem(itemStack), sellCount * -1, sellPrice * sellCount);
-        }));
-
-        if (success.get()) {
-            TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
-            purchases.processPurchases();
+            success = true;
         }
-        return success.get();
+
+        if (success) {
+            TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
+            PurchaseManager.addPurchase(purchases);
+        }
+        return success;
     }
 
     @Nullable

@@ -302,9 +302,13 @@ public class ImporterBlockEntity extends TransactionMachineBlockEntity implement
 
         TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(this.worldPosition, (ServerLevel) this.level, PurchaseManager.PurchaseSource.IMPORTER);
-        purchases.addPurchase(selectedDescription, processCount, processCount * price);
-        purchases.processPurchases();
+        PurchaseManager.addPurchase(PurchaseManager.Purchase.of(
+                selectedDescription,
+                processCount,
+                processCount * price,
+                PurchaseManager.timestamp(),
+                PurchaseManager.PurchaseSource.IMPORTER
+        ), this.worldPosition, (ServerLevel) this.level);
     }
 
     @Override

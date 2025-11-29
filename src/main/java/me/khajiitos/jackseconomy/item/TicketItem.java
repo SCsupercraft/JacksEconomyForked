@@ -155,12 +155,12 @@ public abstract class TicketItem extends Item {
         boolean hasBroke = handleDamage(stack, damage);
         if (hasBroke && !level.isClientSide) {
             level.playSound(
-                    null, // Player - null means all nearby players hear it
-                    blockPos,  // Position of the block entity
-                    SoundEvents.ITEM_BREAK, // The sound event
-                    SoundSource.BLOCKS,     // Sound category
-                    1.0F,                   // Volume
-                    1.0F                    // Pitch
+                    null,
+                    blockPos,
+                    SoundEvents.ITEM_BREAK,
+                    SoundSource.BLOCKS,
+                    1.0F,
+                    1.0F
             );
         }
         return hasBroke;

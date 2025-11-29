@@ -69,7 +69,7 @@ public final class DataHandler {
 				}
 				return tag;
 			} else {
-				JacksEconomy.LOGGER.error("Failed to load data: missing file '{}', '{}'", nbtFile, legacyJsonFile);
+				JacksEconomy.LOGGER.error("Failed to load data: missing file '{}' or '{}'", nbtFile, legacyJsonFile);
 			}
 		} else {
 			JacksEconomy.LOGGER.error("Failed to load data: missing file '{}'", nbtFile);

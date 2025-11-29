@@ -33,7 +33,10 @@ public class AdminShopPurchaseHandler {
 
         ItemStack wallet = CuriosWallet.get(sender);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(sender, PurchaseManager.PurchaseSource.ADMIN_SHOP);
+        PurchaseManager.Purchases purchases = PurchaseManager.player(
+                PurchaseManager.PurchaseSource.ADMIN_SHOP,
+                sender
+        );
 
         BigDecimal value = BigDecimal.ZERO;
         for (Map.Entry<AdminShopPurchasePacket.ShopItemDescription, Integer> entry : msg.shoppingCart().entrySet()) {
@@ -273,6 +276,6 @@ public class AdminShopPurchaseHandler {
             }
         }
 
-        purchases.processPurchases();
+        PurchaseManager.addPurchase(purchases);
     }
 }

@@ -39,14 +39,7 @@ public class PurchaseManager {
 					Purchase.CODEC.decode(NbtOps.INSTANCE, tag)
 							.resultOrPartial(error -> JacksEconomy.LOGGER.warn("Failed to decode purchase: {}", error))
 							.map(Pair::getFirst)
-							.ifPresent(purchase -> {
-								try {
-									purchase.assertValid();
-									purchases.add(purchase);
-								} catch (IllegalStateException e) {
-									JacksEconomy.LOGGER.error("Failed to validate purchase: {}", purchase, e);
-								}
-							})
+							.ifPresent(purchases::add)
 			);
 		} else save();
 	}
@@ -64,13 +57,64 @@ public class PurchaseManager {
 		purchases.clear();
 	}
 
+    public static void addPurchase(Purchase purchase, ServerPlayer buyer) {
+        MinecraftForge.EVENT_BUS.post(new PurchaseEvent.Player(
+                Collections.singletonList(purchase), buyer
+        ));
+        purchases.add(purchase);
+    }
+
+    public static void addPurchase(Purchase purchase, BlockPos pos, ServerLevel level) {
+        MinecraftForge.EVENT_BUS.post(new PurchaseEvent.Block(
+                Collections.singletonList(purchase), pos, level
+        ));
+        purchases.add(purchase);
+    }
+
+    public static void addPurchase(Purchases purchases) {
+        HashMap<Either<ItemDescription, FluidDescription>, Purchase> mergedPurchases = new HashMap<>();
+
+        purchases.purchases.forEach(purchase -> {
+            if (mergedPurchases.containsKey(purchase.description))
+                mergedPurchases.computeIfPresent(purchase.description,
+                        (k, current) -> new Purchase(
+                                purchase.description,
+                                purchase.buyer,
+                                purchase.quantity + current.quantity,
+                                purchase.totalCost + current.totalCost,
+                                purchases.timestamp,
+                                purchases.source
+                        ));
+            else mergedPurchases.put(purchase.description, purchase);
+        });
+
+        PurchaseEvent event = purchases.buyer != null
+                ? new PurchaseEvent.Player(List.copyOf(mergedPurchases.values()), purchases.buyer)
+                : new PurchaseEvent.Block(List.copyOf(mergedPurchases.values()), purchases.pos, purchases.level);
+        MinecraftForge.EVENT_BUS.post(event);
+
+        PurchaseManager.purchases.addAll(mergedPurchases.values());
+    }
+
+    public static Purchases player(PurchaseSource source, ServerPlayer buyer) {
+        return new Purchases(buyer, source);
+    }
+
+    public static Purchases block(PurchaseSource source, BlockPos pos, ServerLevel level) {
+        return new Purchases(pos, level, source);
+    }
+
+    public static long timestamp() {
+        return JacksEconomy.server.overworld().getGameTime();
+    }
+
 	public static class Purchases {
 		private final ServerPlayer buyer;
 		private final BlockPos pos;
 		private final ServerLevel level;
 		private final PurchaseSource source;
 		private final List<Purchase> purchases = new ArrayList<>();
-		private final long timestamp = JacksEconomy.server.overworld().getGameTime();
+		private final long timestamp = PurchaseManager.timestamp();
 
 		public Purchases(ServerPlayer buyer, PurchaseSource source) {
 			this.buyer = buyer;
@@ -89,12 +133,12 @@ public class PurchaseManager {
 		public void addPurchase(@NotNull ItemDescription description, int quantity, double totalCost) {
 			addPurchase(Purchase.of(description, getBuyerUuid(), quantity, totalCost, timestamp, source));
 		}
+
 		public void addPurchase(@NotNull FluidDescription description, int quantity, double totalCost) {
 			addPurchase(Purchase.of(description, getBuyerUuid(), quantity, totalCost, timestamp, source));
 		}
 
 		private void addPurchase(@NotNull Purchase purchase) {
-			purchase.assertValid();
 			purchases.add(purchase);
 		}
 
@@ -102,29 +146,18 @@ public class PurchaseManager {
 			return buyer == null ? null : buyer.getUUID();
 		}
 
-		public void processPurchases() {
-			HashMap<Either<ItemDescription, FluidDescription>, Purchase> mergedPurchases = new HashMap<>();
+        /**
+         * @deprecated please use {@link PurchaseManager#addPurchase(Purchases)} instead.
+         *  Will be removed in 1.2.2-1.7.0
+         */
+        @Deprecated(since = "1.2.2-1.6.2", forRemoval = true)
+        public void processPurchases() {
+            PurchaseManager.addPurchase(this);
+        }
+    }
 
-			this.purchases.forEach(purchase -> {
-				if (mergedPurchases.containsKey(purchase.description)) {
-					Purchase current = mergedPurchases.get(purchase.description);
-
-					mergedPurchases.put(purchase.description, new Purchase(
-							purchase.description, purchase.buyer, purchase.quantity + current.quantity, purchase.totalCost + current.totalCost, timestamp, source
-					));
-				} else mergedPurchases.put(purchase.description, purchase);
-			});
-
-			PurchaseEvent event = this.buyer != null
-					? new PurchaseEvent.Player(List.copyOf(mergedPurchases.values()), this.buyer)
-					: new PurchaseEvent.Block(List.copyOf(mergedPurchases.values()), this.pos, this.level);
-			MinecraftForge.EVENT_BUS.post(event);
-
-			PurchaseManager.purchases.addAll(mergedPurchases.values());
-		}
-	}
-
-	public record Purchase(Either<ItemDescription, FluidDescription> description, Optional<UUID> buyer, int quantity, double totalCost, long timestamp, PurchaseSource source) {
+	public record Purchase(Either<ItemDescription, FluidDescription> description, Optional<UUID> buyer, int quantity,
+                           double totalCost, long timestamp, PurchaseSource source) {
 		public static final Codec<Purchase> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.either(ItemDescription.CODEC, FluidDescription.CODEC)
 						.fieldOf("description")
@@ -141,27 +174,31 @@ public class PurchaseManager {
 						.forGetter(Purchase::source)
 		).apply(instance, Purchase::new));
 
-		private static Purchase of(@NotNull ItemDescription description, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+        public Purchase {
+            if (totalCost <= 0)
+                throw new IllegalStateException("Purchases must have a valid unit cost! (greater than zero)");
+            if (description.left().isPresent() && source.type != PurchaseSource.Type.ITEM)
+                throw new IllegalStateException(String.format("Purchase of type %s needs a fluid, not an item!", this.source().name()));
+            if (description.right().isPresent() && source.type != PurchaseSource.Type.FLUID)
+                throw new IllegalStateException(String.format("Purchase of type %s needs an item, not a fluid!", this.source().name()));
+            if (buyer.isEmpty() && source.requiresBuyer)
+                throw new IllegalStateException(String.format("Purchase of type %s requires a buyer!", this.source().name()));
+        }
+
+		public static Purchase of(@NotNull ItemDescription description, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
 			return of(description, null, quantity, totalCost, timestamp, source);
 		}
-		private static Purchase of(@NotNull ItemDescription description, @Nullable UUID buyer, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+
+		public static Purchase of(@NotNull ItemDescription description, @Nullable UUID buyer, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
 			return new Purchase(Either.left(description), Optional.ofNullable(buyer), quantity, totalCost, timestamp, source);
 		}
 
-		private static Purchase of(@NotNull FluidDescription description, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+		public static Purchase of(@NotNull FluidDescription description, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
 			return of(description, null, quantity, totalCost, timestamp, source);
 		}
-		private static Purchase of(@NotNull FluidDescription description, @Nullable UUID buyer, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+
+		public static Purchase of(@NotNull FluidDescription description, @Nullable UUID buyer, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
 			return new Purchase(Either.right(description), Optional.ofNullable(buyer), quantity, totalCost, timestamp, source);
-		}
-
-		private void assertValid() {
-			if (totalCost <= 0) throw new IllegalStateException("Purchases must have a valid unit cost! (greater than zero)");
-			source.assertValid(this);
-		}
-
-		private boolean isValid() {
-			return source.isValid(this);
 		}
 	}
 
@@ -180,18 +217,6 @@ public class PurchaseManager {
 		PurchaseSource(boolean requiresBuyer, Type type) {
 			this.requiresBuyer = requiresBuyer;
 			this.type = type;
-		}
-
-		void assertValid(Purchase purchase) {
-			if (purchase.description.left().isPresent() && type != Type.ITEM) throw new IllegalStateException(String.format("Purchase of type %s needs a fluid, not an item!", this.name()));
-			if (purchase.description.right().isPresent() && type != Type.FLUID) throw new IllegalStateException(String.format("Purchase of type %s needs an item, not a fluid!", this.name()));
-			if (purchase.buyer.isEmpty() && requiresBuyer) throw new IllegalStateException(String.format("Purchase of type %s requires a buyer!", this.name()));
-		}
-
-		boolean isValid(Purchase purchase) {
-			if (purchase.description.left().isPresent() && type != Type.ITEM) return false;
-			if (purchase.description.right().isPresent() && type != Type.FLUID) return false;
-			return purchase.buyer.isPresent() || !requiresBuyer;
 		}
 
 		public enum Type {

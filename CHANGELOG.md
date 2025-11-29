@@ -21,6 +21,7 @@
 - **Undraggable Scrollbars**: Scrollbars in the admin shop are now draggable.
 - **Clicking Off-Screen Elements**: You can no longer click scrollbar elements that are off-screen. 
   - **What This Means**: This should fix issues with not being able to press the purchase button when not scrolled all the way down.
+- **Exporting Crash**: Fixed issues with exporting items when there is more than one item stack.
 
 ## 1.2.2-1.6.1
 

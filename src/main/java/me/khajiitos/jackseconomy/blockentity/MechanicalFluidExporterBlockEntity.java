@@ -252,9 +252,13 @@ public class MechanicalFluidExporterBlockEntity extends FluidTransactionKineticM
 
         TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(this.worldPosition, (ServerLevel) this.level, PurchaseManager.PurchaseSource.FLUID_EXPORTER);
-        purchases.addPurchase(description, amountSold * -1, sellPrice * amountSold);
-        purchases.processPurchases();
+        PurchaseManager.addPurchase(PurchaseManager.Purchase.of(
+                description,
+                amountSold * -1,
+                sellPrice * amountSold,
+                PurchaseManager.timestamp(),
+                PurchaseManager.PurchaseSource.FLUID_EXPORTER
+        ), this.worldPosition, (ServerLevel) this.level);
 
         return true;
     }
