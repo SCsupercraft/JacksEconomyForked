@@ -3,6 +3,7 @@ package me.khajiitos.jackseconomy.jei;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
@@ -150,10 +151,16 @@ public class AdminShopBuyingCategory implements IRecipeCategory<AdminShopBuyingC
 
 		protected void addAllRecipes(List<Details> list, @Nullable String name, JacksEconomyClient.AdminShopData data) {
 			data.shopItems().values().stream().map(LinkedHashMap::values).forEach(lists -> lists.forEach(list2 -> list2.forEach(
-					(shopItem) -> list.add(
+					(shopItem) -> {
+                        if (hasStage(shopItem.stage())) list.add(
 							new Details(name, BigDecimal.valueOf(shopItem.price()), shopItem.itemDescription())
-					)
+                        );
+                    }
 			)));
 		}
+
+        protected boolean hasStage(String stage) {
+            return stage == null || GameStagesManager.hasGameStage(Minecraft.getInstance().player, stage);
+        }
 	}
 }

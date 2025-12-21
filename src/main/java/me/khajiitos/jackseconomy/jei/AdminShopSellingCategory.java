@@ -3,6 +3,7 @@ package me.khajiitos.jackseconomy.jei;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.JacksEconomyClient;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
@@ -144,7 +145,13 @@ public class AdminShopSellingCategory implements IRecipeCategory<AdminShopSellin
 		}
 
 		protected void addAllRecipes(List<Details> list, @Nullable String name, JacksEconomyClient.AdminShopData data) {
-			data.sellPrices().forEach((description, sellabilityInfo) -> list.add(new Details(name, BigDecimal.valueOf(sellabilityInfo.worth()), description)));
+			data.sellPrices().forEach((description, sellabilityInfo) -> {
+                if (hasStage(sellabilityInfo.stage())) list.add(new Details(name, BigDecimal.valueOf(sellabilityInfo.worth()), description));
+            });
 		}
+
+        protected boolean hasStage(String stage) {
+            return stage == null || GameStagesManager.hasGameStage(Minecraft.getInstance().player, stage);
+        }
 	}
 }

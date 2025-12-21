@@ -1,7 +1,5 @@
 package me.khajiitos.jackseconomy.data.price;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
@@ -9,14 +7,12 @@ import me.khajiitos.jackseconomy.data.DataHandler;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.packet.AdminShopSchemaPacket;
 import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
-import me.khajiitos.jackseconomy.util.ItemHelper;
 import me.khajiitos.jackseconomy.util.NewShopUnlocks;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
