@@ -4,7 +4,6 @@ import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class ItemPriceInfo {
-
     public static @Nullable ItemPriceInfo fromNbt(CompoundTag compoundTag) {
         try {
             ItemPriceInfo info = null;

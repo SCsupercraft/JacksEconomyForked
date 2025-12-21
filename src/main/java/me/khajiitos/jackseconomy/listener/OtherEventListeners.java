@@ -1,9 +1,7 @@
 package me.khajiitos.jackseconomy.listener;
 
 import me.khajiitos.jackseconomy.data.AdminShopColorManager;
-import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.menu.WalletMenu;
-import me.khajiitos.jackseconomy.packet.PricesInfoPacket;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.TickEvent;

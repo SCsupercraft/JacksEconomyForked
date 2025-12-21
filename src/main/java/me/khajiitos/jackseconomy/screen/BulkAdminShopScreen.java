@@ -316,7 +316,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 			case 1 -> { // Right-click (Edit)
 				this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, false, (value) -> {
 					this.sendChanges();
-					adminShopName = value.equals("") ? null : value;
+					adminShopName = value.isEmpty() ? null : value;
 					this.requestShopData();
 					this.removeWidget(this.floatingEditBox);
 					this.floatingEditBox = null;

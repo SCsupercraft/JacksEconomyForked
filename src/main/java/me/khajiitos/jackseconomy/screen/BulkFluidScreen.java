@@ -6,7 +6,6 @@ import me.khajiitos.jackseconomy.data.price.*;
 import me.khajiitos.jackseconomy.init.ContainerReg;
 import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.packet.UpdateFluidPricesPacket;
-import me.khajiitos.jackseconomy.packet.UpdateItemPricesPacket;
 import me.khajiitos.jackseconomy.screen.widget.FloatingEditBoxWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;

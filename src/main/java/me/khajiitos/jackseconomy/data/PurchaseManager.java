@@ -123,7 +123,7 @@ public class PurchaseManager {
         private final ServerLevel level;
         private final PurchaseSource source;
         private final List<Purchase> purchases = new ArrayList<>();
-        private final long timestamp = PurchaseManager.timestamp();
+        private final long timestamp = timestamp();
 
         public Purchases(ServerPlayer buyer, PurchaseSource source) {
             this.buyer = buyer;
@@ -183,8 +183,8 @@ public class PurchaseManager {
         ).apply(instance, Purchase::new));
 
         public Purchase {
-            if (totalCost <= 0)
-                throw new IllegalStateException("Purchases must have a valid unit cost! (greater than zero)");
+            if (totalCost < 0)
+                throw new IllegalStateException("Purchases must have a valid unit cost! (equal to or greater than zero)");
             if (description.left().isPresent() && source.type != PurchaseSource.Type.ITEM)
                 throw new IllegalStateException(String.format("Purchase of type %s needs a fluid, not an item!", this.source().name()));
             if (description.right().isPresent() && source.type != PurchaseSource.Type.FLUID)
@@ -218,7 +218,8 @@ public class PurchaseManager {
         ADMIN_SHOP(true, Type.ITEM),
         IMPORTER(false, Type.ITEM),
         EXPORTER(false, Type.ITEM),
-        FLUID_IMPORTER(false, Type.FLUID), FLUID_EXPORTER(false, Type.FLUID);
+        FLUID_IMPORTER(false, Type.FLUID),
+        FLUID_EXPORTER(false, Type.FLUID);
 
         public static final Codec<PurchaseSource> CODEC = Codec.STRING.xmap(PurchaseSource::valueOf, PurchaseSource::name);
 

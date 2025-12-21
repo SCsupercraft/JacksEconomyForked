@@ -37,8 +37,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MechanicalExporterBlockEntity extends TransactionKineticMachineBlockEntity implements IExporterBlockEntity {
     private static final int[] slotsInput = new int[]{0, 1, 2};

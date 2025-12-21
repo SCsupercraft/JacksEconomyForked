@@ -26,6 +26,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -147,10 +148,10 @@ public abstract class AbstractExporterScreen<S extends IExporterBlockEntity, T e
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int pMouseX, int pMouseY) {}
+    protected void renderLabels(@NotNull GuiGraphics guiGraphics, int pMouseX, int pMouseY) {}
 
     @Override
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+    public void render(@NotNull GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         this.tooltip = null;
         this.renderBackground(guiGraphics);
         super.render(guiGraphics, pMouseX, pMouseY, pPartialTick);

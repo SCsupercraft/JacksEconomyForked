@@ -166,10 +166,10 @@ public class PriceManager {
                 });
 
                 itemsArray.forEach(tag -> {
-                    CompoundTag object = ((CompoundTag) tag);
+                    CompoundTag compoundTag = ((CompoundTag) tag);
 
-                    ItemDescription itemDescription = ItemDescription.fromNbt(object);
-                    ItemPriceInfo priceInfo = ItemPriceInfo.fromNbt(object);
+                    ItemDescription itemDescription = ItemDescription.fromNbt(compoundTag);
+                    ItemPriceInfo priceInfo = ItemPriceInfo.fromNbt(compoundTag);
 
                     if (itemDescription != null && priceInfo != null)
                         itemPriceInfos.add(new ItemPriceEntry(itemDescription, priceInfo));

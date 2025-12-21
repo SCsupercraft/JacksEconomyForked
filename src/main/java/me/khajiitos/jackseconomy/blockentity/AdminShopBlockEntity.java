@@ -3,6 +3,7 @@ package me.khajiitos.jackseconomy.blockentity;
 import me.khajiitos.jackseconomy.block.AdminShopBlock;
 import me.khajiitos.jackseconomy.data.AdminShopColorManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -12,6 +13,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +40,13 @@ public class AdminShopBlockEntity extends BlockEntity {
 		if (pkt.getTag() != null) {
 			this.load(pkt.getTag());
 		}
+
+        Minecraft mc = Minecraft.getInstance();
+        BlockPos pos = pkt.getPos();
+        BlockState state = mc.level.getBlockState(pos);
+
+        // Force minecraft to re-render the block
+        mc.level.sendBlockUpdated(pos, state, state, Block.UPDATE_IMMEDIATE);
 	}
 
 	public void handleUpdateTag(CompoundTag tag) {

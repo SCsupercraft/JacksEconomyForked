@@ -2,7 +2,6 @@ package me.khajiitos.jackseconomy.block;
 
 import me.khajiitos.jackseconomy.blockentity.AdminShopBlockEntity;
 import me.khajiitos.jackseconomy.config.Config;
-import me.khajiitos.jackseconomy.data.AdminShopColorManager;
 import me.khajiitos.jackseconomy.init.BlockEntityReg;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
 import me.khajiitos.jackseconomy.item.NameableBlockItem;
