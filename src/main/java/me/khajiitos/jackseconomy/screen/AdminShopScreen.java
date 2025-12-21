@@ -23,6 +23,7 @@ import me.khajiitos.jackseconomy.util.NewShopUnlocks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -437,7 +438,23 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
                 }
             }
             
-            this.categoryPanel.children.add(new CategoryEntry(0, 0, this.categoryPanel.isScrollbarDisplayed() ? 67 : 75, 25, category, (entry, button) -> selectBigCategory(category), () -> this.selectedBigCategory == category, () -> this.newShopUnlocks.unlockedCategories.contains(category.getName())));
+            this.categoryPanel.children.add(new CategoryEntry(
+                    0,
+                    0,
+                    75,
+                    25,
+                    category,
+                    (entry, button) -> selectBigCategory(category),
+                    () -> this.selectedBigCategory == category,
+                    () -> this.newShopUnlocks.unlockedCategories.contains(category.getName()),
+                    this.categoryPanel
+            ));
+        }
+
+        if (categoryPanel.isScrollbarDisplayed()) {
+            for (AbstractWidget widget: categoryPanel.children) {
+                widget.setWidth(67);
+            }
         }
 
         // Makes the list not scroll all the way up when adding new categories
@@ -965,6 +982,12 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
         }
 
         return super.mouseClicked(pMouseX, pMouseY, pButton);
+    }
+
+    @Override
+    public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
+        return this.categoryPanel.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY)
+                || super.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
     }
 
     protected @Nullable ShopItem getItemAtSlot(int slot, InnerCategory category) {

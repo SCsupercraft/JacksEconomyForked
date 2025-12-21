@@ -7,6 +7,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
 
 import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
@@ -17,13 +18,15 @@ public class CategoryEntry extends AbstractWidget {
     private final BiConsumer<CategoryEntry, Integer> onClick;
     private final Supplier<Boolean> isSelectedSupplier;
     private final Supplier<Boolean> shouldRenderStar;
+    private final ScrollPanel panel;
 
-    public CategoryEntry(int pX, int pY, int pWidth, int pHeight, @Nullable AdminShopScreen.InnerCategory category, BiConsumer<CategoryEntry, Integer> onClick, Supplier<Boolean> isSelectedSupplier, Supplier<Boolean> shouldRenderStar) {
+    public CategoryEntry(int pX, int pY, int pWidth, int pHeight, @Nullable AdminShopScreen.InnerCategory category, BiConsumer<CategoryEntry, Integer> onClick, Supplier<Boolean> isSelectedSupplier, Supplier<Boolean> shouldRenderStar, ScrollPanel panel) {
         super(pX, pY, pWidth, pHeight, Component.empty());
         this.category = category;
         this.onClick = onClick;
         this.isSelectedSupplier = isSelectedSupplier;
         this.shouldRenderStar = shouldRenderStar;
+        this.panel = panel;
     }
 
     public AdminShopScreen.InnerCategory getCategory() {
@@ -32,10 +35,14 @@ public class CategoryEntry extends AbstractWidget {
 
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        boolean hovered = pMouseX >= this.getX() && pMouseX <= this.getX() + this.width && pMouseY >= this.getY() && pMouseY <= this.getY() + this.height;
+        this.isHovered = panel.isMouseOver(pMouseX, pMouseY)
+                && pMouseX >= this.getX()
+                && pMouseX <= this.getX() + this.width
+                && pMouseY >= this.getY()
+                && pMouseY <= this.getY() + this.height;
         boolean selected = isSelectedSupplier.get();
 
-        if (hovered) {
+        if (isHovered) {
             guiGraphics.fillGradient(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, selected ? 0x8800FF00 : 0x88FFFFFF, selected ? 0x6600FF00 : 0x66FFFFFF);
         } else {
             guiGraphics.fillGradient(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, selected ? 0x4400FF00 : 0x44FFFFFF, selected ? 0x2200FF00 : 0x22FFFFFF);

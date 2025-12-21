@@ -34,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
@@ -321,7 +322,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 				if (this.categoryPanel != null || floatingEditBox != null) return;
 				this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, false, (value) -> {
 					this.sendChanges();
-					adminShopName = value.equals("") ? null : value;
+					adminShopName = value.isEmpty() ? null : value;
 					this.requestShopData();
 					this.removeWidget(this.floatingEditBox);
 					this.floatingEditBox = null;
@@ -418,7 +419,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 	}
 
 	@Override
-	public List<Component> getTooltipFromContainerItem(ItemStack pStack) {
+	public @NotNull List<Component> getTooltipFromContainerItem(ItemStack pStack) {
 		if (categoryPanel != null) {
 			List<Component> list = new ArrayList<>();
 			if (floatingEditBox == null) list.add(Component.literal("Right-click to create category").withStyle(ChatFormatting.AQUA));
@@ -765,7 +766,6 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 		shouldShowSelection = false;
 
 		for (AdminShopScreen.Category category : shopItems.keySet()) {
-
 			this.categoryPanel.children.add(new EditCategoryEntry(0, 0, 80, 25, category, (categoryEntry, button) -> {
 				if (button == 0) {
 					this.category = category;
@@ -817,7 +817,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 					setupCategoryPanel();
 					updateOpts();
 				}
-			}, () -> this.category == category, () -> this.categoryHovered = true));
+			}, () -> this.category == category, () -> this.categoryHovered = true, this.categoryPanel));
 		}
 	}
 
@@ -878,7 +878,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 					setupInnerCategoryPanel();
 					updateOpts();
 				}
-			}, () -> this.innerCategory == category, () -> this.categoryHovered = true));
+			}, () -> this.innerCategory == category, () -> this.categoryHovered = true, this.categoryPanel));
 		}
 	}
 
@@ -955,7 +955,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 		}
 
 		@Override
-		public MenuType<?> getType() {
+		public @NotNull MenuType<?> getType() {
 			return ContainerReg.BULK_ADMIN_SHOP_MENU.get();
 		}
 

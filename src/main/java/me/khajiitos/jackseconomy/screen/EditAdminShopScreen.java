@@ -21,6 +21,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
@@ -61,7 +62,6 @@ public class EditAdminShopScreen extends AdminShopScreen {
         this.categoryPanel = this.addRenderableWidget(new BetterScrollPanel(Minecraft.getInstance(), this.leftPos - 80, this.topPos + 20, 75, this.imageHeight - 40));
 
         for (Category category : shopItems.keySet()) {
-
             this.categoryPanel.children.add(new EditCategoryEntry(0, 0, 75, 25, category, (categoryEntry, button) -> {
                 if (button == 0) {
                     if (this.itemOnCursor != null) {
@@ -115,7 +115,7 @@ public class EditAdminShopScreen extends AdminShopScreen {
 
                     this.initCategoryPanel();
                 }
-            }, () -> this.selectedBigCategory == category, () -> tooltip = List.of(Component.translatable("jackseconomy.right_click_to_rename").withStyle(ChatFormatting.AQUA), Component.translatable("jackseconomy.middle_click_to_remove_category").withStyle(ChatFormatting.RED))));
+            }, () -> this.selectedBigCategory == category, () -> tooltip = List.of(Component.translatable("jackseconomy.right_click_to_rename").withStyle(ChatFormatting.AQUA), Component.translatable("jackseconomy.middle_click_to_remove_category").withStyle(ChatFormatting.RED)), this.categoryPanel));
         }
 
         this.categoryPanel.children.add(new EditCategoryEntry(0, 0, 75, 25, null, (categoryEntry, button) -> {
@@ -125,7 +125,13 @@ public class EditAdminShopScreen extends AdminShopScreen {
                 this.initCategoryPanel();
                 this.itemOnCursor = null;
             }
-        }, () -> false, () -> tooltip = List.of(Component.translatable("jackseconomy.drop_item_to_create_category"))));
+        }, () -> false, () -> tooltip = List.of(Component.translatable("jackseconomy.drop_item_to_create_category")), this.categoryPanel));
+
+        if (categoryPanel.isScrollbarDisplayed()) {
+            for (AbstractWidget widget: categoryPanel.children) {
+                widget.setWidth(67);
+            }
+        }
 
         // Makes the list not scroll all the way up when adding new categories
         if (oldPanel != null) {
@@ -429,7 +435,7 @@ public class EditAdminShopScreen extends AdminShopScreen {
     }
 
     @Override
-    protected void slotClicked(@Nullable Slot pSlot, int pSlotId, int pMouseButton, ClickType pType) {
+    protected void slotClicked(@Nullable Slot pSlot, int pSlotId, int pMouseButton, @NotNull ClickType pType) {
         if (pMouseButton == 0) {
             if (this.itemOnCursor == null && pSlot != null) {
                 ItemStack itemStack = pSlot.getItem();

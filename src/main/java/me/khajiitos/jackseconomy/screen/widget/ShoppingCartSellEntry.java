@@ -10,6 +10,8 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -19,14 +21,16 @@ public class ShoppingCartSellEntry extends AbstractWidget {
     private final Runnable onRemoveClicked;
     private final double itemPrice;
     private final boolean oneItemCurrencyMode;
+    private final ScrollPanel panel;
 
-    public ShoppingCartSellEntry(int pX, int pY, int pWidth, int pHeight, boolean oneItemCurrencyMode, Map.Entry<ItemDescription, Integer> itemToSell, double itemPrice, Inventory inventory, Runnable onChange, Runnable onRemoveClicked) {
+    public ShoppingCartSellEntry(int pX, int pY, int pWidth, int pHeight, boolean oneItemCurrencyMode, Map.Entry<ItemDescription, Integer> itemToSell, double itemPrice, Inventory inventory, Runnable onChange, Runnable onRemoveClicked, ScrollPanel panel) {
         super(pX, pY, pWidth, pHeight, Component.empty());
         this.itemToSell = itemToSell;
         this.onChange = onChange;
         this.onRemoveClicked = onRemoveClicked;
         this.itemPrice = itemPrice;
         this.oneItemCurrencyMode = oneItemCurrencyMode;
+        this.panel = panel;
     }
 
     @Override
@@ -54,9 +58,10 @@ public class ShoppingCartSellEntry extends AbstractWidget {
             guiGraphics.pose().popPose();
         }
 
-        boolean removeHovered = pMouseX >= this.getX() + 102 && pMouseX <= this.getX() + 117 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18;
-        boolean minusHovered = pMouseX >= this.getX() + 122 && pMouseX <= this.getX() + 137 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18;
-        boolean plusHovered = pMouseX >= this.getX() + 142 && pMouseX <= this.getX() + 157 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18;
+        boolean panelHovered = panel.isMouseOver(pMouseX, pMouseY);
+        boolean removeHovered = panelHovered && pMouseX >= this.getX() + 102 && pMouseX <= this.getX() + 117 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18;
+        boolean minusHovered = panelHovered && pMouseX >= this.getX() + 122 && pMouseX <= this.getX() + 137 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18;
+        boolean plusHovered = panelHovered && pMouseX >= this.getX() + 142 && pMouseX <= this.getX() + 157 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18;
 
         guiGraphics.fill(this.getX() + 100, this.getY() + 3, this.getX() + 115, this.getY() + 18, removeHovered ? 0xFFFFFFFF : 0xFF000000);
         guiGraphics.fill(this.getX() + 101, this.getY() + 4, this.getX() + 114, this.getY() + 17, 0xFF666666);
@@ -73,22 +78,23 @@ public class ShoppingCartSellEntry extends AbstractWidget {
     }
 
     @Override
-    public void onClick(double pMouseX, double pMouseY) {
-        if (pMouseX >= this.getX() + 122 && pMouseX <= this.getX() + 137 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (mouseX >= this.getX() + 122 && mouseX <= this.getX() + 137 && mouseY >= this.getY() + 4 && mouseY <= this.getY() + 18) {
             if (itemToSell.getValue() > 1) {
                 itemToSell.setValue(itemToSell.getValue() - 1);
                 onChange.run();
             }
-        } else if (pMouseX >= this.getX() + 142 && pMouseX <= this.getX() + 157 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18) {
+        } else if (mouseX >= this.getX() + 142 && mouseX <= this.getX() + 157 && mouseY >= this.getY() + 4 && mouseY <= this.getY() + 18) {
             itemToSell.setValue(itemToSell.getValue() + 1);
             onChange.run();
-        } else if (pMouseX >= this.getX() + 102 && pMouseX <= this.getX() + 117 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18) {
+        } else if (mouseX >= this.getX() + 102 && mouseX <= this.getX() + 117 && mouseY >= this.getY() + 4 && mouseY <= this.getY() + 18) {
             onRemoveClicked.run();
         }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
+    public void updateWidgetNarration(@NotNull NarrationElementOutput pNarrationElementOutput) {
 
     }
 }
