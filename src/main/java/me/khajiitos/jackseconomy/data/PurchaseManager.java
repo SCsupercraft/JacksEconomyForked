@@ -10,9 +10,14 @@ import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.event.PurchaseEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.common.MinecraftForge;
 import org.jetbrains.annotations.NotNull;
@@ -21,43 +26,44 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class PurchaseManager {
-	private static DataHandler dataHandler;
-	private static final List<Purchase> purchases = new ArrayList<>();
+    private static DataHandler dataHandler;
+    private static final List<Purchase> purchases = new ArrayList<>();
 
-	public static void load() {
-		dataHandler = new DataHandler(
-				JacksEconomy.server.getWorldPath(LevelResource.ROOT)
-						.resolve("data/jackseconomy/purchases.dat")
-						.toFile()
-		);
-		resetData();
-		if (dataHandler.fileExists()) {
-			CompoundTag data = dataHandler.load();
-			ListTag listTag = data.getList("purchases", Tag.TAG_COMPOUND);
+    public static void load() {
+        dataHandler = new DataHandler(
+                JacksEconomy.server.getWorldPath(LevelResource.ROOT)
+                        .resolve("data/jackseconomy/purchases.dat")
+                        .toFile()
+        );
+        resetData();
+        if (dataHandler.fileExists()) {
+            CompoundTag data = dataHandler.load();
+            ListTag listTag = data.getList("purchases", Tag.TAG_COMPOUND);
 
-			listTag.forEach(tag ->
-					Purchase.CODEC.decode(NbtOps.INSTANCE, tag)
-							.resultOrPartial(error -> JacksEconomy.LOGGER.warn("Failed to decode purchase: {}", error))
-							.map(Pair::getFirst)
-							.ifPresent(purchases::add)
-			);
-		} else save();
-	}
+            listTag.forEach(tag -> Purchase.CODEC.decode(NbtOps.INSTANCE, tag)
+                    .resultOrPartial(error -> JacksEconomy.LOGGER.warn("Failed to decode purchase: {}", error))
+                    .map(Pair::getFirst)
+                    .filter(purchase -> !purchase.isEmpty())
+                    .ifPresent(purchases::add));
+        } else save();
+    }
 
-	public static void save() {
-		CompoundTag data = new CompoundTag();
-		ListTag listTag = new ListTag();
+    public static void save() {
+        CompoundTag data = new CompoundTag();
+        ListTag listTag = new ListTag();
 
-		purchases.forEach(purchase -> listTag.add(Purchase.CODEC.encodeStart(NbtOps.INSTANCE, purchase).getOrThrow(false, (unused) -> {})));
-		data.put("purchases", listTag);
-		dataHandler.save(data);
-	}
+        purchases.forEach(purchase -> listTag.add(Purchase.CODEC.encodeStart(NbtOps.INSTANCE, purchase).getOrThrow(false, (unused) -> {})));
+        data.put("purchases", listTag);
+        dataHandler.save(data);
+    }
 
-	public static void resetData() {
-		purchases.clear();
-	}
+    public static void resetData() {
+        purchases.clear();
+    }
 
     public static void addPurchase(Purchase purchase, ServerPlayer buyer) {
+        if (purchase.isEmpty()) return;
+
         MinecraftForge.EVENT_BUS.post(new PurchaseEvent.Player(
                 Collections.singletonList(purchase), buyer
         ));
@@ -65,6 +71,8 @@ public class PurchaseManager {
     }
 
     public static void addPurchase(Purchase purchase, BlockPos pos, ServerLevel level) {
+        if (purchase.isEmpty()) return;
+
         MinecraftForge.EVENT_BUS.post(new PurchaseEvent.Block(
                 Collections.singletonList(purchase), pos, level
         ));
@@ -75,6 +83,7 @@ public class PurchaseManager {
         HashMap<Either<ItemDescription, FluidDescription>, Purchase> mergedPurchases = new HashMap<>();
 
         purchases.purchases.forEach(purchase -> {
+            if (purchase.isEmpty()) return;
             if (mergedPurchases.containsKey(purchase.description))
                 mergedPurchases.computeIfPresent(purchase.description,
                         (k, current) -> new Purchase(
@@ -108,47 +117,47 @@ public class PurchaseManager {
         return JacksEconomy.server.overworld().getGameTime();
     }
 
-	public static class Purchases {
-		private final ServerPlayer buyer;
-		private final BlockPos pos;
-		private final ServerLevel level;
-		private final PurchaseSource source;
-		private final List<Purchase> purchases = new ArrayList<>();
-		private final long timestamp = PurchaseManager.timestamp();
+    public static class Purchases {
+        private final ServerPlayer buyer;
+        private final BlockPos pos;
+        private final ServerLevel level;
+        private final PurchaseSource source;
+        private final List<Purchase> purchases = new ArrayList<>();
+        private final long timestamp = PurchaseManager.timestamp();
 
-		public Purchases(ServerPlayer buyer, PurchaseSource source) {
-			this.buyer = buyer;
-			this.pos = null;
-			this.level = null;
-			this.source = source;
-		}
+        public Purchases(ServerPlayer buyer, PurchaseSource source) {
+            this.buyer = buyer;
+            this.pos = null;
+            this.level = null;
+            this.source = source;
+        }
 
-		public Purchases(BlockPos pos, ServerLevel level, PurchaseSource source) {
-			this.buyer = null;
-			this.pos = pos;
-			this.level = level;
-			this.source = source;
-		}
+        public Purchases(BlockPos pos, ServerLevel level, PurchaseSource source) {
+            this.buyer = null;
+            this.pos = pos;
+            this.level = level;
+            this.source = source;
+        }
 
-		public void addPurchase(@NotNull ItemDescription description, int quantity, double totalCost) {
-			addPurchase(Purchase.of(description, getBuyerUuid(), quantity, totalCost, timestamp, source));
-		}
+        public void addPurchase(@NotNull ItemDescription description, int quantity, double totalCost) {
+            addPurchase(Purchase.of(description, getBuyerUuid(), quantity, totalCost, timestamp, source));
+        }
 
-		public void addPurchase(@NotNull FluidDescription description, int quantity, double totalCost) {
-			addPurchase(Purchase.of(description, getBuyerUuid(), quantity, totalCost, timestamp, source));
-		}
+        public void addPurchase(@NotNull FluidDescription description, int quantity, double totalCost) {
+            addPurchase(Purchase.of(description, getBuyerUuid(), quantity, totalCost, timestamp, source));
+        }
 
-		private void addPurchase(@NotNull Purchase purchase) {
-			purchases.add(purchase);
-		}
+        private void addPurchase(@NotNull Purchase purchase) {
+            purchases.add(purchase);
+        }
 
-		private UUID getBuyerUuid() {
-			return buyer == null ? null : buyer.getUUID();
-		}
+        private UUID getBuyerUuid() {
+            return buyer == null ? null : buyer.getUUID();
+        }
 
         /**
          * @deprecated please use {@link PurchaseManager#addPurchase(Purchases)} instead.
-         *  Will be removed in 1.2.2-1.7.0
+         * Will be removed in 1.2.2-1.7.0
          */
         @Deprecated(since = "1.2.2-1.6.2", forRemoval = true)
         public void processPurchases() {
@@ -156,23 +165,22 @@ public class PurchaseManager {
         }
     }
 
-	public record Purchase(Either<ItemDescription, FluidDescription> description, Optional<UUID> buyer, int quantity,
+    public record Purchase(Either<ItemDescription, FluidDescription> description, Optional<UUID> buyer, int quantity,
                            double totalCost, long timestamp, PurchaseSource source) {
-		public static final Codec<Purchase> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.either(ItemDescription.CODEC, FluidDescription.CODEC)
-						.fieldOf("description")
-						.forGetter(Purchase::description),
-				UUIDUtil.CODEC.optionalFieldOf("buyer")
-						.forGetter(Purchase::buyer),
-				Codec.INT.fieldOf("quantity")
-						.forGetter(Purchase::quantity),
-				Codec.DOUBLE.fieldOf("total_cost")
-						.forGetter(Purchase::totalCost),
-				Codec.LONG.fieldOf("timestamp")
-						.forGetter(Purchase::timestamp),
-				PurchaseSource.CODEC.fieldOf("source")
-						.forGetter(Purchase::source)
-		).apply(instance, Purchase::new));
+        public static final Codec<Purchase> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.either(ItemDescription.CODEC, FluidDescription.CODEC).fieldOf("description")
+                        .forGetter(Purchase::description),
+                UUIDUtil.CODEC.optionalFieldOf("buyer")
+                        .forGetter(Purchase::buyer),
+                Codec.INT.fieldOf("quantity")
+                        .forGetter(Purchase::quantity),
+                Codec.DOUBLE.fieldOf("total_cost")
+                        .forGetter(Purchase::totalCost),
+                Codec.LONG.fieldOf("timestamp")
+                        .forGetter(Purchase::timestamp),
+                PurchaseSource.CODEC.fieldOf("source")
+                        .forGetter(Purchase::source)
+        ).apply(instance, Purchase::new));
 
         public Purchase {
             if (totalCost <= 0)
@@ -185,43 +193,45 @@ public class PurchaseManager {
                 throw new IllegalStateException(String.format("Purchase of type %s requires a buyer!", this.source().name()));
         }
 
-		public static Purchase of(@NotNull ItemDescription description, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
-			return of(description, null, quantity, totalCost, timestamp, source);
-		}
+        public static Purchase of(@NotNull ItemDescription description, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+            return of(description, null, quantity, totalCost, timestamp, source);
+        }
 
-		public static Purchase of(@NotNull ItemDescription description, @Nullable UUID buyer, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
-			return new Purchase(Either.left(description), Optional.ofNullable(buyer), quantity, totalCost, timestamp, source);
-		}
+        public static Purchase of(@NotNull ItemDescription description, @Nullable UUID buyer, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+            return new Purchase(Either.left(description), Optional.ofNullable(buyer), quantity, totalCost, timestamp, source);
+        }
 
-		public static Purchase of(@NotNull FluidDescription description, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
-			return of(description, null, quantity, totalCost, timestamp, source);
-		}
+        public static Purchase of(@NotNull FluidDescription description, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+            return of(description, null, quantity, totalCost, timestamp, source);
+        }
 
-		public static Purchase of(@NotNull FluidDescription description, @Nullable UUID buyer, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
-			return new Purchase(Either.right(description), Optional.ofNullable(buyer), quantity, totalCost, timestamp, source);
-		}
-	}
+        public static Purchase of(@NotNull FluidDescription description, @Nullable UUID buyer, int quantity, double totalCost, long timestamp, @NotNull PurchaseSource source) {
+            return new Purchase(Either.right(description), Optional.ofNullable(buyer), quantity, totalCost, timestamp, source);
+        }
 
-	public enum PurchaseSource {
-		ADMIN_SHOP(true, Type.ITEM),
-		IMPORTER(false, Type.ITEM),
-		EXPORTER(false, Type.ITEM),
-		FLUID_IMPORTER(false, Type.FLUID),
-		FLUID_EXPORTER(false, Type.FLUID);
+        boolean isEmpty() {
+            return quantity == 0 || description.map(i -> i.item() != Items.AIR, f -> f.fluid() != Fluids.EMPTY);
+        }
+    }
 
-		public static final Codec<PurchaseSource> CODEC = Codec.STRING.xmap(PurchaseSource::valueOf, PurchaseSource::name);
+    public enum PurchaseSource {
+        ADMIN_SHOP(true, Type.ITEM),
+        IMPORTER(false, Type.ITEM),
+        EXPORTER(false, Type.ITEM),
+        FLUID_IMPORTER(false, Type.FLUID), FLUID_EXPORTER(false, Type.FLUID);
 
-		public final boolean requiresBuyer;
-		public final Type type;
+        public static final Codec<PurchaseSource> CODEC = Codec.STRING.xmap(PurchaseSource::valueOf, PurchaseSource::name);
 
-		PurchaseSource(boolean requiresBuyer, Type type) {
-			this.requiresBuyer = requiresBuyer;
-			this.type = type;
-		}
+        public final boolean requiresBuyer;
+        public final Type type;
 
-		public enum Type {
-			ITEM,
-			FLUID
-		}
-	}
+        PurchaseSource(boolean requiresBuyer, Type type) {
+            this.requiresBuyer = requiresBuyer;
+            this.type = type;
+        }
+
+        public enum Type {
+            ITEM, FLUID
+        }
+    }
 }

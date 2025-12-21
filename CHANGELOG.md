@@ -22,6 +22,7 @@
 - **Clicking Off-Screen Elements**: You can no longer click scrollbar elements that are off-screen. 
   - **What This Means**: This should fix issues with not being able to press the purchase button when not scrolled all the way down.
 - **Exporting Crash**: Fixed issues with exporting items when there is more than one item stack.
+- **Empty Purchase Crash (1.21.1)**: Empty purchases are now ignored to avoid crashes.
 
 ## 1.2.2-1.6.1
 
