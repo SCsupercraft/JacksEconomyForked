@@ -7,7 +7,6 @@ import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.argument.AdminShopArgument;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.AdminShopColorManager;
-import me.khajiitos.jackseconomy.data.PurchaseManager;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.menu.AdminShopMenu;
 import me.khajiitos.jackseconomy.packet.AdminShopSchemaPacket;

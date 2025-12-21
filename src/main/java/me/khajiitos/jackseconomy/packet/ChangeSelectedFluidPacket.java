@@ -1,6 +1,5 @@
 package me.khajiitos.jackseconomy.packet;
 
-import io.netty.buffer.ByteBuf;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
 import net.minecraft.network.RegistryFriendlyByteBuf;

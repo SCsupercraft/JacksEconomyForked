@@ -2,6 +2,7 @@
   "parent": "minecraft:block/orientable",
   "render_type": "minecraft:cutout",
   "textures": {
+    "particle": "jackseconomy:block/admin_shop",
     "down": "jackseconomy:block/machine",
     "up": "jackseconomy:block/machine",
     "north": "jackseconomy:block/admin_shop",

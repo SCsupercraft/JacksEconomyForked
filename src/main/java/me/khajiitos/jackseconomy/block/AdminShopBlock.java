@@ -40,6 +40,7 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -77,18 +78,20 @@ public class AdminShopBlock extends BaseEntityBlock implements NameableBlockItem
     }
 
     @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
         return CODEC;
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState pState) {
+    public @NotNull RenderShape getRenderShape(@NotNull BlockState pState) {
         return RenderShape.MODEL;
     }
 
     @Override
-    public InteractionResult useWithoutItem(BlockState pState, Level pLevel, BlockPos pPos, Player player, BlockHitResult pHit) {
-        if (!pLevel.isClientSide && player instanceof ServerPlayer serverPlayer && pLevel.getBlockEntity(pPos) instanceof AdminShopBlockEntity entity) {
+    public @NotNull InteractionResult useWithoutItem(@NotNull BlockState pState, Level pLevel, @NotNull BlockPos pPos,
+                                                     @NotNull Player player, @NotNull BlockHitResult pHit) {
+        if (!pLevel.isClientSide && player instanceof ServerPlayer serverPlayer
+                && pLevel.getBlockEntity(pPos) instanceof AdminShopBlockEntity entity) {
             CompoundTag compoundTag = PriceManager.toAdminShopSchemaCompound(serverPlayer, entity.getName());
             serverPlayer.openMenu(new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new AdminShopMenu(pContainerId, pPlayerInventory), Component.empty()));
             PacketDistributor.sendToPlayer(serverPlayer, new AdminShopSchemaPacket(compoundTag, Optional.ofNullable(entity.getName()), Config.oneItemCurrencyMode.get()));
@@ -98,7 +101,7 @@ public class AdminShopBlock extends BaseEntityBlock implements NameableBlockItem
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public @NotNull List<ItemStack> getDrops(@NotNull BlockState state, LootParams.Builder params) {
         ItemStack stack = new ItemStack(ItemBlockReg.ADMIN_SHOP_ITEM.get(), 1);
 
         if (params.getParameter(LootContextParams.BLOCK_ENTITY) instanceof AdminShopBlockEntity entity) {
@@ -109,7 +112,7 @@ public class AdminShopBlock extends BaseEntityBlock implements NameableBlockItem
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(@NotNull ItemStack stack, Item.@NotNull TooltipContext tooltipContext, @NotNull List<Component> tooltip, TooltipFlag flag) {
         if (flag.isAdvanced()) {
             CompoundTag tag = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).getUnsafe();
 

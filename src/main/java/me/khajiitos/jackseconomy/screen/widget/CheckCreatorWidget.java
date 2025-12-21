@@ -94,13 +94,13 @@ public class CheckCreatorWidget extends AbstractWidget {
         }));
 
         this.renderables.add(new SimpleButton(this.getX() + 33, this.getY() + 100, 15, 15, Component.literal("."), (b) -> {
-            if (this.keypadTextbox.getText().length() > 0 && !this.keypadTextbox.getText().contains(".") &&  this.keypadTextbox.getText().length() < 8) {
+            if (!this.keypadTextbox.getText().isEmpty() && !this.keypadTextbox.getText().contains(".") &&  this.keypadTextbox.getText().length() < 8) {
                 keypadTextbox.setText(keypadTextbox.getText() + b.getMessage().getString());
             }
         }));
 
         this.renderables.add(new SimpleButton(this.getX() + 53, this.getY() + 100, 15, 15, Component.literal("C"), (b) -> {
-            if (this.keypadTextbox.getText().length() > 0) {
+            if (!this.keypadTextbox.getText().isEmpty()) {
                 this.keypadTextbox.setText(this.keypadTextbox.getText().substring(0, this.keypadTextbox.getText().length() - 1));
             }
         }));
