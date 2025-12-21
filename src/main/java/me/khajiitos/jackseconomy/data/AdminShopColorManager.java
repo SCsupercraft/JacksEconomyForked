@@ -17,14 +17,14 @@ import java.util.HashMap;
 public class AdminShopColorManager {
 	public static final HashMap<String, Integer> adminShopColors = new HashMap<>();
 	public static Integer defaultAdminShopColor = -1;
-	private static final DataHandler DATA_HANDLER = new DataHandler.NBTDataHandler(
+	private static final DataHandler DATA_HANDLER = new DataHandler(
 			new File("config/jackseconomy_adminshop_colors.dat")
 	);
 
 	public static void load() {
 		resetData();
-		if (DATA_HANDLER.DATA_FILE.exists()) {
-			CompoundTag data = DATA_HANDLER.loadAsNbt();
+		if (DATA_HANDLER.fileExists()) {
+			CompoundTag data = DATA_HANDLER.load();
 
 			if (data.contains("colors")) {
 				ListTag listTag = data.getList("colors", Tag.TAG_COMPOUND);

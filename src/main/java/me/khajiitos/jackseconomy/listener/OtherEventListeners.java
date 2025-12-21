@@ -8,6 +8,7 @@ import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.menu.WalletMenu;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -21,18 +22,19 @@ public class OtherEventListeners {
 
 		PriceManager.load();
 		AdminShopColorManager.load();
-		StockMarketManager.load();
+        if (!FMLEnvironment.production) StockMarketManager.load();
 		PurchaseManager.load();
 	}
 
 	@SubscribeEvent
 	public void onServerStarted(ServerStartedEvent e) {
-		JacksEconomy.server.addTickable(StockMarketManager::tick);
+        // Work in progress, only enable in a development environment.
+        if (!FMLEnvironment.production) JacksEconomy.server.addTickable(StockMarketManager::tick);
 	}
 
 	@SubscribeEvent
 	public void onServerStopped(ServerStoppedEvent e) {
-		StockMarketManager.save();
+        if (!FMLEnvironment.production) StockMarketManager.save();
 		PurchaseManager.save();
 
 		JacksEconomy.server = null;

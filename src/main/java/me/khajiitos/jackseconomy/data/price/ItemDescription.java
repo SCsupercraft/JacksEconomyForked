@@ -1,19 +1,14 @@
 package me.khajiitos.jackseconomy.data.price;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
-import io.netty.buffer.ByteBuf;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.util.ComponentUtil;
-import me.khajiitos.jackseconomy.util.NBTUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -64,25 +59,5 @@ public record ItemDescription(Holder<Item> item, @NotNull DataComponentPatch com
 
     public ItemStack createItemStack() {
         return new ItemStack(this.item, 1, this.components);
-    }
-
-    public JsonObject toJson() {
-        JsonElement jsonElement = NBTUtil.nbtToJson(this.toNbt());
-
-        if (jsonElement instanceof JsonObject object) {
-            return object;
-        } else {
-            return new JsonObject();
-        }
-    }
-
-    public static @Nullable ItemDescription fromJson(JsonObject json) {
-        Tag tag = NBTUtil.jsonToNbt(json);
-
-        if (tag instanceof CompoundTag compoundTag) {
-            return ItemDescription.fromNbt(compoundTag);
-        } else {
-            return null;
-        }
     }
 }

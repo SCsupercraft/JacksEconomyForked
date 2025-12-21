@@ -9,14 +9,14 @@ public class StockMarketManager {
 	private static long lastUpdated;
 
 	public static void load() {
-		dataHandler = new DataHandler.NBTDataHandler(
+		dataHandler = new DataHandler(
 				JacksEconomy.server.getWorldPath(LevelResource.ROOT)
 						.resolve("data/jackseconomy/stock-market.dat")
 						.toFile()
 		);
 		resetData();
-		if (dataHandler.DATA_FILE.exists()) {
-			CompoundTag data = dataHandler.loadAsNbt();
+		if (dataHandler.fileExists()) {
+			CompoundTag data = dataHandler.load();
 			lastUpdated = data.getLong("lastUpdated");
 		} else save();
 	}

@@ -25,14 +25,14 @@ public class PurchaseManager {
 	private static final List<Purchase> purchases = new ArrayList<>();
 
 	public static void load() {
-		dataHandler = new DataHandler.NBTDataHandler(
+		dataHandler = new DataHandler(
 				JacksEconomy.server.getWorldPath(LevelResource.ROOT)
 						.resolve("data/jackseconomy/purchases.dat")
 						.toFile()
 		);
 		resetData();
-		if (dataHandler.DATA_FILE.exists()) {
-			CompoundTag data = dataHandler.loadAsNbt();
+		if (dataHandler.fileExists()) {
+			CompoundTag data = dataHandler.load();
 			ListTag listTag = data.getList("purchases", Tag.TAG_COMPOUND);
 
 			listTag.forEach(tag ->

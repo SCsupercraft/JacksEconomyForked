@@ -1,6 +1,6 @@
 package me.khajiitos.jackseconomy.data.price;
 
-import com.google.gson.JsonObject;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,15 +20,16 @@ public class PricesItemPriceInfo extends ItemPriceInfo {
         this.adminShopName = adminShopName;
     }
 
-    protected static @Nullable ItemPriceInfo fromJsonOrNull(JsonObject jsonObject) {
+    protected static @Nullable ItemPriceInfo fromNbtOrNull(CompoundTag compoundTag) {
         try {
-            if (hasAny(jsonObject, List.of("sellPrice", "adminShopSellPrice", "importerBuyPrice"))) {
+            if (hasAny(compoundTag, List.of("sellPrice", "adminShopSellPrice", "importerBuyPrice"))) {
 
-                double sellPrice = jsonObject.has("sellPrice") ? jsonObject.get("sellPrice").getAsDouble() : -1;
-                double adminShopSellPrice = jsonObject.has("adminShopSellPrice") ? jsonObject.get("adminShopSellPrice").getAsDouble() : -1;
-                double importerBuyPrice = jsonObject.has("importerBuyPrice") ? jsonObject.get("importerBuyPrice").getAsDouble() : -1;
-                String adminShopSellStage = jsonObject.has("adminShopSellStage") ? jsonObject.get("adminShopSellStage").getAsString() : null;
-                String adminShopName = jsonObject.has("adminShopName") ? jsonObject.get("adminShopName").getAsString() : null;
+                double sellPrice = compoundTag.contains("sellPrice") ? compoundTag.getDouble("sellPrice") : -1;
+                double adminShopSellPrice = compoundTag.contains("adminShopSellPrice") ? compoundTag.getDouble("adminShopSellPrice") : -1;
+                double importerBuyPrice = compoundTag.contains("importerBuyPrice") ? compoundTag.getDouble("importerBuyPrice") : -1;
+                String adminShopSellStage = compoundTag.contains("adminShopSellStage") ? compoundTag.getString("adminShopSellStage") : null;
+                String adminShopName = compoundTag.contains("adminShopName") ? compoundTag.getString("adminShopName") : null;
+                if (adminShopName != null && adminShopName.length() > 32) return null;
 
                 return new PricesItemPriceInfo(sellPrice, adminShopSellPrice, importerBuyPrice, adminShopSellStage, adminShopName);
             }
@@ -37,30 +38,30 @@ public class PricesItemPriceInfo extends ItemPriceInfo {
         return null;
     }
 
-    public JsonObject toJson() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "prices");
+    public CompoundTag toNbt() {
+        CompoundTag compoundTag = new CompoundTag();
+        compoundTag.putString("type", "prices");
 
         if (this.adminShopSellPrice != -1) {
-            jsonObject.addProperty("adminShopSellPrice", this.adminShopSellPrice);
+            compoundTag.putDouble("adminShopSellPrice", this.adminShopSellPrice);
         }
 
         if (this.sellPrice != -1) {
-            jsonObject.addProperty("sellPrice", this.sellPrice);
+            compoundTag.putDouble("sellPrice", this.sellPrice);
         }
 
         if (this.importerBuyPrice != -1) {
-            jsonObject.addProperty("importerBuyPrice", this.importerBuyPrice);
+            compoundTag.putDouble("importerBuyPrice", this.importerBuyPrice);
         }
 
         if (this.adminShopSellStage != null) {
-            jsonObject.addProperty("adminShopSellStage", this.adminShopSellStage);
+            compoundTag.putString("adminShopSellStage", this.adminShopSellStage);
         }
 
         if (this.adminShopName != null) {
-            jsonObject.addProperty("adminShopName", this.adminShopName);
+            compoundTag.putString("adminShopName", this.adminShopName);
         }
 
-        return jsonObject;
+        return compoundTag;
     }
 }

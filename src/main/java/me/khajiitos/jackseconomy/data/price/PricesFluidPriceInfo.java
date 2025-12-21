@@ -1,6 +1,6 @@
 package me.khajiitos.jackseconomy.data.price;
 
-import com.google.gson.JsonObject;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -14,12 +14,12 @@ public class PricesFluidPriceInfo extends FluidPriceInfo {
         this.importerBuyPrice = importerBuyPrice;
     }
 
-    protected static @Nullable PricesFluidPriceInfo fromJsonOrNull(JsonObject jsonObject) {
+    protected static @Nullable PricesFluidPriceInfo fromNbtOrNull(CompoundTag compoundTag) {
         try {
-            if (hasAny(jsonObject, List.of("sellPrice", "importerBuyPrice"))) {
+            if (hasAny(compoundTag, List.of("sellPrice", "importerBuyPrice"))) {
 
-                double sellPrice = jsonObject.has("sellPrice") ? jsonObject.get("sellPrice").getAsDouble() : -1;
-                double importerBuyPrice = jsonObject.has("importerBuyPrice") ? jsonObject.get("importerBuyPrice").getAsDouble() : -1;
+                double sellPrice = compoundTag.contains("sellPrice") ? compoundTag.getDouble("sellPrice") : -1;
+                double importerBuyPrice = compoundTag.contains("importerBuyPrice") ? compoundTag.getDouble("importerBuyPrice") : -1;
 
                 return new PricesFluidPriceInfo(sellPrice, importerBuyPrice);
             }
@@ -28,18 +28,18 @@ public class PricesFluidPriceInfo extends FluidPriceInfo {
         return null;
     }
 
-    public JsonObject toJson() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "prices");
+    public CompoundTag toNbt() {
+        CompoundTag compoundTag = new CompoundTag();
+        compoundTag.putString("type", "prices");
 
         if (this.sellPrice != -1) {
-            jsonObject.addProperty("sellPrice", this.sellPrice);
+            compoundTag.putDouble("sellPrice", this.sellPrice);
         }
 
         if (this.importerBuyPrice != -1) {
-            jsonObject.addProperty("importerBuyPrice", this.importerBuyPrice);
+            compoundTag.putDouble("importerBuyPrice", this.importerBuyPrice);
         }
 
-        return jsonObject;
+        return compoundTag;
     }
 }
