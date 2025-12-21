@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -169,7 +170,7 @@ public class FluidExporterBlockEntity extends FluidTransactionMachineBlockEntity
     }
 
     @Override
-    public int[] getSlotsForFace(Direction pSide) {
+    public int @NotNull [] getSlotsForFace(@NotNull Direction pSide) {
         Direction facing = getBlockState().getValue(TransactionMachineBlock.FACING);
 
         if (this.sideConfig.getValue(SideConfig.directionRelative(facing, pSide)) == SideConfig.Value.OUTPUT) {
@@ -233,26 +234,30 @@ public class FluidExporterBlockEntity extends FluidTransactionMachineBlockEntity
 
         TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(this.worldPosition, (ServerLevel) this.level, PurchaseManager.PurchaseSource.FLUID_EXPORTER);
-        purchases.addPurchase(description, amountSold * -1, sellPrice * amountSold);
-        purchases.processPurchases();
+        PurchaseManager.addPurchase(PurchaseManager.Purchase.of(
+                description,
+                amountSold * -1,
+                sellPrice * amountSold,
+                PurchaseManager.timestamp(),
+                PurchaseManager.PurchaseSource.FLUID_EXPORTER
+        ), this.worldPosition, (ServerLevel) this.level);
 
         return true;
     }
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+    public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player) {
         return new FluidExporterMenu(containerId, inventory, this);
     }
 
     @Override
-    public boolean canPlaceItemThroughFace(int pIndex, ItemStack pItemStack, @Nullable Direction pDirection) {
+    public boolean canPlaceItemThroughFace(int pIndex, @NotNull ItemStack pItemStack, @Nullable Direction pDirection) {
         return false;
     }
 
     @Override
-    public boolean canTakeItemThroughFace(int pIndex, ItemStack pStack, Direction pDirection) {
+    public boolean canTakeItemThroughFace(int pIndex, @NotNull ItemStack pStack, @NotNull Direction pDirection) {
         return true;
     }
 }

@@ -28,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -68,12 +69,12 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
     }
 
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return getDefaultName();
     }
 
     @Override
-    public Component getDisplayName() {
+    public @NotNull Component getDisplayName() {
         return getDefaultName();
     }
 
@@ -190,7 +191,7 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
     }
 
     @Override
-    public int[] getSlotsForFace(Direction pSide) {
+    public int @NotNull [] getSlotsForFace(@NotNull Direction pSide) {
         Direction facing = getBlockState().getValue(TransactionMachineBlock.FACING);
 
         switch (this.sideConfig.getValue(SideConfig.directionRelative(facing, pSide))) {
@@ -248,50 +249,52 @@ public class MechanicalExporterBlockEntity extends TransactionKineticMachineBloc
     }
 
     public boolean sellFromItemstacks(ArrayList<ItemStack> itemStacks, ItemStack ticketItem) {
-        AtomicBoolean success = new AtomicBoolean(true);
-        AtomicInteger processCount = new AtomicInteger();
-        int maxProcesses = TicketItem.getMaxProcessCount(ticketItem);
+        boolean success = false;
+        int processes = TicketItem.getMaxProcessCount(ticketItem);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(this.worldPosition, (ServerLevel) this.level, PurchaseManager.PurchaseSource.EXPORTER);
+        PurchaseManager.Purchases purchases = PurchaseManager.block(
+                PurchaseManager.PurchaseSource.EXPORTER,
+                this.worldPosition,
+                (ServerLevel) this.level
+        );
 
-        itemStacks.forEach((itemStack -> {
+        for (ItemStack itemStack : itemStacks) {
+            if (processes == 0) break;
+
             double sellPrice = PriceManager.getExporterSellPrice(ItemDescription.ofItem(itemStack), 1);
-            if (sellPrice == -1.0 || !success.get()) {
-                success.set(false);
-                return;
-            }
+            if (sellPrice == -1.0) continue;
 
-            int count = itemStack.getCount();
-            int sellCount = Math.min(maxProcesses - processCount.get(), count);
+            int sellCount = Math.min(processes, itemStack.getCount());
 
             this.currency = this.currency.add(BigDecimal.valueOf(sellPrice * sellCount));
             itemStack.shrink(sellCount);
-            processCount.addAndGet(sellCount);
+            processes -= sellCount;
 
             purchases.addPurchase(ItemDescription.ofItem(itemStack), sellCount * -1, sellPrice * sellCount);
-        }));
-
-        if (success.get()) {
-            TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
-            purchases.processPurchases();
+            success = true;
         }
-        return success.get();
+
+        if (success) {
+            TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
+            PurchaseManager.addPurchase(purchases);
+        }
+        return success;
     }
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+    public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player) {
         return new MechanicalExporterMenu(containerId, inventory, this);
     }
 
 
     @Override
-    public boolean canPlaceItemThroughFace(int pIndex, ItemStack pItemStack, @Nullable Direction pDirection) {
+    public boolean canPlaceItemThroughFace(int pIndex, @NotNull ItemStack pItemStack, @Nullable Direction pDirection) {
         return PriceManager.getExporterSellPrice(ItemDescription.ofItem(pItemStack), 1) != -1;
     }
 
     @Override
-    public boolean canTakeItemThroughFace(int pIndex, ItemStack pStack, Direction pDirection) {
+    public boolean canTakeItemThroughFace(int pIndex, @NotNull ItemStack pStack, @NotNull Direction pDirection) {
         return true;
     }
 }

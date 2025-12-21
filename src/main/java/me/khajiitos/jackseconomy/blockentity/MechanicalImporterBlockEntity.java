@@ -28,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -67,12 +68,12 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
     }
 
     @Override
-    public boolean canPlaceItemThroughFace(int pIndex, ItemStack pItemStack, @Nullable Direction pDirection) {
+    public boolean canPlaceItemThroughFace(int pIndex, @NotNull ItemStack pItemStack, @Nullable Direction pDirection) {
         return true;
     }
 
     @Override
-    public boolean canTakeItemThroughFace(int pIndex, ItemStack pStack, Direction pDirection) {
+    public boolean canTakeItemThroughFace(int pIndex, @NotNull ItemStack pStack, @NotNull Direction pDirection) {
         return true;
     }
 
@@ -87,7 +88,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
+    public AbstractContainerMenu createMenu(int pContainerId, @NotNull Inventory pPlayerInventory, @NotNull Player pPlayer) {
         return new MechanicalImporterMenu(pContainerId, pPlayerInventory, this);
     }
 
@@ -120,7 +121,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
     }
 
     @Override
-    public int[] getSlotsForFace(Direction pSide) {
+    public int @NotNull [] getSlotsForFace(@NotNull Direction pSide) {
         Direction facing = getBlockState().getValue(TransactionMachineBlock.FACING);
 
         switch (this.sideConfig.getValue(SideConfig.directionRelative(facing, pSide))) {
@@ -269,13 +270,17 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
 
         TicketItem.handleDamageWithSound(ticketItem, 1, level, worldPosition);
 
-        PurchaseManager.Purchases purchases = new PurchaseManager.Purchases(this.worldPosition, (ServerLevel) this.level, PurchaseManager.PurchaseSource.IMPORTER);
-        purchases.addPurchase(selectedDescription, processCount, processCount * price);
-        purchases.processPurchases();
+        PurchaseManager.addPurchase(PurchaseManager.Purchase.of(
+                selectedDescription,
+                processCount,
+                processCount * price,
+                PurchaseManager.timestamp(),
+                PurchaseManager.PurchaseSource.IMPORTER
+        ), this.worldPosition, (ServerLevel) this.level);
     }
 
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return Component.translatable("block.jackseconomy.mechanical_importer");
     }
 
