@@ -8,7 +8,7 @@
   - Admin shop as workstation
   - Opens admin shop GUI when interacted with
 
-## 1.2.2-1.6.2 (WIP)
+## 1.2.2-1.6.2
 
 ### Changed
 
