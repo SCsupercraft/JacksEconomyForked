@@ -4,9 +4,26 @@
 
 - Stock Market
 - Gui improvements
-- "Shopkeep" villager
-  - Admin shop as workstation
-  - Opens admin shop GUI when interacted with
+
+## 1.2.2-1.7.0
+
+### Planned
+
+- **JEI Improvements**: Ability to drag items from JEI when creating manifests
+- **Importer Improvements**: Ability for importers to round-robin multiple items at a time off of a manifest
+- **Banks**: Blocks that store large amounts of money, with wireless versions
+  - Might reduce money capacity of other block to favour the banks
+- **Credit Card**: For use with wireless banks, can't store any money itself
+- **Transfer Link Tool**: For linking blocks/machines to wireless banks
+
+### Possible Additions
+
+- **Player Shops**: Admin shops that can be configured by players
+- **Item Stand (and admin version)**: Like the player shop but for a single type of item
+
+### Added
+
+- **Shopkeeper Villager**: Villagers can use admin shops as a workstation and open the admin shop GUI when interacted with
 
 ## 1.2.2-1.6.2
 
