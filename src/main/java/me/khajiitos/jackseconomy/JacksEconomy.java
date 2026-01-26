@@ -45,6 +45,9 @@ public class JacksEconomy {
 
         ItemBlockReg.init(eventBus);
 
+        PoiTypeReg.init(eventBus);
+        VillagerProfessionReg.init(eventBus);
+
         ArgumentReg.register(eventBus);
         BlockEntityReg.init(eventBus);
         ContainerReg.init(eventBus);

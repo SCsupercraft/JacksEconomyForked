@@ -6,9 +6,11 @@
   "refmap": "jackseconomy.refmap.json",
   "mixins": [
     "ClientboundCustomPayloadPacketMixin",
-    "ServerboundCustomPayloadPacketMixin"
+    "ServerboundCustomPayloadPacketMixin",
+    "VillagerMixin"
   ],
   "client": [
+    "VillagerProfessionLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

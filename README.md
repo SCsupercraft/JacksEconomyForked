@@ -79,6 +79,6 @@ You can also use a mod like Bigger Stacks alongside single item currency mode an
 
 Please use this in your modpack! :) It is always nice to let us know so we can check out your modpack!
 
-Consider [donating](https://scsupercraft.github.io/jacks-economy/donate) for more content and [updates](https://scsupercraft.github.io/jacks-economy/updates)!
+Consider [donating](https://scsupercraft.github.io/jacks-economy/donate) for more content and [updates](https://scsupercraft.github.io/jacks-economy/updates)!
 
-Special thanks to [Khajiitos](https://www.curseforge.com/members/khajiitos/projects) the *amazing dev* that made this mod what it is and [oRandomy](https://github.com/oRandomy) who is the amazing artist that created most of the assets and textures for this mod!
+Special thanks to [Khajiitos](https://www.curseforge.com/members/khajiitos/projects) the *amazing dev* that made this mod what it is and [oRandomy](https://github.com/oRandomy) who is the amazing artist that created most of the assets and textures for this mod!

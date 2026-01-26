@@ -8,20 +8,34 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.Merchant;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
 public class AdminShopMenu extends AbstractContainerMenu {
+    private final @Nullable Merchant merchant;
     public final Inventory inventory;
     private boolean slotsLocked = true;
     public final boolean oneItemCurrencyMode;
 
     public AdminShopMenu(int pContainerId, Inventory inventory) {
+        this(pContainerId, inventory, null);
+    }
+
+    public AdminShopMenu(int pContainerId, Inventory inventory, @Nullable Merchant merchant) {
         super(ContainerReg.ADMIN_SHOP_MENU.get(), pContainerId);
+        this.merchant = merchant;
         this.inventory = inventory;
         this.oneItemCurrencyMode = Config.oneItemCurrencyMode.get();
 
         this.addPlayerInventory(inventory, 150);
+    }
+
+    @Override
+    public void removed(Player pPlayer) {
+        super.removed(pPlayer);
+        if (this.merchant != null) this.merchant.setTradingPlayer(null);
     }
 
     public void setSlotsLocked(boolean slotsLocked) {
