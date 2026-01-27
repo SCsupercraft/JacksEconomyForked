@@ -124,6 +124,12 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
 
             for (int i = 0; i < this.container.getContainerSize(); i++) {
                 ItemStack item = this.container.getItem(i);
+                boolean ghost;
+
+                if (item.getTag() != null) {
+                    ghost = item.getTag().getBoolean("jackseconomy_ghost");
+                    item.getTag().remove("jackseconomy_ghost");
+                } else ghost = false;
 
                 if (!item.isEmpty()) {
                     FluidDescription fluidDescription = FluidDescription.ofFluid(item.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElseThrow(RuntimeException::new).getFluidInTank(0));
@@ -132,7 +138,7 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
                         fluidDescriptions.add(fluidDescription);
                     }
 
-                    if (Config.returnManifestItems.get()) {
+                    if (Config.returnManifestItems.get() && !ghost) {
                         if (!serverPlayer.getInventory().add(item)) {
                             ItemHelper.dropItem(item, serverPlayer.level(), serverPlayer.blockPosition());
                         }
@@ -158,7 +164,7 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
         super.removed(pPlayer);
     }
 
-    public static class FluidSlot extends Slot {
+    public static class FluidSlot extends TicketCreatorMenu.GhostSlot {
 
         public FluidSlot(Container pContainer, int pSlot, int pX, int pY) {
             super(pContainer, pSlot, pX, pY);

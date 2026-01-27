@@ -9,7 +9,6 @@
 
 ### Planned
 
-- **JEI Improvements**: Ability to drag items from JEI when creating manifests
 - **Importer Improvements**: Ability for importers to round-robin multiple items at a time off of a manifest
 - **Banks**: Blocks that store large amounts of money, with wireless versions
   - Might reduce money capacity of other block to favour the banks
@@ -24,6 +23,7 @@
 ### Added
 
 - **Shopkeeper Villager**: Villagers can use admin shops as a workstation and open the admin shop GUI when interacted with
+- **JEI Improvements**: Ability to drag items from JEI when creating manifests
 
 ## 1.2.2-1.6.2
 

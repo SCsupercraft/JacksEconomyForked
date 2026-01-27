@@ -34,7 +34,7 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
 
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(this.container, col + row * 9, 8 + col * 18, 7 + row * 18));
+                this.addSlot(new GhostSlot(this.container, col + row * 9, 8 + col * 18, 7 + row * 18));
             }
         }
 
@@ -122,6 +122,12 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
 
             for (int i = 0; i < this.container.getContainerSize(); i++) {
                 ItemStack item = this.container.getItem(i);
+                boolean ghost;
+
+                if (item.getTag() != null) {
+                    ghost = item.getTag().getBoolean("jackseconomy_ghost");
+                    item.getTag().remove("jackseconomy_ghost");
+                } else ghost = false;
 
                 if (!item.isEmpty()) {
                     ItemDescription itemDescription = ItemDescription.ofItem(item);
@@ -130,7 +136,7 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
                         itemDescriptions.add(itemDescription);
                     }
 
-                    if (Config.returnManifestItems.get()) {
+                    if (Config.returnManifestItems.get() && !ghost) {
                         if (!serverPlayer.getInventory().add(item)) {
                             ItemHelper.dropItem(item, serverPlayer.level(), serverPlayer.blockPosition());
                         }
@@ -154,5 +160,20 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
         }
 
         super.removed(pPlayer);
+    }
+
+    public static class GhostSlot extends Slot {
+        public GhostSlot(Container pContainer, int pSlot, int pX, int pY) {
+            super(pContainer, pSlot, pX, pY);
+        }
+
+        @Override
+        public void onTake(Player pPlayer, ItemStack pStack) {
+            if (pStack.getTag() != null && pStack.getTag().getBoolean("jackseconomy_ghost")) {
+                pStack.setCount(0);
+                pStack.getTag().remove("jackseconomy_ghost");
+            }
+            super.onTake(pPlayer, pStack);
+        }
     }
 }
