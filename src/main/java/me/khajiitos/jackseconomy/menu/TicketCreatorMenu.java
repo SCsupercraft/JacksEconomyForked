@@ -54,6 +54,12 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
         Slot slot = this.slots.get(index);
         if (slot.hasItem()) {
             ItemStack clickedStack = slot.getItem();
+            if (clickedStack.getTag() != null && clickedStack.getTag().getBoolean("jackseconomy_ghost")) {
+                clickedStack.setCount(0);
+                clickedStack.getTag().remove("jackseconomy_ghost");
+                return ItemStack.EMPTY;
+            }
+
             clickedStackCopy = clickedStack.copy();
             if (index < containerSize) {
                 if (!this.moveItemStackTo(clickedStack, containerSize, containerSize + 36, false)) {
