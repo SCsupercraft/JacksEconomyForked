@@ -1,5 +1,6 @@
 package me.khajiitos.jackseconomy.screen.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.khajiitos.jackseconomy.screen.AdminShopScreen;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.ChatFormatting;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraftforge.client.gui.widget.ScrollPanel;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Map;
 
@@ -74,13 +76,22 @@ public class ShoppingCartEntry extends AbstractWidget {
 
     @Override
     public void onClick(double pMouseX, double pMouseY) {
+        int count;
+        if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
+            count = 64;
+        } else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL)) {
+            count = 10;
+        } else {
+            count = 1;
+        }
+
         if (pMouseX >= this.getX() + 122 && pMouseX <= this.getX() + 137 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18) {
             if (shoppingCartItem.getValue() > 1) {
-                shoppingCartItem.setValue(shoppingCartItem.getValue() - 1);
+                shoppingCartItem.setValue(Math.max(shoppingCartItem.getValue() - count, 1));
                 onChange.run();
             }
         } else if (pMouseX >= this.getX() + 142 && pMouseX <= this.getX() + 157 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18) {
-            shoppingCartItem.setValue(shoppingCartItem.getValue() + 1);
+            shoppingCartItem.setValue(shoppingCartItem.getValue() + count);
             onChange.run();
         } else if (pMouseX >= this.getX() + 102 && pMouseX <= this.getX() + 117 && pMouseY >= this.getY() + 4 && pMouseY <= this.getY() + 18) {
             onRemoveClicked.run();

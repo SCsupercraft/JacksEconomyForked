@@ -24,6 +24,8 @@
 
 - **Shopkeeper Villager**: Villagers can use admin shops as a workstation and open the admin shop GUI when interacted with
 - **JEI Improvements**: Ability to drag items from JEI when creating manifests
+- **Shopping Cart Improvements**: Holding the `Shift` and `Control` keys down while pressing the `+` or `-` buttons now applies a multiplier
+  - `Shift` is for 64 items, while `Control` is for 10
 
 ## 1.2.2-1.6.2
 
