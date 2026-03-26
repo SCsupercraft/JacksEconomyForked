@@ -188,7 +188,7 @@ public class CurrencyConverterBlockEntity extends BlockEntity implements Worldly
             }
         }
 
-        int toAdd = Math.min(blockEntity.selectedCurrencyType.item.getMaxStackSize(), (blockEntity.currency.divide(blockEntity.selectedCurrencyType.worth, RoundingMode.DOWN).intValue()));
+        int toAdd = Math.min(blockEntity.selectedCurrencyType.item.getMaxStackSize(), (blockEntity.currency.divide(blockEntity.selectedCurrencyType.worth, 0, RoundingMode.DOWN).intValue()));
 
         if (toAdd > 0) {
             ItemStack stack = new ItemStack(blockEntity.selectedCurrencyType.item, toAdd);

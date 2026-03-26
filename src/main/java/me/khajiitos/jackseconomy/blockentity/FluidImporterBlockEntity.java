@@ -261,7 +261,7 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
     }
 
     public void buyFluid(FluidStack fluidStackToBuy, FluidDescription selectedDescription, double price, ItemStack ticketItem) {
-        BigDecimal amountAffordable = getBalance().divide(BigDecimal.valueOf(price), RoundingMode.FLOOR);
+        BigDecimal amountAffordable = getBalance().divide(BigDecimal.valueOf(price), 0, RoundingMode.FLOOR);
 
         int maxProcesses = TicketItem.getMaxProcessCount(ticketItem);
 

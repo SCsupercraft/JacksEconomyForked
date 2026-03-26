@@ -26,7 +26,7 @@ public class CurrencyHelper {
             boolean anything = false;
             for (CurrencyType currencyType : sortedCurrencies) {
                 if (value.compareTo(currencyType.worth) >= 0) {
-                    int count = Math.min(currencyType.item.getMaxStackSize(), value.divide(currencyType.worth, RoundingMode.DOWN).intValue());
+                    int count = Math.min(currencyType.item.getMaxStackSize(), value.divide(currencyType.worth, 0, RoundingMode.DOWN).intValue());
                     items.add(new ItemStack(currencyType.item, count));
                     value = value.subtract(currencyType.worth.multiply(new BigDecimal(count)));
                     anything = true;
