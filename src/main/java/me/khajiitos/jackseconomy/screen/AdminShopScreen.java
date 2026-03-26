@@ -531,6 +531,28 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
         if (!this.isEditMode()) {
             shoppingCartButton = this.addRenderableWidget(new ImageButton(this.leftPos + 139, this.topPos + 121, 30, 26, 176, 0, 26, BACKGROUND, 256, 256, (b) -> {
                 assert this.minecraft != null;
+
+                if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
+                    assert this.minecraft.player != null;
+
+                    for (ItemStack item : this.minecraft.player.getInventory().items) {
+                        ItemDescription itemDescription = ItemDescription.ofItem(item);
+                        ItemSellabilityInfo info = this.sellPrices.get(itemDescription);
+                        if (info == null) continue;
+
+                        String stage = info.stage;
+                        if (stage == null || GameStagesManager.hasGameStage(Minecraft.getInstance().player, stage)) {
+                            int oldAmount = itemsToSell.getOrDefault(itemDescription, 0);
+                            int newAmount = oldAmount + item.getCount();
+
+                            itemsToSell.put(itemDescription, newAmount);
+                        }
+                    }
+
+                    this.reduceSellItemsIfMissing();
+                    return;
+                }
+
                 this.minecraft.screen = new ShoppingCartScreen(this.menu, this.menu.inventory, this);
                 this.minecraft.screen.init(this.minecraft, this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight());
             }, Component.empty()));
@@ -648,8 +670,19 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
         }
 
         if (shoppingCartButton != null && shoppingCartButton.isHovered()) {
-            this.tooltip = List.of(Component.translatable("jackseconomy.items", Component.literal(String.valueOf(this.shoppingCart.size()))).withStyle(ChatFormatting.GRAY),
-                    Component.translatable("jackseconomy.value", Component.literal(oneItemCurrencyMode ? "$" + getShoppingCartValue().longValue() : CurrencyHelper.format(getShoppingCartValue()))).withStyle(ChatFormatting.GRAY));
+            this.tooltip = List.of(
+                    Component.translatable(
+                            "jackseconomy.items",
+                            Component.literal(String.valueOf(this.shoppingCart.size()))
+                    ).withStyle(ChatFormatting.GRAY),
+                    Component.translatable(
+                            "jackseconomy.value",
+                            Component.literal(oneItemCurrencyMode ? "$" + getShoppingCartValue().longValue() : CurrencyHelper.format(getShoppingCartValue()))
+                    ).withStyle(ChatFormatting.GRAY),
+                    Component.translatable(
+                            "jackseconomy.sell_all"
+                    ).withStyle(ChatFormatting.GRAY)
+            );
         }
 
         /*
