@@ -20,7 +20,7 @@ public class CurrencyHelper {
 
     public static List<ItemStack> getCurrencyItems(BigDecimal value) {
         List<ItemStack> items = new ArrayList<>();
-        List<CurrencyType> sortedCurrencies = Config.oneItemCurrencyMode.get() ? List.of(CurrencyType.DOLLAR_BILL) : Arrays.stream(CurrencyType.values()).sorted(Comparator.comparing(CurrencyType::getWorth).reversed()).toList();
+        List<CurrencyType> sortedCurrencies = Config.oneItemCurrencyMode.get() ? List.of(CurrencyType.DOLLAR_BILL) : getCurrencyTypesAsOrderedList();
 
         while (value.compareTo(BigDecimal.ZERO) > 0) {
             boolean anything = false;
@@ -41,6 +41,10 @@ public class CurrencyHelper {
         return items;
     }
 
+    public static List<CurrencyType> getCurrencyTypesAsOrderedList() {
+        return Arrays.stream(CurrencyType.values()).sorted(Comparator.comparing(CurrencyType::getWorth).reversed()).toList();
+    }
+
     public static BigDecimal addMoney(BigDecimal money, ItemStack wallet, Player player) {
         if (wallet.getItem() instanceof WalletItem) {
             BigDecimal balance = WalletItem.getBalance(wallet);
@@ -51,6 +55,7 @@ public class CurrencyHelper {
         }
         return null;
     }
+
     public static BigDecimal giveChange(Player player, ItemStack itemStack) {
         if (itemStack.getItem() instanceof InfiniteWalletItem walletItem) {
             return WalletItem.getBalance(itemStack);
@@ -61,17 +66,9 @@ public class CurrencyHelper {
             if (balance.compareTo(capacity) > 0) {
                 double change = balance.subtract(capacity).doubleValue();
 
-                change = giveChange(player, change, CurrencyType.THOUSAND_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.HUNDRED_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.FIFTY_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.TWENTY_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.TEN_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.FIVE_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.QUARTER);
-                change = giveChange(player, change, CurrencyType.DIME);
-                change = giveChange(player, change, CurrencyType.NICKEL);
-                giveChange(player, change, CurrencyType.PENNY);
+                for (CurrencyType type : getCurrencyTypesAsOrderedList()) {
+                    change = giveChange(player, change, type);
+                }
 
                 WalletItem.setBalance(itemStack, capacity);
                 return capacity;
@@ -80,19 +77,20 @@ public class CurrencyHelper {
         }
         return null;
     }
+
     public static double giveChange(Player player, double amount, CurrencyType currencyType) {
         double worth = currencyType.worth.doubleValue();
         double count = Math.floor(amount / worth);
         double itemsLeft = count;
 
         while (itemsLeft > 0) {
-            int items = (int) Math.min(64, count);
+            int items = (int) Math.min(64, itemsLeft);
             ItemStack itemStack = new ItemStack(currencyType.item, items);
 
-            //if (!player.getInventory().add(itemStack)) {
+            if (!player.getInventory().add(itemStack)) {
                 ItemEntity itemEntity = new ItemEntity(player.level(), player.getX(), player.getY(), player.getZ(), itemStack);
                 player.level().addFreshEntity(itemEntity);
-            //}
+            }
 
             itemsLeft -= items;
         }

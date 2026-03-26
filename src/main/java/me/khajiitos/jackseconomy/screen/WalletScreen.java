@@ -291,11 +291,11 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
                     BigDecimal worth = item.currencyType.worth;
 
                     if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
-                        count = BigDecimal.valueOf(64).min(balance.divide(worth, RoundingMode.DOWN));
+                        count = BigDecimal.valueOf(64).min(balance.divide(worth, 0, RoundingMode.DOWN));
                     } else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL)) {
-                        count = BigDecimal.valueOf(10).min(balance.divide(worth, RoundingMode.DOWN));
+                        count = BigDecimal.valueOf(10).min(balance.divide(worth, 0, RoundingMode.DOWN));
                     } else {
-                        count = BigDecimal.valueOf(1).min(balance.divide(worth, RoundingMode.DOWN));
+                        count = BigDecimal.valueOf(1).min(balance.divide(worth, 0, RoundingMode.DOWN));
                     }
 
                     if (count.compareTo(BigDecimal.ZERO) > 0) {

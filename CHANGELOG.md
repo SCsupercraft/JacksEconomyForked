@@ -28,6 +28,11 @@
   - `Shift` is for 64 items, while `Control` is for 10
 - **Sell All**: By shift-clicking the shopping cart button in the admin shop, all items that you are able to sell will be added to the cart
 
+### Fixed
+
+- **Withdrawal Crash**: Fixed crashes when withdrawing money from the wallet GUI
+- **Incorrect Change**: Fixed issues with incorrect amounts of change being given
+
 ## 1.2.2-1.6.2
 
 ### Changed
