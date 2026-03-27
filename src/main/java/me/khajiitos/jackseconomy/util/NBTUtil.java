@@ -57,7 +57,7 @@ public class NBTUtil {
         } else if (tag == null) {
             return JsonNull.INSTANCE;
         } else {
-            JacksEconomy.LOGGER.warn("NBTUtil::nbtToJson - unsupported tag type " + tag.getClass().getSimpleName());
+            JacksEconomy.LOGGER.warn("NBTUtil::nbtToJson - unsupported tag type {}", tag.getClass().getSimpleName());
         }
 
         return JsonNull.INSTANCE;
@@ -90,7 +90,7 @@ public class NBTUtil {
             jsonArray.forEach(element -> listTag.add(jsonToNbt(element)));
             return listTag;
         } else if (!(jsonElement instanceof JsonNull)) {
-            JacksEconomy.LOGGER.warn("NBTUtil::jsonToNbt - unsupported element type " + jsonElement.getClass().getSimpleName());
+            JacksEconomy.LOGGER.warn("NBTUtil::jsonToNbt - unsupported element type {}", jsonElement.getClass().getSimpleName());
         }
 
         return null;

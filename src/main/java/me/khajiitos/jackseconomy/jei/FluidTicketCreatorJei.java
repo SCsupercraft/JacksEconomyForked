@@ -18,7 +18,7 @@ public class FluidTicketCreatorJei implements IGhostIngredientHandler<FluidTicke
                 || gui.getMinecraft().player == null
                 || !gui.getMinecraft().player.isCreative()
                 || !ingredient.getIngredient(VanillaTypes.ITEM_STACK)
-                    .get()
+                    .orElseThrow()
                     .getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM)
                     .isPresent()
         ) return List.of();
