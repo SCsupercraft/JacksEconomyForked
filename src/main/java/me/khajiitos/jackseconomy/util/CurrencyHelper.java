@@ -103,6 +103,10 @@ public class CurrencyHelper {
         return DecimalFormat.getCurrencyInstance(Locale.US).format(value);
     }
 
+    public static String formatShortened(double value) {
+        return formatShortened(BigDecimal.valueOf(value));
+    }
+
     public static String formatShortened(BigDecimal bigDecimal) {
         String sign = (bigDecimal.compareTo(BigDecimal.ZERO) < 0) ? "-" : "";
         BigDecimal bigDecimalAbs = bigDecimal.abs();

@@ -27,6 +27,7 @@
 - **Shopping Cart Improvements**: Holding the `Shift` and `Control` keys down while pressing the `+` or `-` buttons now applies a multiplier
   - `Shift` is for 64 items, while `Control` is for 10
 - **Sell All**: By shift-clicking the shopping cart button in the admin shop, all items that you are able to sell will be added to the cart
+- **New Command**: `/economy player` can be used to manipulate the contents of a player's wallet
 
 ### Fixed
 

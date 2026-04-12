@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
@@ -16,7 +17,7 @@ import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 import java.util.Map;
 
 public class CuriosHandler {
-    public static ItemStack getWallet(Player player) {
+    public static @NotNull ItemStack getWallet(Player player) {
         ICuriosItemHandler handler = CuriosApi.getCuriosInventory(player).resolve().orElse(null);
 
         if (handler != null) {
