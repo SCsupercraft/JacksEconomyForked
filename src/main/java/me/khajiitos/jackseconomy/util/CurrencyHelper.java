@@ -112,13 +112,13 @@ public class CurrencyHelper {
         BigDecimal bigDecimalAbs = bigDecimal.abs();
 
         if (bigDecimalAbs.compareTo(TRILLION) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(TRILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "T";
+            return "$" + sign + bigDecimalAbs.divide(TRILLION, 2, RoundingMode.DOWN) + "T";
         } else if (bigDecimalAbs.compareTo(BILLION) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(BILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "B";
+            return "$" + sign + bigDecimalAbs.divide(BILLION, 2, RoundingMode.DOWN) + "B";
         } else if (bigDecimalAbs.compareTo(MILLION) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(MILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "M";
+            return "$" + sign + bigDecimalAbs.divide(MILLION, 2, RoundingMode.DOWN) + "M";
         } else if (bigDecimalAbs.compareTo(THOUSAND) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(THOUSAND, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "K";
+            return "$" + sign + bigDecimalAbs.divide(THOUSAND, 2, RoundingMode.DOWN) + "K";
         }
         return format(bigDecimal);
     }

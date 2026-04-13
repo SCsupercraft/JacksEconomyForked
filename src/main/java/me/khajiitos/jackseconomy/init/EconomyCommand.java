@@ -462,7 +462,7 @@ public class EconomyCommand {
             }
 
             CurrencyHelper.addMoney(BigDecimal.valueOf(money), stack, player);
-            ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.player_give_money", CurrencyHelper.format(money), player.getDisplayName()), true);
+            ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.player_give_money", CurrencyHelper.formatShortened(money), player.getDisplayName()), true);
             return 1;
         }
 
@@ -481,7 +481,7 @@ public class EconomyCommand {
                 WalletItem.setBalance(stack, balance.subtract(BigDecimal.valueOf(money)).max(BigDecimal.ZERO));
             }
 
-            ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.player_remove_money", CurrencyHelper.format(money), player.getDisplayName()), true);
+            ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.player_remove_money", CurrencyHelper.formatShortened(money), player.getDisplayName()), true);
             return 1;
         }
 
@@ -500,7 +500,7 @@ public class EconomyCommand {
                 WalletItem.setBalance(stack, BigDecimal.ZERO);
             } else cleared = BigDecimal.ZERO;
 
-            ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.player_cleared_money", CurrencyHelper.format(cleared), player.getDisplayName()), true);
+            ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.player_cleared_money", CurrencyHelper.formatShortened(cleared), player.getDisplayName()), true);
             return 1;
         }
 
@@ -515,7 +515,7 @@ public class EconomyCommand {
 
             Component count;
             if (stack.getItem() instanceof WalletItem) {
-                count = Component.literal(CurrencyHelper.format(WalletItem.getBalance(stack)));
+                count = Component.literal(CurrencyHelper.formatShortened(WalletItem.getBalance(stack)));
             } else if (stack.getItem() instanceof GoldenWalletItem) {
                 count = Component.literal("$").append(Component.translatable("jackseconomy.infinite"));
             } else return 0;
