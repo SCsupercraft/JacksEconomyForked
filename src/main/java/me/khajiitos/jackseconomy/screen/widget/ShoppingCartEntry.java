@@ -46,7 +46,7 @@ public class ShoppingCartEntry extends AbstractWidget {
             guiGraphics.pose().pushPose();
             guiGraphics.pose().scale(scale, scale, scale);
         }
-        Component header = itemName.append(Component.literal(" (" + shoppingCartItem.getValue() + ")").withStyle(ChatFormatting.GRAY));
+        Component header = itemName.append(Component.literal(" (" + shoppingCartItem.getValue() * shoppingCartItem.getKey().count() + ")").withStyle(ChatFormatting.GRAY));
         Component footer = Component.literal(oneItemCurrencyMode ? "$" + (long)(shoppingCartItem.getKey().price() * shoppingCartItem.getValue()) : CurrencyHelper.format(shoppingCartItem.getKey().price() * shoppingCartItem.getValue())).withStyle(ChatFormatting.DARK_GRAY);
         guiGraphics.drawString(Minecraft.getInstance().font, header, (int) ((this.getX() + 22) / scale), (int) ((this.getY()) / scale), 0xFFFFFFFF);
         guiGraphics.drawString(Minecraft.getInstance().font, footer, (int) ((this.getX() + 22) / scale), (int) ((this.getY() + 9) / scale), 0xFFFFFFFF);

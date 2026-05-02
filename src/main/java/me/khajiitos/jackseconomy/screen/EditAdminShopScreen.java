@@ -21,6 +21,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
@@ -264,22 +265,47 @@ public class EditAdminShopScreen extends AdminShopScreen {
             return;
         }
         if (pButton == 0) {
-            ShopItem onCursorBefore = this.itemOnCursor;
-            if (onCursorBefore != null && onCursorBefore.price() == -1 && this.floatingEditBox == null) {
-                Pair<Integer, Integer> slotPos = this.getSlotPos(slot);
+            Pair<Integer, Integer> slotPos = this.getSlotPos(slot);
 
-                this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, slotPos.getFirst() + 8, slotPos.getSecond() + 18, 50, 15, true, (value) -> {
+            if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
+                if (this.floatingEditBox != null) {
+                    this.removeWidget(this.floatingEditBox);
+                    this.floatingEditBox = null;
+                    return;
+                }
+
+                ShopItem itemAtSlot = this.getItemAtSlot(slot, this.selectedCategory);
+                if (itemAtSlot == null) {
+                    return;
+                }
+
+                this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, slotPos.getFirst() + 8, slotPos.getSecond() + 16, 50, 15, FloatingEditBoxWidget.Type.INTEGER, (value) -> {
                     try {
-                        double newPrice = Double.parseDouble(value);
+                        int newCount = Integer.parseUnsignedInt(value);
 
-                        this.setItemAtSlot(new ShopItem(onCursorBefore.itemDescription(), newPrice, slot, onCursorBefore.customName(), onCursorBefore.stage()), slot, this.selectedCategory);
+                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), itemAtSlot.price(), newCount, slot, itemAtSlot.customName(), itemAtSlot.stage()), slot, this.selectedCategory);
                         this.removeWidget(this.floatingEditBox);
                         this.floatingEditBox = null;
                     } catch (NumberFormatException ignored) {}
                 }));
+                this.floatingEditBox.setValue(String.valueOf(itemAtSlot.count()));
                 this.setFocused(this.floatingEditBox);
+            } else {
+                ShopItem onCursorBefore = this.itemOnCursor;
+                if (onCursorBefore != null && onCursorBefore.price() == -1 && this.floatingEditBox == null) {
+                    this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, slotPos.getFirst() + 8, slotPos.getSecond() + 18, 50, 15, FloatingEditBoxWidget.Type.DECIMAL, (value) -> {
+                        try {
+                            double newPrice = Double.parseDouble(value);
+
+                            this.setItemAtSlot(new ShopItem(onCursorBefore.itemDescription(), newPrice, onCursorBefore.count(), slot, onCursorBefore.customName(), onCursorBefore.stage()), slot, this.selectedCategory);
+                            this.removeWidget(this.floatingEditBox);
+                            this.floatingEditBox = null;
+                        } catch (NumberFormatException ignored) {}
+                    }));
+                    this.setFocused(this.floatingEditBox);
+                }
+                this.itemOnCursor = this.setItemAtSlot(this.itemOnCursor, slot, this.selectedCategory);
             }
-            this.itemOnCursor = this.setItemAtSlot(this.itemOnCursor, slot, this.selectedCategory);
         } else if (pButton == 1) {
             if (this.floatingEditBox != null) {
                 this.removeWidget(this.floatingEditBox);
@@ -298,9 +324,9 @@ public class EditAdminShopScreen extends AdminShopScreen {
             if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
                 this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, slotPos.getFirst() + 8, slotPos.getSecond() + 16, 50, 15, (value) -> {
                     if (!value.isEmpty()) {
-                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), itemAtSlot.price(), slot, value, itemAtSlot.stage()), slot, this.selectedCategory);
+                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), itemAtSlot.price(), itemAtSlot.count(), slot, value, itemAtSlot.stage()), slot, this.selectedCategory);
                     } else {
-                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), itemAtSlot.price(), slot, null, itemAtSlot.stage()), slot, this.selectedCategory);
+                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), itemAtSlot.price(), itemAtSlot.count(), slot, null, itemAtSlot.stage()), slot, this.selectedCategory);
                     }
                     this.removeWidget(this.floatingEditBox);
                     this.floatingEditBox = null;
@@ -312,9 +338,9 @@ public class EditAdminShopScreen extends AdminShopScreen {
             } else if (GameStagesCheck.isInstalled() && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL)) {
                 this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, slotPos.getFirst() + 8, slotPos.getSecond() + 16, 50, 15, (value) -> {
                     if (!value.isEmpty()) {
-                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), itemAtSlot.price(), slot, itemAtSlot.customName(), value), slot, this.selectedCategory);
+                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), itemAtSlot.price(), itemAtSlot.count(), slot, itemAtSlot.customName(), value), slot, this.selectedCategory);
                     } else {
-                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), itemAtSlot.price(), slot, itemAtSlot.customName(), null), slot, this.selectedCategory);
+                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), itemAtSlot.price(), itemAtSlot.count(), slot, itemAtSlot.customName(), null), slot, this.selectedCategory);
                     }
                     this.removeWidget(this.floatingEditBox);
                     this.floatingEditBox = null;
@@ -324,11 +350,11 @@ public class EditAdminShopScreen extends AdminShopScreen {
                     this.floatingEditBox.setValue(itemAtSlot.stage());
                 }
             } else {
-                this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, slotPos.getFirst() + 8, slotPos.getSecond() + 16, 50, 15, true, (value) -> {
+                this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, slotPos.getFirst() + 8, slotPos.getSecond() + 16, 50, 15, FloatingEditBoxWidget.Type.DECIMAL, (value) -> {
                     try {
                         double newPrice = Double.parseDouble(value);
 
-                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), newPrice, slot, itemAtSlot.customName(), itemAtSlot.stage()), slot, this.selectedCategory);
+                        this.setItemAtSlot(new ShopItem(itemAtSlot.itemDescription(), newPrice, itemAtSlot.count(), slot, itemAtSlot.customName(), itemAtSlot.stage()), slot, this.selectedCategory);
                         this.removeWidget(this.floatingEditBox);
                         this.floatingEditBox = null;
                     } catch (NumberFormatException ignored) {}
@@ -375,6 +401,7 @@ public class EditAdminShopScreen extends AdminShopScreen {
                 for (ShopItem shopItem : entry.getValue()) {
                     CompoundTag itemTag = shopItem.itemDescription().toNbt();
                     itemTag.putDouble("adminShopBuyPrice", shopItem.price());
+                    itemTag.putInt("adminShopBuyCount", shopItem.count());
 
                     itemTag.putString("category", category.name + ":" + entry.getKey().name);
                     itemTag.putInt("slot", shopItem.slot());
@@ -435,12 +462,12 @@ public class EditAdminShopScreen extends AdminShopScreen {
     }
 
     @Override
-    protected void slotClicked(@Nullable Slot pSlot, int pSlotId, int pMouseButton, ClickType pType) {
+    protected void slotClicked(@Nullable Slot pSlot, int pSlotId, int pMouseButton, @NotNull ClickType pType) {
         if (pMouseButton == 0) {
             if (this.itemOnCursor == null && pSlot != null) {
                 ItemStack itemStack = pSlot.getItem();
                 if (!itemStack.isEmpty()) {
-                    this.itemOnCursor = new ShopItem(ItemDescription.ofItem(itemStack), -1, -1, null, null);
+                    this.itemOnCursor = new ShopItem(ItemDescription.ofItem(itemStack), -1, 1, -1, null, null);
                 }
             } else if (pSlot == null) {
                 this.itemOnCursor = null;
@@ -476,7 +503,7 @@ public class EditAdminShopScreen extends AdminShopScreen {
 
                     this.setFocused(this.floatingEditBox);
                 } else {
-                    this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, this.leftPos + pSlot.x + 8, this.topPos + pSlot.y + 16, 50, 15, true, (value) -> {
+                    this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, this.leftPos + pSlot.x + 8, this.topPos + pSlot.y + 16, 50, 15, FloatingEditBoxWidget.Type.DECIMAL, (value) -> {
                         try {
                             double newPrice = Double.parseDouble(value);
 

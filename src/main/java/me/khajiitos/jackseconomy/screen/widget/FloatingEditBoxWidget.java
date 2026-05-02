@@ -11,14 +11,34 @@ public class FloatingEditBoxWidget extends EditBox {
     private final int midX;
     private final OnDone onDone;
 
-    public FloatingEditBoxWidget(Font pFont, int midX, int pY, int minWidth, int height, boolean showDollarSign, OnDone onDone) {
+    /**
+     * @deprecated please use {@link #FloatingEditBoxWidget(Font, int, int, int, int, Type, OnDone)} instead.
+     * Will be removed in 1.2.2-1.8.0
+     */
+    @Deprecated(since = "1.2.2-1.7.0", forRemoval = true)
+    public FloatingEditBoxWidget(Font pFont, int midX, int pY, int minWidth, int height, boolean isDecimal, OnDone onDone) {
+        this(pFont, midX, pY, minWidth, height, isDecimal ? Type.DECIMAL : Type.STRING, onDone);
+    }
+
+    public FloatingEditBoxWidget(Font pFont, int midX, int pY, int minWidth, int height, Type type, OnDone onDone) {
         super(pFont, midX, pY, minWidth, height, Component.empty());
         this.midX = midX;
         this.minWidth = minWidth;
         this.onDone = onDone;
 
-        if (showDollarSign) {
-            this.setFilter(newValue -> {
+        switch (type) {
+            case INTEGER -> setFilter(newValue -> {
+                for (int i = 0; i < newValue.length(); i++) {
+                    char c = newValue.charAt(i);
+
+                    if (c < '0' || c > '9') {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+            case DECIMAL -> setFilter(newValue -> {
                 boolean hasDot = false;
                 for (int i = 0; i < newValue.length(); i++) {
                     char c = newValue.charAt(i);
@@ -43,7 +63,7 @@ public class FloatingEditBoxWidget extends EditBox {
     }
 
     public FloatingEditBoxWidget(Font pFont, int midX, int pY, int minWidth, int height, OnDone onDone) {
-        this(pFont, midX, pY, minWidth, height, false, onDone);
+        this(pFont, midX, pY, minWidth, height, Type.STRING, onDone);
     }
 
     public void calculateWidthAndPos() {
@@ -83,5 +103,23 @@ public class FloatingEditBoxWidget extends EditBox {
     @FunctionalInterface
     public interface OnDone {
         void onDone(String value);
+    }
+
+    /**
+     * Used to determine what characters can be entered.
+     */
+    public enum Type {
+        /**
+         * Allows for any character.
+         */
+        STRING,
+        /**
+         * Only allows for numbers.
+         */
+        INTEGER,
+        /**
+         * Only allows for numbers and a single decimal point.
+         */
+        DECIMAL
     }
 }
