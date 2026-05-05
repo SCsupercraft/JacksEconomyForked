@@ -118,7 +118,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // Jack's Economy (Forked)
-    implementation fg.deobf("${mod_group_id}:jackseconomy-forked:1.2.2-1.6.2")
+    implementation fg.deobf("${mod_group_id}:jackseconomy-forked:1.2.2-1.7.0")
 
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.3.5+1.20.1")
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.3.5+1.20.1:api")
