@@ -30,6 +30,7 @@
 - **Admin Shop Set Item Quantities**: You can now give items in the admin shop a set quantity
   - Items can only be bought in these set quantities
   - For example, you could let the player buy 16 torches for $1.00
+- **FTB Quests Integration**: Added one new task and one new reward for accepting/giving money.
 - **New Command**: `/economy player` can be used to manipulate the contents of a player's wallet
 
 ### Fixed
