@@ -83,7 +83,7 @@ public class AdminShopCommand {
 
 		if (player != null) {
 			String configOpt = Config.adminShopCommandShopName.get();
-			String name = configOpt.equals("") ? null : configOpt;
+			String name = configOpt.isEmpty() ? null : configOpt;
 
 			CompoundTag compoundTag = PriceManager.toAdminShopSchemaCompound(player, name);
 			player.openMenu(new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new AdminShopMenu(pContainerId, pPlayerInventory), Component.empty()));

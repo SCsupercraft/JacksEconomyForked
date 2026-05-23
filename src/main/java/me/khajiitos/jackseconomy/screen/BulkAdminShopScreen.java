@@ -843,7 +843,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 
 					this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, (value) -> {
 						for (AdminShopScreen.InnerCategory otherCategory : this.shopItems.get(this.category).keySet()) {
-							if (this.shopItems.get(this.category).keySet().size() > 1 && otherCategory == category) {
+							if (this.shopItems.get(this.category).size() > 1 && otherCategory == category) {
 								continue;
 							}
 
@@ -865,7 +865,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 					}));
 					this.setFocused(this.floatingEditBox);
 				} else if (button == 2) {
-					this.shopItems.get(this.category).keySet().remove(category);
+					this.shopItems.get(this.category).remove(category);
 
 					if (this.innerCategory == category) {
 						this.innerCategory = null;

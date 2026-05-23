@@ -136,9 +136,9 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
 
             for (int i = 0; i < this.container.getContainerSize(); i++) {
                 ItemStack item = this.container.getItem(i);
-                boolean ghost;
 
-                if (ghost = isGhostItem(item))
+                boolean ghost = isGhostItem(item);
+                if (ghost)
                     removeGhostItem(item);
 
                 if (!item.isEmpty()) {

@@ -13,7 +13,7 @@ public class JeiInsertGhostItemHandler {
         if (!(context.player() instanceof ServerPlayer sender))
             return;
 
-        if (sender == null || !sender.isCreative()) {
+        if (!sender.isCreative()) {
             return;
         }
 

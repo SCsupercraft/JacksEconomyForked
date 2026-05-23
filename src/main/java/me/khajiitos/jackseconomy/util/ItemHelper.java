@@ -25,12 +25,12 @@ public class ItemHelper {
             Item item = JacksEconomy.registryAccess().registryOrThrow(Registries.ITEM).get(resourceLocation);
 
             if (item == null) {
-                JacksEconomy.LOGGER.info("Invalid item: " + name);
+                JacksEconomy.LOGGER.info("Invalid item: {}", name);
             }
 
             return item;
         } catch (ResourceLocationException e) {
-            JacksEconomy.LOGGER.warn("Invalid resource location: " + name);
+            JacksEconomy.LOGGER.warn("Invalid resource location: {}", name);
         }
 
         return null;

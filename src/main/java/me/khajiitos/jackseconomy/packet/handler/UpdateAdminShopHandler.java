@@ -124,7 +124,7 @@ public class UpdateAdminShopHandler {
         PriceManager.sendDataToPlayers(false);
         JacksEconomy.server.getPlayerList().getPlayers().forEach(player -> {
             CompoundTag tag = PriceManager.toAdminShopSchemaCompound(player, msg.adminShopName().orElse(null));
-            PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(tag, Optional.ofNullable(msg.adminShopName().orElse(null)), Config.oneItemCurrencyMode.get()));
+            PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(tag, msg.adminShopName(), Config.oneItemCurrencyMode.get()));
         });
 
         sender.sendSystemMessage(Component.translatable("jackseconomy.admin_shop_saved").withStyle(ChatFormatting.GREEN));

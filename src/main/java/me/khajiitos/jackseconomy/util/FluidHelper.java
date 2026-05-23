@@ -16,12 +16,12 @@ public class FluidHelper {
             Fluid fluid = JacksEconomy.registryAccess().registryOrThrow(Registries.FLUID).get(resourceLocation);
 
             if (fluid == null) {
-                JacksEconomy.LOGGER.info("Invalid fluid: " + name);
+                JacksEconomy.LOGGER.info("Invalid fluid: {}", name);
             }
 
             return fluid;
         } catch (ResourceLocationException e) {
-            JacksEconomy.LOGGER.warn("Invalid resource location: " + name);
+            JacksEconomy.LOGGER.warn("Invalid resource location: {}", name);
         }
 
         return null;

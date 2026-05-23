@@ -695,7 +695,7 @@ public abstract class FluidSelectionScreen<T extends FluidSelectionScreen.ItemPi
 
 		int i = this.getTabX(pCreativeModeTab);
 		int j = this.getTabY(pCreativeModeTab);
-		if (this.isHovering(i + 3, j + 3, 21, 27, (double)pMouseX, (double)pMouseY)) {
+		if (this.isHovering(i + 3, j + 3, 21, 27, pMouseX, pMouseY)) {
 			pGuiGraphics.renderTooltip(this.font, pCreativeModeTab.getDisplayName(), pMouseX, pMouseY);
 			return true;
 		} else {
