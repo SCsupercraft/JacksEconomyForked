@@ -138,6 +138,7 @@
 
   "jackseconomy.currency": "Currency: %.1f",
   "jackseconomy.wallet": "Wallet",
+  "jackseconomy.no_wallet": "No wallet!",
 
   "jackseconomy.turn_into_check": "Click to turn the specified balance into a check!",
 
@@ -152,6 +153,7 @@
   "jackseconomy.value": "Value: %s",
   "jackseconomy.wallet_balance": "Wallet: %s",
   "jackseconomy.balance_out_of": "Balance: %s/%s",
+  "jackseconomy.items": "Items: %s",
 
   "jackseconomy.fe_per_tick": "Usage: %s FE/tick",
   "jackseconomy.progress_per_tick": "Speed: %s progress/tick",
@@ -160,17 +162,14 @@
   "jackseconomy.subtitle.cash": "Cash sounds",
   "jackseconomy.subtitle.checkout": "Checkout sounds",
 
-  "jackseconomy.items": "Items: %s",
-
   "jackseconomy.in_cart": "In cart: %s",
   "jackseconomy.to_sell": "To sell: %s",
-
-  "jackseconomy.no_wallet": "No wallet!",
 
   "jackseconomy.purchase": "Purchase",
 
   "jackseconomy.cant_afford": "Can't afford!",
   "jackseconomy.shopping_cart_empty": "Shopping cart is empty!",
+  "jackseconomy.sell_all": "Shift-click to sell all",
 
   "jackseconomy.sold_items": "Sold items: %s",
   "jackseconomy.bought_items": "Bought items: %s",
