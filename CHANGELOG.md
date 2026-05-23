@@ -37,6 +37,7 @@
 
 - **Withdrawal Crash**: Fixed crashes when withdrawing money from the wallet GUI
 - **Incorrect Change**: Fixed issues with incorrect amounts of change being given
+- **Purchase Tracking**: Fixed the issue with the purchase manager not tracking purchases
 
 ## 1.2.2-1.6.2
 
