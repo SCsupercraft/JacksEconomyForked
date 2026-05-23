@@ -1,11 +1,11 @@
 package me.khajiitos.jackseconomy.jei;
 
+import me.khajiitos.jackseconomy.menu.FluidTicketCreatorMenu;
 import me.khajiitos.jackseconomy.screen.FluidTicketCreatorScreen;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.world.inventory.Slot;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -17,10 +17,8 @@ public class FluidTicketCreatorJei implements IGhostIngredientHandler<FluidTicke
         if (ingredient.getType() != VanillaTypes.ITEM_STACK
                 || gui.getMinecraft().player == null
                 || !gui.getMinecraft().player.isCreative()
-                || !ingredient.getIngredient(VanillaTypes.ITEM_STACK)
-                    .orElseThrow()
-                    .getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM)
-                    .isPresent()
+                || !FluidTicketCreatorMenu.mayPlace(ingredient.getIngredient(VanillaTypes.ITEM_STACK)
+                    .orElseThrow())
         ) return List.of();
 
         ArrayList<Target<I>> targets = new ArrayList<>();

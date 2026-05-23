@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 
 public class TextBox extends AbstractWidget {
     private String text;
-    private int backgroundColor;
+    private final int backgroundColor;
 
     public TextBox(int pX, int pY, int pWidth, int pHeight, String text, int backgroundColor) {
         super(pX, pY, pWidth, pHeight, Component.empty());

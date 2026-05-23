@@ -55,7 +55,7 @@ public class EconomyCommand {
 	}
 
 	private static class PriceCommand {
-		public static LiteralArgumentBuilder<CommandSourceStack> command =
+		public static final LiteralArgumentBuilder<CommandSourceStack> command =
 				Commands.literal("price")
 						.then(Commands.literal("set")
 								.then(Commands.literal("exporter").then(Commands.argument("price", DoubleArgumentType.doubleArg(-1.0)).executes(PriceCommand::setExporterPrice).then(Commands.literal("strip_nbt").executes(PriceCommand::setExporterPriceStripNbt))))
@@ -74,6 +74,8 @@ public class EconomyCommand {
 						.then(Commands.literal("reset")
 								.executes(PriceCommand::resetPrices)
 						);
+        private static final SimpleCommandExceptionType NOT_IN_CREATIVE =
+                new SimpleCommandExceptionType(Component.translatable("jackseconomy.bulk_admin_shop_not_creative"));
 
 		private static int resetPrices(CommandContext<CommandSourceStack> ctx) {
 			PriceManager.resetData();
@@ -286,7 +288,7 @@ public class EconomyCommand {
 			if (player == null) return 1;
 
 			if (!player.isCreative()) {
-				throw new SimpleCommandExceptionType(Component.translatable("jackseconomy.bulk_admin_shop_not_creative")).create();
+				throw NOT_IN_CREATIVE.create();
 			}
 
 			NetworkHooks.openScreen(player, new SimpleMenuProvider((pContainerId, pPlayerInventory, pPlayer) -> new BulkAdminShopScreen.Menu(pContainerId, pPlayerInventory), Component.empty()));
@@ -311,7 +313,7 @@ public class EconomyCommand {
 	}
 
 	private static class PurchasesCommand {
-		public static LiteralArgumentBuilder<CommandSourceStack> command =
+		public static final LiteralArgumentBuilder<CommandSourceStack> command =
 				Commands.literal("purchases")
 						.then(Commands.literal("reset").executes(PurchasesCommand::resetPurchases));
 
@@ -323,7 +325,7 @@ public class EconomyCommand {
 	}
 
 	private static class ManifestCommand {
-		public static LiteralArgumentBuilder<CommandSourceStack> command =
+		public static final LiteralArgumentBuilder<CommandSourceStack> command =
 				Commands.literal("manifest")
 						.then(
 								Commands.literal("max_process_count").executes(ManifestCommand::getMaxProcessCount).then(
@@ -435,7 +437,7 @@ public class EconomyCommand {
 	}
 
     private static class PlayerCommand {
-        public static LiteralArgumentBuilder<CommandSourceStack> command =
+        public static final LiteralArgumentBuilder<CommandSourceStack> command =
                 Commands.literal("player")
                         .requires(stack -> !Config.oneItemCurrencyMode.get())
                         .then(Commands.argument("target", EntityArgument.player())

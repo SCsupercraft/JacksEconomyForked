@@ -22,6 +22,8 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -170,6 +172,13 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
         super.removed(pPlayer);
     }
 
+    public static boolean mayPlace(ItemStack stack) {
+        LazyOptional<IFluidHandlerItem> capability = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
+        return capability.isPresent() && capability.map(cap ->
+                        cap.getTanks() > 0 && !cap.getFluidInTank(0).isEmpty())
+                .orElse(false);
+    }
+
     public static class FluidSlot extends TicketCreatorMenu.GhostSlot {
 
         public FluidSlot(Container pContainer, int pSlot, int pX, int pY) {
@@ -178,7 +187,7 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
 
         @Override
         public boolean mayPlace(@NotNull ItemStack pStack) {
-            return pStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent();
+            return FluidTicketCreatorMenu.mayPlace(pStack);
         }
     }
 }

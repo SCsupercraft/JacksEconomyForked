@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
 
 public class FloatingEditBoxWidget extends EditBox {
@@ -16,6 +17,7 @@ public class FloatingEditBoxWidget extends EditBox {
      * Will be removed in 1.2.2-1.8.0
      */
     @Deprecated(since = "1.2.2-1.7.0", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "1.8.0")
     public FloatingEditBoxWidget(Font pFont, int midX, int pY, int minWidth, int height, boolean isDecimal, OnDone onDone) {
         this(pFont, midX, pY, minWidth, height, isDecimal ? Type.DECIMAL : Type.STRING, onDone);
     }

@@ -1204,11 +1204,12 @@ public class AdminShopScreen extends AbstractContainerScreen<AdminShopMenu> {
                 return false;
             }
             ShopItem that = (ShopItem) obj;
-            return Double.compare(that.price, price) == 0 &&
-                    slot == that.slot &&
-                    Objects.equals(itemDescription, that.itemDescription) &&
-                    Objects.equals(customName, that.customName) &&
-                    Objects.equals(stage, that.stage);
+            return Double.compare(that.price, price) == 0
+                    && count == that.count
+                    && slot == that.slot
+                    && Objects.equals(itemDescription, that.itemDescription)
+                    && Objects.equals(customName, that.customName)
+                    && Objects.equals(stage, that.stage);
         }
     }
 

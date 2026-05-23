@@ -16,8 +16,8 @@ public class VillagerProfessionReg {
     public static final RegistryObject<VillagerProfession> SHOPKEEPER = PROFESSIONS.register("shopkeeper", () ->
             new VillagerProfession(
                     "shopkeeper",
-                    holder -> holder.value().equals(PoiTypeReg.ADMIN_SHOP.get()),
-                    holder -> holder.value().equals(PoiTypeReg.ADMIN_SHOP.get()),
+                    holder -> holder.is(PoiTypeReg.ADMIN_SHOP.getKey()),
+                    holder -> holder.is(PoiTypeReg.ADMIN_SHOP.getKey()),
                     ImmutableSet.of(),
                     ImmutableSet.of(),
                     SoundEvents.VILLAGER_WORK_LIBRARIAN

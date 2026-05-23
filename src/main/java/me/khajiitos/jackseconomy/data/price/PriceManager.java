@@ -113,7 +113,7 @@ public class PriceManager {
                 .orElse(Optional.empty()).orElse(null);
     }
 
-    public static AdminShopItemPriceInfo getAdminShopBuyPriceInfo(ItemDescription itemDescription, int slot, String category, @Nullable String adminShopName) {
+    public static @Nullable AdminShopItemPriceInfo getAdminShopBuyPriceInfo(ItemDescription itemDescription, int slot, String category, @Nullable String adminShopName) {
         return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof AdminShopItemPriceInfo info && Objects.equals(info.adminShopName, adminShopName) && info.adminShopSlot == slot && Objects.equals(info.category, category)).map(entry -> ((AdminShopItemPriceInfo)entry.itemPriceInfo)).findFirst().orElse(null);
     }
 

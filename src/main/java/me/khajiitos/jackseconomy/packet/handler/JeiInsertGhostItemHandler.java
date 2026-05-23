@@ -5,7 +5,6 @@ import me.khajiitos.jackseconomy.menu.TicketCreatorMenu;
 import me.khajiitos.jackseconomy.packet.JeiInsertGhostItemPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -22,9 +21,10 @@ public class JeiInsertGhostItemHandler {
         stack.getOrCreateTag().putBoolean("jackseconomy_ghost", true);
 
         if (sender.containerMenu instanceof TicketCreatorMenu menu) {
-            menu.container.setItem(msg.slot(), stack);
+            if (menu.container.getItem(msg.slot()).isEmpty())
+                menu.container.setItem(msg.slot(), stack);
         } else if (sender.containerMenu instanceof FluidTicketCreatorMenu menu) {
-            if (stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent())
+            if (menu.container.getItem(msg.slot()).isEmpty() && FluidTicketCreatorMenu.mayPlace(stack))
                 menu.container.setItem(msg.slot(), stack);
         }
     }

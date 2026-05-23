@@ -274,7 +274,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 
 	private void setSellStage(Slot slot) {
 		if (!GameStagesCheck.isInstalled()) return;
-		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, FloatingEditBoxWidget.Type.DECIMAL, (value) -> {
+		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, (value) -> {
 			for (ItemStack stack : selectedItems) {
 				ItemDescription description = ItemDescription.ofItem(stack);
 				AdminShopScreen.ItemSellabilityInfo existingInfo = this.sellPrices.get(description);
@@ -428,7 +428,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 		double buyPrice = buy ? item.price() : -1;
 		double sellPrice = sell ? this.sellPrices.get(description).worth() : -1;
 
-		if (buy) components.add(Component.translatable("jackseconomy.buy_price", 1, Component.literal(oneItemCurrencyMode ? "$" + (long)buyPrice : CurrencyHelper.format(buyPrice)).withStyle(ChatFormatting.GRAY)));
+		if (buy) components.add(Component.translatable("jackseconomy.buy_price", item.count(), Component.literal(oneItemCurrencyMode ? "$" + (long)buyPrice : CurrencyHelper.format(buyPrice)).withStyle(ChatFormatting.GRAY)));
 		if (sell) components.add(Component.translatable("jackseconomy.sell_price", 1, Component.literal(oneItemCurrencyMode ? "$" + (long)sellPrice : CurrencyHelper.format(sellPrice)).withStyle(ChatFormatting.GRAY)));
 		if (buy || sell) components.add(Component.empty());
 	}

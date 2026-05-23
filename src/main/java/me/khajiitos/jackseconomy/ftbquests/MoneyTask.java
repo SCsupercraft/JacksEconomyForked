@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class MoneyTask extends Task {
+    private static final BigDecimal HUNDRED = new BigDecimal("100");
     private double amount = 1;
 
     public MoneyTask(long id, Quest quest) {
@@ -104,25 +105,29 @@ public class MoneyTask extends Task {
     }
 
     @Override
+    public boolean checkOnLogin() {
+        return false;
+    }
+
+    @Override
     public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
         if (this.checkTaskSequence(teamData) && !teamData.isCompleted(this)) {
              ItemStack stack = CuriosWallet.get(player);
-             double current = progressToMoney(teamData.getProgress(this));
-             double needed = amount - current;
+             BigDecimal current = progressToMoney(teamData.getProgress(this));
+             BigDecimal needed = BigDecimal.valueOf(amount).subtract(current);
 
              if (stack.is(ItemBlockReg.GOLDEN_WALLET_ITEM.get())) {
-                 addProgress(teamData, amount - current);
+                 addProgress(teamData, needed);
              } else if (stack.getItem() instanceof WalletItem) {
                  BigDecimal balance = WalletItem.getBalance(stack);
-                 BigDecimal needed1 = BigDecimal.valueOf(needed);
 
-                 BigDecimal toAdd = balance.min(needed1).setScale(2, RoundingMode.DOWN);
+                 BigDecimal toAdd = balance.min(needed).setScale(2, RoundingMode.DOWN);
                  WalletItem.setBalance(stack, balance.subtract(toAdd));
 
-                 addProgress(teamData, toAdd.doubleValue());
+                 addProgress(teamData, toAdd);
                  Packets.sendToClient(player, new WalletBalanceDifPacket(toAdd.negate()));
              } else if (Config.oneItemCurrencyMode.get()) {
-                 long neededLong = (long) Math.floor(needed);
+                 long neededLong = needed.longValue();
                  long left = neededLong;
 
                  for (ItemStack itemStack: player.getInventory().items) {
@@ -165,16 +170,16 @@ public class MoneyTask extends Task {
         }
     }
 
-    private void addProgress(TeamData data, double money) {
+    private void addProgress(TeamData data, BigDecimal money) {
         data.addProgress(this, moneyToProgress(money));
     }
 
-    private double progressToMoney(long progress) {
-        return (double) progress / 100;
+    private BigDecimal progressToMoney(long progress) {
+        return BigDecimal.valueOf(progress).divide(HUNDRED, 2, RoundingMode.DOWN);
     }
 
-    private long moneyToProgress(double money) {
-        return (long) Math.floor(money * 100);
+    private long moneyToProgress(BigDecimal money) {
+        return money.multiply(HUNDRED).longValue();
     }
 
     @Override

@@ -238,6 +238,8 @@ public class AdminShopPurchaseHandler {
 
         for (Map.Entry<AdminShopPurchasePacket.ShopItemDescription, Integer> entry : msg.shoppingCart().entrySet()) {
             AdminShopItemPriceInfo priceInfo = PriceManager.getAdminShopBuyPriceInfo(entry.getKey().itemDescription(), entry.getKey().slot(), entry.getKey().category(), msg.adminShopName());
+            if (priceInfo == null) return;
+
             int countLeft = entry.getValue() * priceInfo.adminShopBuyCount;
             int stackCount = entry.getKey().itemDescription().item().getMaxStackSize();
 
