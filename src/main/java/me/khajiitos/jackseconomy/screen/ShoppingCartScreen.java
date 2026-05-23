@@ -219,7 +219,7 @@ public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
 
                     tooltip.add(Component.translatable("jackseconomy.buying").withStyle(ChatFormatting.GRAY));
                     this.parent.shoppingCart.forEach(((shopItem, amount) -> {
-                        tooltip.add(shopItem.itemDescription().item().value().getDescription().copy().withStyle(ChatFormatting.BLUE).append(Component.literal(" x" + amount).withStyle(ChatFormatting.BLUE)));
+                        tooltip.add(shopItem.itemDescription().createItemStack().getHoverName().copy().withStyle(ChatFormatting.BLUE).append(Component.literal(" x" + amount).withStyle(ChatFormatting.BLUE)));
                     }));
                 }
 
@@ -228,7 +228,7 @@ public class ShoppingCartScreen extends AbstractContainerScreen<AdminShopMenu> {
 
                     tooltip.add(Component.translatable("jackseconomy.selling").withStyle(ChatFormatting.GRAY));
                     this.parent.itemsToSell.forEach(((itemDescription, amount) -> {
-                        tooltip.add(itemDescription.item().value().getDescription().copy().withStyle(ChatFormatting.BLUE).append(Component.literal(" x" + amount).withStyle(ChatFormatting.BLUE)));
+                        tooltip.add(itemDescription.createItemStack().getHoverName().copy().withStyle(ChatFormatting.BLUE).append(Component.literal(" x" + amount).withStyle(ChatFormatting.BLUE)));
                     }));
                 }
             }

@@ -121,6 +121,12 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 		boolean ctrl = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL);
 		boolean shift = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT);
 		switch (pMouseButton) {
+            case 0 -> { // Left-click
+                if (shift) {
+                    setBuyCount(pSlot);
+                    return;
+                }
+            }
 			case 1 -> { // Right-click
 				if (shift) {
 					if (ctrl) setBuyStage(pSlot); else setSellStage(pSlot);
@@ -137,8 +143,37 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 		super.onSelectedSlotClicked(pSlot, pSlotId, pMouseButton, pType);
 	}
 
+    private void setBuyCount(Slot slot) {
+        this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, FloatingEditBoxWidget.Type.INTEGER, (value) -> {
+            try {
+                int newCount = Integer.parseUnsignedInt(value);
+
+                for (ItemStack stack : selectedItems) {
+                    ItemDescription description = ItemDescription.ofItem(stack);
+                    List<AdminShopScreen.ShopItem> items = this.shopItems.get(category).get(innerCategory);
+                    AdminShopScreen.ShopItem existingInfo = items.stream().filter(shopItem -> shopItem.itemDescription().equals(description)).findFirst().orElse(null);
+
+                    if (existingInfo != null) {
+                        items.remove(existingInfo);
+                        items.add(new AdminShopScreen.ShopItem(
+                                existingInfo.itemDescription(),
+                                existingInfo.price(),
+                                newCount,
+                                existingInfo.slot(),
+                                existingInfo.customName(),
+                                existingInfo.stage()
+                        ));
+                    }
+                }
+            } catch (NumberFormatException ignored) {}
+            this.removeWidget(this.floatingEditBox);
+            this.floatingEditBox = null;
+        }));
+        this.setFocused(this.floatingEditBox);
+    }
+
 	private void setBuyPrice(Slot slot) {
-		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, true, (value) -> {
+		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, FloatingEditBoxWidget.Type.DECIMAL, (value) -> {
 			try {
 				double newPrice = Double.parseDouble(value);
 
@@ -152,6 +187,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 						items.add(new AdminShopScreen.ShopItem(
 								existingInfo.itemDescription(),
 								newPrice,
+                                existingInfo.count(),
 								existingInfo.slot(),
 								existingInfo.customName(),
 								existingInfo.stage()
@@ -160,6 +196,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 						items.add(new AdminShopScreen.ShopItem(
 							description,
 							newPrice,
+                            1,
 							findFirstAvailableSlot(innerCategory),
 							null,
 							null
@@ -175,7 +212,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 	}
 
 	private void setSellPrice(Slot slot) {
-		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, true, (value) -> {
+		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, FloatingEditBoxWidget.Type.DECIMAL, (value) -> {
 			try {
 				double newPrice = Double.parseDouble(value);
 
@@ -214,7 +251,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 
 	private void setBuyStage(Slot slot) {
 		if (!GameStagesCheck.isInstalled()) return;
-		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, false, (value) -> {
+		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, (value) -> {
 			for (ItemStack stack : selectedItems) {
 				ItemDescription description = ItemDescription.ofItem(stack);
 				List<AdminShopScreen.ShopItem> items = this.shopItems.get(category).get(innerCategory);
@@ -225,6 +262,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 					items.add(new AdminShopScreen.ShopItem(
 							existingInfo.itemDescription(),
 							existingInfo.price(),
+                            existingInfo.count(),
 							existingInfo.slot(),
 							existingInfo.customName(),
 							value
@@ -240,7 +278,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 
 	private void setSellStage(Slot slot) {
 		if (!GameStagesCheck.isInstalled()) return;
-		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, false, (value) -> {
+		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, (value) -> {
 			for (ItemStack stack : selectedItems) {
 				ItemDescription description = ItemDescription.ofItem(stack);
 				AdminShopScreen.ItemSellabilityInfo existingInfo = this.sellPrices.get(description);
@@ -262,7 +300,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 			List<AdminShopScreen.ShopItem> items = this.shopItems.get(category).get(innerCategory);
 			items.stream().filter(shopItem -> shopItem.itemDescription().equals(description)).findFirst().ifPresent(item -> {
 				items.remove(item);
-				items.add(new AdminShopScreen.ShopItem(item.itemDescription(), item.price(), item.slot(), item.customName(), null));
+				items.add(new AdminShopScreen.ShopItem(item.itemDescription(), item.price(), item.count(), item.slot(), item.customName(), null));
 			});
 		}
 		this.itemsWithBuyPrices = 0;
@@ -320,7 +358,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 			}
 			case 1 -> { // Right-click (Edit)
 				if (this.categoryPanel != null || floatingEditBox != null) return;
-				this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, false, (value) -> {
+				this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, (value) -> {
 					this.sendChanges();
 					adminShopName = value.isEmpty() ? null : value;
 					this.requestShopData();
@@ -398,7 +436,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 		double buyPrice = buy ? item.price() : -1;
 		double sellPrice = sell ? this.sellPrices.get(description).worth() : -1;
 
-		if (buy) components.add(Component.translatable("jackseconomy.buy_price", 1, Component.literal(oneItemCurrencyMode ? "$" + (long)buyPrice : CurrencyHelper.format(buyPrice)).withStyle(ChatFormatting.GRAY)));
+		if (buy) components.add(Component.translatable("jackseconomy.buy_price", item.count(), Component.literal(oneItemCurrencyMode ? "$" + (long)buyPrice : CurrencyHelper.format(buyPrice)).withStyle(ChatFormatting.GRAY)));
 		if (sell) components.add(Component.translatable("jackseconomy.sell_price", 1, Component.literal(oneItemCurrencyMode ? "$" + (long)sellPrice : CurrencyHelper.format(sellPrice)).withStyle(ChatFormatting.GRAY)));
 		if (buy || sell) components.add(Component.empty());
 	}
@@ -408,6 +446,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 		super.onTooltipSelected(components, stack);
 		if (!shouldShowSelection) return;
 
+        components.add(Component.translatable("jackseconomy.shift_left_click_to_edit_count").withStyle(ChatFormatting.AQUA));
 		components.add(Component.translatable("jackseconomy.bulk_set_sell_price").withStyle(ChatFormatting.AQUA));
 		components.add(Component.translatable("jackseconomy.bulk_set_buy_price").withStyle(ChatFormatting.AQUA));
 		if (itemsWithSellPrices != 0 && GameStagesCheck.isInstalled()) components.add(Component.translatable("jackseconomy.bulk_set_sell_stage").withStyle(ChatFormatting.AQUA));
@@ -532,6 +571,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 				for (AdminShopScreen.ShopItem shopItem : entry.getValue()) {
 					CompoundTag itemTag = shopItem.itemDescription().toNbt();
 					itemTag.putDouble("adminShopBuyPrice", shopItem.price());
+                    itemTag.putInt("adminShopBuyCount", shopItem.count());
 
 					itemTag.putString("category", category.name + ":" + entry.getKey().name);
 					itemTag.putInt("slot", shopItem.slot());
@@ -635,6 +675,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 				}
 
 				double buyPrice = compoundTag.getDouble("adminShopBuyPrice");
+                int buyCount = compoundTag.getInt("adminShopBuyCount");
 				int slot = compoundTag.contains("slot") ? compoundTag.getInt("slot") : -1;
 				String customName = compoundTag.contains("customAdminShopName") ? compoundTag.getString("customAdminShopName") : null;
 				String stage = compoundTag.contains("adminShopStage") ? compoundTag.getString("adminShopStage") : null;
@@ -642,7 +683,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 
 				double price = oneItemCurrencyMode ? Math.round(buyPrice) : buyPrice;
 				if (slot < 0) {
-					slotlessShopItems.computeIfAbsent(category, categoryName -> new ArrayList<>()).add(new AdminShopScreen.UnpreparedShopItem(itemDescription, price, customName, stage));
+					slotlessShopItems.computeIfAbsent(category, categoryName -> new ArrayList<>()).add(new AdminShopScreen.UnpreparedShopItem(itemDescription, price, buyCount, customName, stage));
 				} else {
 					String[] categoryNamesInner = category.split(":", 2);
 					if (categoryNamesInner.length < 2) {
@@ -656,7 +697,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 						if (categoryEntry.getKey().name.equals(bigCategoryName)) {
 							for (Map.Entry<AdminShopScreen.InnerCategory, List<AdminShopScreen.ShopItem>> entry : shopItems.get(categoryEntry.getKey()).entrySet()) {
 								if (entry.getKey().name.equals(innerCategoryName)) {
-									entry.getValue().add(new AdminShopScreen.ShopItem(itemDescription, price, slot, customName, stage));
+									entry.getValue().add(new AdminShopScreen.ShopItem(itemDescription, price, buyCount, slot, customName, stage));
 									break;
 								}
 							}
@@ -683,7 +724,7 @@ public class BulkAdminShopScreen extends ItemSelectionScreen<BulkAdminShopScreen
 					for (AdminShopScreen.UnpreparedShopItem item : list) {
 						for (Map.Entry<AdminShopScreen.InnerCategory, List<AdminShopScreen.ShopItem>> entry1 : entry.getValue().entrySet()) {
 							if (entry1.getKey().name.equals(innerCategoryName)) {
-								shopItems.get(entry.getKey()).get(entry1.getKey()).add(new AdminShopScreen.ShopItem(item.itemDescription(), item.price(), this.findFirstAvailableSlot(entry.getKey()), item.customName(), item.stage()));
+								shopItems.get(entry.getKey()).get(entry1.getKey()).add(new AdminShopScreen.ShopItem(item.itemDescription(), item.price(), item.count(), this.findFirstAvailableSlot(entry.getKey()), item.customName(), item.stage()));
 								break;
 							}
 						}

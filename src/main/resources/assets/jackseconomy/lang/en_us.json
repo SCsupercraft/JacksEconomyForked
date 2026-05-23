@@ -97,6 +97,9 @@
 
   "jackseconomy.search": "Search...",
 
+  "jackseconomy.price_each": "%s each",
+  "jackseconomy.price_for": "%s for %s items",
+
   "jackseconomy.sell_price": "Sell price (%s): %s",
   "jackseconomy.buy_price": "Buy price (%s): %s",
 
@@ -214,6 +217,7 @@
 
   "jackseconomy.right_click_to_change": "Right-click to change",
   "jackseconomy.right_click_to_edit_price": "Right-click to edit price",
+  "jackseconomy.shift_left_click_to_edit_count": "L-Shift + Left-click to edit quantity",
   "jackseconomy.middle_click_to_remove": "Middle-click to remove item",
   "jackseconomy.middle_click_to_reset": "Middle-click to reset",
   "jackseconomy.middle_click_to_cancel": "Middle-click to cancel",
@@ -277,8 +281,6 @@
   "jackseconomy.required_game_stage": "Required game stage: %s",
   "jackseconomy.locked_behind_stage": "Locked behind game-stage: %s",
 
-  "jackseconomy.lctrl_right_click_to_change_stage": "L-CTRL + Right-click to change unlock stage",
-
   "jackseconomy.selling": "Selling",
   "jackseconomy.buying": "Buying",
 
@@ -288,6 +290,7 @@
   "jackseconomy.selling_locked": "Selling locked",
   "jackseconomy.selling_locked_behind_gamestage": "Selling locked behind game-stage: %s",
 
+  "jackseconomy.lctrl_right_click_to_change_stage": "L-CTRL + Right-click to change unlock stage",
   "jackseconomy.shift_right_click_to_edit_stage": "L-Shift + Right-click to edit required stage",
   "jackseconomy.shift_middle_click_to_remove_stage": "L-Shift + Middle-click to remove required stage",
 

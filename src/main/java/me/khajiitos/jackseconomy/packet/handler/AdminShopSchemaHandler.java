@@ -87,6 +87,7 @@ public class AdminShopSchemaHandler {
                 }
 
                 double buyPrice = compoundTag.getDouble("adminShopBuyPrice");
+                int buyCount = compoundTag.getInt("adminShopBuyCount");
                 int slot = compoundTag.contains("slot") ? compoundTag.getInt("slot") : -1;
                 String customName = compoundTag.contains("customAdminShopName") ? compoundTag.getString("customAdminShopName") : null;
                 String stage = compoundTag.contains("adminShopStage") ? compoundTag.getString("adminShopStage") : null;
@@ -94,7 +95,7 @@ public class AdminShopSchemaHandler {
 
                 double price = oneItemCurrencyMode ? Math.round(buyPrice) : buyPrice;
                 if (slot < 0) {
-                    slotlessShopItems.computeIfAbsent(category, categoryName -> new ArrayList<>()).add(new AdminShopScreen.UnpreparedShopItem(itemDescription, price, customName, stage));
+                    slotlessShopItems.computeIfAbsent(category, categoryName -> new ArrayList<>()).add(new AdminShopScreen.UnpreparedShopItem(itemDescription, price, buyCount, customName, stage));
                 } else {
                     String[] categoryNamesInner = category.split(":", 2);
                     if (categoryNamesInner.length < 2) {
@@ -108,7 +109,7 @@ public class AdminShopSchemaHandler {
                         if (categoryEntry.getKey().getName().equals(bigCategoryName)) {
                             for (Map.Entry<AdminShopScreen.InnerCategory, List<AdminShopScreen.ShopItem>> entry : adminShopData.shopItems().get(categoryEntry.getKey()).entrySet()) {
                                 if (entry.getKey().getName().equals(innerCategoryName)) {
-                                    entry.getValue().add(new AdminShopScreen.ShopItem(itemDescription, price, slot, customName, stage));
+                                    entry.getValue().add(new AdminShopScreen.ShopItem(itemDescription, price, buyCount, slot, customName, stage));
                                     break;
                                 }
                             }
@@ -135,7 +136,7 @@ public class AdminShopSchemaHandler {
                     for (AdminShopScreen.UnpreparedShopItem item : list) {
                         for (Map.Entry<AdminShopScreen.InnerCategory, List<AdminShopScreen.ShopItem>> entry1 : entry.getValue().entrySet()) {
                             if (entry1.getKey().getName().equals(innerCategoryName)) {
-                                adminShopData.shopItems().get(entry.getKey()).get(entry1.getKey()).add(new AdminShopScreen.ShopItem(item.itemDescription(), item.price(), findFirstAvailableSlot(adminShopData, entry.getKey(), entry1.getKey()), item.customName(), item.stage()));
+                                adminShopData.shopItems().get(entry.getKey()).get(entry1.getKey()).add(new AdminShopScreen.ShopItem(item.itemDescription(), item.price(), item.count(), findFirstAvailableSlot(adminShopData, entry.getKey(), entry1.getKey()), item.customName(), item.stage()));
                                 break;
                             }
                         }

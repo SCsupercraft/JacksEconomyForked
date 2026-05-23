@@ -3,6 +3,7 @@ package me.khajiitos.jackseconomy.packet.handler;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
 import me.khajiitos.jackseconomy.data.PurchaseManager;
+import me.khajiitos.jackseconomy.data.price.AdminShopItemPriceInfo;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.data.price.PriceManager;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
@@ -35,12 +36,13 @@ public class AdminShopPurchaseHandler {
         BigDecimal value = BigDecimal.ZERO;
         for (Map.Entry<AdminShopPurchasePacket.ShopItemDescription, Integer> entry : msg.shoppingCart().entrySet()) {
             ItemDescription description = entry.getKey().itemDescription();
-            double price = PriceManager.getAdminShopBuyPrice(description, entry.getValue(), entry.getKey().slot(), entry.getKey().category(), msg.adminShopName().orElse(null));
+            AdminShopItemPriceInfo priceInfo = PriceManager.getAdminShopBuyPriceInfo(description, entry.getKey().slot(), entry.getKey().category(), msg.adminShopName().orElse(null));
+            double price = priceInfo != null ? priceInfo.adminShopBuyPrice * entry.getValue() : -1;
             if (price <= 0) {
                 return;
             }
 
-            purchases.addPurchase(description, entry.getValue(), price);
+            purchases.addPurchase(description, entry.getValue() * priceInfo.adminShopBuyCount, price);
 
             if (Config.oneItemCurrencyMode.get()) {
                 value = value.add(BigDecimal.valueOf(Math.round(price)));
@@ -226,15 +228,14 @@ public class AdminShopPurchaseHandler {
         }
 
         for (Map.Entry<AdminShopPurchasePacket.ShopItemDescription, Integer> entry : msg.shoppingCart().entrySet()) {
-            int countLeft = entry.getValue();
+            AdminShopItemPriceInfo priceInfo = PriceManager.getAdminShopBuyPriceInfo(entry.getKey().itemDescription(), entry.getKey().slot(), entry.getKey().category(), msg.adminShopName().orElse(null));
+            if (priceInfo == null) continue;
+
+            int countLeft = entry.getValue() * priceInfo.adminShopBuyCount;
             int stackCount = entry.getKey().itemDescription().createItemStack().getMaxStackSize();
 
             while (countLeft > 0) {
                 int thisStackCount = Math.min(countLeft, stackCount);
-                double price = PriceManager.getAdminShopBuyPrice(entry.getKey().itemDescription(), thisStackCount, entry.getKey().slot(), entry.getKey().category(), msg.adminShopName().orElse(null));
-                if (price <= 0) {
-                    continue;
-                }
 
                 ItemStack itemStack = entry.getKey().itemDescription().createItemStack();
                 itemStack.setCount(thisStackCount);
