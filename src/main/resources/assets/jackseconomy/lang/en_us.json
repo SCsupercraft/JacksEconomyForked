@@ -149,6 +149,7 @@
   "jackseconomy.normal_coins": "Normal Click: 1 item",
 
   "jackseconomy.infinite_money": "Infinite Money",
+  "jackseconomy.infinite": "Infinite",
   "jackseconomy.balance": "Balance: %s",
   "jackseconomy.value": "Value: %s",
   "jackseconomy.wallet_balance": "Wallet: %s",
@@ -316,6 +317,14 @@
   "jackseconomy.bulk_remove_buy_stage": "L-CTRL + L-Shift + Middle-click to remove buy stage",
   "jackseconomy.bulk_remove_sell_price": "Middle-click to remove sell price",
   "jackseconomy.bulk_remove_sell_stage": "L-Shift + Middle-click to remove sell stage",
+
+  "jackseconomy.bulk_admin_shop_not_creative": "You must be in creative mode to edit the admin shop!",
+
+  "jackseconomy.player_no_wallet": "Player %s doesn't have a wallet equipped!",
+  "jackseconomy.player_give_money": "Gave %s to %s.",
+  "jackseconomy.player_remove_money": "Took %s from %s.",
+  "jackseconomy.player_cleared_money": "Took all %s from %s.",
+  "jackseconomy.player_count_money": "%s has %s",
 
   "jackseconomy.jei_placeholder_manifest_required": "Manifest Required!",
   "jackseconomy.jei_placeholder_wallet_required": "Wallet Required!"
