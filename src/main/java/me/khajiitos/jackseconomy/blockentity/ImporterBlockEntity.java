@@ -263,7 +263,7 @@ public class ImporterBlockEntity extends TransactionMachineBlockEntity implement
             return spaces;
         };
 
-        Supplier<BigDecimal> amountAffordable = () -> getBalance().divide(BigDecimal.valueOf(price), RoundingMode.FLOOR);
+        Supplier<BigDecimal> amountAffordable = () -> getBalance().divide(BigDecimal.valueOf(price), 0, RoundingMode.FLOOR);
 
         int maxProcesses = TicketItem.getMaxProcessCount(ticketItem);
         int processCount = 0;

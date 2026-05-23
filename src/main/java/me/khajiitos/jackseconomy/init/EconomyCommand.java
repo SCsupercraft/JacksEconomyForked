@@ -145,7 +145,7 @@ public class EconomyCommand {
 			}
 
 			if (price > 0) {
-				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.importer_price_set", itemInHand.getItem().getDescription().copy().withStyle(ChatFormatting.YELLOW), Component.literal(CurrencyHelper.format(price)).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
+				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.importer_price_set", itemInHand.getItem().getDescription().copy().withStyle(ChatFormatting.YELLOW), Component.literal(CurrencyHelper.formatShortened(price)).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
 			} else {
 				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.importer_price_removed", itemInHand.getItem().getDescription().copy().withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
 			}
@@ -182,7 +182,7 @@ public class EconomyCommand {
 			}
 
 			if (price > 0) {
-				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.exporter_price_set", itemInHand.getItem().getDescription().copy().withStyle(ChatFormatting.YELLOW), Component.literal(CurrencyHelper.format(price)).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
+				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.exporter_price_set", itemInHand.getItem().getDescription().copy().withStyle(ChatFormatting.YELLOW), Component.literal(CurrencyHelper.formatShortened(price)).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
 			} else {
 				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.exporter_price_removed", itemInHand.getItem().getDescription().copy().withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
 			}
@@ -226,7 +226,7 @@ public class EconomyCommand {
 			}
 
 			if (price > 0) {
-				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.fluid_importer_price_set", fluidContents.getFluid().getFluidType().getDescription().copy().withStyle(ChatFormatting.YELLOW), Component.literal(CurrencyHelper.format(price)).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
+				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.fluid_importer_price_set", fluidContents.getFluid().getFluidType().getDescription().copy().withStyle(ChatFormatting.YELLOW), Component.literal(CurrencyHelper.formatShortened(price)).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
 			} else {
 				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.fluid_importer_price_removed", fluidContents.getFluid().getFluidType().getDescription().copy().withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
 			}
@@ -270,7 +270,7 @@ public class EconomyCommand {
 			}
 
 			if (price > 0) {
-				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.fluid_exporter_price_set", fluidContents.getFluid().getFluidType().getDescription().copy().withStyle(ChatFormatting.YELLOW), Component.literal(CurrencyHelper.format(price)).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
+				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.fluid_exporter_price_set", fluidContents.getFluid().getFluidType().getDescription().copy().withStyle(ChatFormatting.YELLOW), Component.literal(CurrencyHelper.formatShortened(price)).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
 			} else {
 				ctx.getSource().sendSuccess(() -> Component.translatable("jackseconomy.fluid_exporter_price_removed", fluidContents.getFluid().getFluidType().getDescription().copy().withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GOLD), true);
 			}
