@@ -330,5 +330,11 @@
   "jackseconomy.player_count_money": "%s has %s",
 
   "jackseconomy.jei_placeholder_manifest_required": "Manifest Required!",
-  "jackseconomy.jei_placeholder_wallet_required": "Wallet Required!"
+  "jackseconomy.jei_placeholder_wallet_required": "Wallet Required!",
+
+  "ftbquests.reward.jackseconomy.money": "Money",
+  "ftbquests.reward.jackseconomy.money.amount": "Amount",
+
+  "ftbquests.task.jackseconomy.money": "Money",
+  "ftbquests.task.jackseconomy.money.amount": "Amount"
 }
