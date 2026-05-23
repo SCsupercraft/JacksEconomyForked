@@ -1,4 +1,6 @@
 {
+  "entity.minecraft.villager.jackseconomy.shopkeeper": "Shopkeeper",
+
   "itemGroup.jackseconomy": "Jack's Economy (Forked)",
 
   "block.jackseconomy.admin_shop": "Admin Shop",

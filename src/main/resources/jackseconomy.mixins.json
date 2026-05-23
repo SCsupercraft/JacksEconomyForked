@@ -2,7 +2,12 @@
   "required": true,
   "package": "me.khajiitos.jackseconomy.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
+  "mixins": [
+    "VillagerMixin"
+  ],
+  "client": [
+    "VillagerProfessionLayerMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

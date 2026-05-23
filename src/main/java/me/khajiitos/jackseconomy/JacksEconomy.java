@@ -50,9 +50,13 @@ public class JacksEconomy {
             CuriosHandler.init();
         }
 
+        ItemBlockReg.register(modEventBus);
+
+        PoiTypeReg.init(modEventBus);
+        VillagerProfessionReg.init(modEventBus);
+
         ArgumentReg.register(modEventBus);
         ComponentReg.register(modEventBus);
-        ItemBlockReg.register(modEventBus);
         BlockEntityReg.register(modEventBus);
         ContainerReg.register(modEventBus);
         Sounds.register(modEventBus);
