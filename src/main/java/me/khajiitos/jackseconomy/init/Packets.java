@@ -33,6 +33,7 @@ public class Packets {
         registrar.playToServer(  RequestAdminShopSchemaPacket.TYPE,  RequestAdminShopSchemaPacket.STREAM_CODEC,  RequestAdminShopSchemaHandler::handle);
         registrar.playToServer(        UpdateItemPricesPacket.TYPE,        UpdateItemPricesPacket.STREAM_CODEC,        UpdateItemPricesHandler::handle);
         registrar.playToServer(       UpdateFluidPricesPacket.TYPE,       UpdateFluidPricesPacket.STREAM_CODEC,       UpdateFluidPricesHandler::handle);
+        registrar.playToServer(      JeiInsertGhostItemPacket.TYPE,      JeiInsertGhostItemPacket.STREAM_CODEC,      JeiInsertGhostItemHandler::handle);
         registrar.playToClient(              PricesInfoPacket.TYPE,              PricesInfoPacket.STREAM_CODEC,              PricesInfoHandler::handle);
         registrar.playToClient(     UpdateWalletBalancePacket.TYPE,     UpdateWalletBalancePacket.STREAM_CODEC,     UpdateWalletBalanceHandler::handle);
         registrar.playToClient(        WalletBalanceDifPacket.TYPE,        WalletBalanceDifPacket.STREAM_CODEC,        WalletBalanceDifHandler::handle);

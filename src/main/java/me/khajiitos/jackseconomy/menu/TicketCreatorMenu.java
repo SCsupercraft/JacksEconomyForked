@@ -3,6 +3,7 @@ package me.khajiitos.jackseconomy.menu;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
+import me.khajiitos.jackseconomy.init.ComponentReg;
 import me.khajiitos.jackseconomy.item.EmptyTicketItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.util.ItemHelper;
@@ -26,6 +27,9 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
+import static me.khajiitos.jackseconomy.init.ComponentReg.isGhostItem;
+import static me.khajiitos.jackseconomy.init.ComponentReg.removeGhostItem;
+
 public abstract class TicketCreatorMenu extends AbstractContainerMenu {
     public final Container container;
 
@@ -35,7 +39,7 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
 
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(this.container, col + row * 9, 8 + col * 18, 7 + row * 18));
+                this.addSlot(new ComponentReg.GhostSlot(this.container, col + row * 9, 8 + col * 18, 7 + row * 18));
             }
         }
 
@@ -55,6 +59,12 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
         Slot slot = this.slots.get(index);
         if (slot.hasItem()) {
             ItemStack clickedStack = slot.getItem();
+            if (isGhostItem(clickedStack)) {
+                clickedStack.setCount(0);
+                removeGhostItem(clickedStack);
+                return ItemStack.EMPTY;
+            }
+
             clickedStackCopy = clickedStack.copy();
             if (index < containerSize) {
                 if (!this.moveItemStackTo(clickedStack, containerSize, containerSize + 36, false)) {
@@ -123,6 +133,10 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
 
             for (int i = 0; i < this.container.getContainerSize(); i++) {
                 ItemStack item = this.container.getItem(i);
+                boolean ghost;
+
+                if (ghost = isGhostItem(item))
+                    removeGhostItem(item);
 
                 if (!item.isEmpty()) {
                     ItemDescription itemDescription = ItemDescription.ofItem(item);
@@ -131,7 +145,7 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
                         itemDescriptions.add(itemDescription);
                     }
 
-                    if (Config.returnManifestItems.get()) {
+                    if (Config.returnManifestItems.get() && !ghost) {
                         if (!serverPlayer.getInventory().add(item)) {
                             ItemHelper.dropItem(item, serverPlayer.level(), serverPlayer.blockPosition());
                         }

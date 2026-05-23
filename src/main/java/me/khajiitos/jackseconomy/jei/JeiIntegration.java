@@ -3,6 +3,8 @@ package me.khajiitos.jackseconomy.jei;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.create.CreateCheck;
 import me.khajiitos.jackseconomy.init.ItemBlockReg;
+import me.khajiitos.jackseconomy.screen.FluidTicketCreatorScreen;
+import me.khajiitos.jackseconomy.screen.TicketCreatorScreen;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
@@ -63,7 +65,13 @@ public class JeiIntegration implements IModPlugin {
 		});
 	}
 
-	@Override
+    @Override
+    public void registerGuiHandlers(IGuiHandlerRegistration registration) {
+        registration.addGhostIngredientHandler(TicketCreatorScreen.class, new TicketCreatorJei());
+        registration.addGhostIngredientHandler(FluidTicketCreatorScreen.class, new FluidTicketCreatorJei());
+    }
+
+    @Override
 	public void registerAdvanced(IAdvancedRegistration registration) {
 		registration.addTypedRecipeManagerPlugin(AdminShopBuyingCategory.RECIPE_TYPE, new AdminShopBuyingCategory.RecipeManager());
 		registration.addTypedRecipeManagerPlugin(AdminShopSellingCategory.RECIPE_TYPE, new AdminShopSellingCategory.RecipeManager());
