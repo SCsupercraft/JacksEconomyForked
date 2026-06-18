@@ -11,6 +11,7 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.curios.CuriosWallet;
 import me.khajiitos.jackseconomy.init.Packets;
+import me.khajiitos.jackseconomy.item.GoldenWalletItem;
 import me.khajiitos.jackseconomy.item.OIMWalletItem;
 import me.khajiitos.jackseconomy.item.WalletItem;
 import me.khajiitos.jackseconomy.packet.WalletBalanceDifPacket;
@@ -107,6 +108,12 @@ public class MoneyReward extends Reward {
                     ItemHelper.dropItem(left, player.level(), player.blockPosition());
                 }
             });
+        } else if (!(stack.getItem() instanceof GoldenWalletItem)) {
+            for (ItemStack item: CurrencyHelper.getCurrencyItems(BigDecimal.valueOf(amount))) {
+                if (!player.getInventory().add(item)) {
+                    ItemHelper.dropItem(item, player.level(), player.blockPosition());
+                }
+            }
         }
     }
 
