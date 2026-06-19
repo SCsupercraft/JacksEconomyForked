@@ -51,6 +51,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
     protected LazyOptional<IItemHandler> itemHandlerRejectionOutputLazy = LazyOptional.of(() -> itemHandlerRejectionOutput);
 
     public ItemDescription selectedItem;
+    public boolean roundRobin;
     private float progress;
 
     public MechanicalImporterBlockEntity(BlockPos pos, BlockState state) {
@@ -106,6 +107,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
         if (this.selectedItem != null) {
             tag.put("SelectedItem", this.selectedItem.toNbt());
         }
+        tag.putBoolean("RoundRobin", roundRobin);
     }
 
     @Override
@@ -124,6 +126,7 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
         } else {
             this.selectedItem = null;
         }
+        roundRobin = tag.getBoolean("RoundRobin");
     }
 
     @Override
@@ -244,6 +247,9 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
 
                     level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5f, 1.5f);
                     serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 1.25, pos.getZ() + 0.5, 3, 0.2, 0.15, 0.2, 0.25);
+
+                    if (importer.roundRobin)
+                        importer.selectedItem = items.get((items.indexOf(selectedDescription) + 1) % items.size());
                 }
             }
         }
@@ -311,5 +317,15 @@ public class MechanicalImporterBlockEntity extends TransactionKineticMachineBloc
     @Override
     public ItemDescription getSelectedItem() {
         return this.selectedItem;
+    }
+
+    @Override
+    public void setRoundRobin(boolean roundRobin) {
+        this.roundRobin = roundRobin;
+    }
+
+    @Override
+    public boolean isRoundRobinEnabled() {
+        return roundRobin;
     }
 }

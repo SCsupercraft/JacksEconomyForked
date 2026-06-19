@@ -105,7 +105,7 @@ public abstract class AbstractFluidExporterScreen<S extends IFluidExporterBlockE
         if (ticketItem.getItem() instanceof FluidExporterTicketItem && (!(ticketItem.getItem() instanceof GoldenFluidExporterTicketItem))) {
             List<FluidDescription> fluids = FluidTicketItem.getFluids(ticketItem);
             if (!fluids.isEmpty()) {
-                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<>(this.leftPos + 39, this.topPos + 65, false, fluids, null, null, (tooltip) -> this.tooltip = tooltip));
+                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<>(this.leftPos + 39, this.topPos + 65, false, fluids, null, false, null, null, (tooltip) -> this.tooltip = tooltip));
             } else {
                 this.ticketPreview = null;
             }
