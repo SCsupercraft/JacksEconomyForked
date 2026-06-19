@@ -9,7 +9,6 @@
 
 ### Planned
 
-- **Importer Improvements**: Ability for importers to round-robin multiple items at a time off of a manifest
 - **Banks**: Blocks that store large amounts of money, with wireless versions
   - Might reduce money capacity of other block to favour the banks
 - **Credit Card**: For use with wireless banks, can't store any money itself
@@ -32,12 +31,15 @@
   - For example, you could let the player buy 16 torches for $1.00
 - **FTB Quests Integration**: Added one new task and one new reward for accepting/giving money.
 - **New Command**: `/economy player` can be used to manipulate the contents of a player's wallet
+- **Importer Improvements**: Importers now have the ability to round-robin multiple items at a time off of a manifest
 
 ### Fixed
 
 - **Withdrawal Crash**: Fixed crashes when withdrawing money from the wallet GUI
 - **Incorrect Change**: Fixed issues with incorrect amounts of change being given
 - **Purchase Tracking**: Fixed the issue with the purchase manager not tracking purchases
+- **Generated Commands (1.21.1)**: Fixed the ticket creator menu giving invalid `/give` commands
+- **Loading Errors (1.21.1)**: Fixed errors when loading certain block entities, which resulted in data loss
 
 ## 1.2.2-1.6.2
 
