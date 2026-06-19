@@ -35,7 +35,7 @@ public class PriceManager {
 
     static {
         itemPriceInfos.add(new ItemPriceEntry(ItemDescription.ofItem(new ItemStack(Items.DIAMOND)), new PricesItemPriceInfo(50.0, 45.0,100.0, null, null)));
-        itemPriceInfos.add(new ItemPriceEntry(ItemDescription.ofItem(new ItemStack(Items.DIAMOND)), new AdminShopItemPriceInfo(150.0, "General:Gems", 0, null, null, null)));
+        itemPriceInfos.add(new ItemPriceEntry(ItemDescription.ofItem(new ItemStack(Items.DIAMOND)), new AdminShopItemPriceInfo(150.0, 1, "General:Gems", 0, null, null, null)));
         fluidPriceInfos.add(new FluidPriceEntry(FluidDescription.ofFluid(new FluidStack(Fluids.LAVA, 1)), new PricesFluidPriceInfo(0.02, 0.05)));
 
         ArrayList<Category> categoriesInnerDefault = new ArrayList<>();
@@ -114,8 +114,8 @@ public class PriceManager {
                 .orElse(Optional.empty()).orElse(null);
     }
 
-    public static double getAdminShopBuyPrice(ItemDescription itemDescription, int count, int slot, String category, @Nullable String adminShopName) {
-        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof AdminShopItemPriceInfo info && Objects.equals(info.adminShopName, adminShopName) && info.adminShopSlot == slot && Objects.equals(info.category, category)).map(entry -> ((AdminShopItemPriceInfo)entry.itemPriceInfo).adminShopBuyPrice * count).findFirst().orElse(-1.0);
+    public static @Nullable AdminShopItemPriceInfo getAdminShopBuyPriceInfo(ItemDescription itemDescription, int slot, String category, @Nullable String adminShopName) {
+        return itemPriceInfos.stream().filter(itemPriceEntry -> itemPriceEntry.itemDescription.equals(itemDescription) && itemPriceEntry.itemPriceInfo instanceof AdminShopItemPriceInfo info && Objects.equals(info.adminShopName, adminShopName) && info.adminShopSlot == slot && Objects.equals(info.category, category)).map(entry -> ((AdminShopItemPriceInfo)entry.itemPriceInfo)).findFirst().orElse(null);
     }
 
     public static void load() {
@@ -303,6 +303,7 @@ public class PriceManager {
 
                 CompoundTag itemTag = entry.itemDescription.toNbt();
                 itemTag.putDouble("adminShopBuyPrice", itemPriceInfo.adminShopBuyPrice);
+                itemTag.putInt("adminShopBuyCount", itemPriceInfo.adminShopBuyCount);
                 itemTag.putString("category", itemPriceInfo.category);
                 itemTag.putInt("slot", itemPriceInfo.adminShopSlot);
 

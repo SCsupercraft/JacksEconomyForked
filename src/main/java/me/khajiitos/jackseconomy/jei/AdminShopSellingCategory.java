@@ -74,7 +74,7 @@ public class AdminShopSellingCategory implements IRecipeCategory<AdminShopSellin
 
 	@Override
 	public void setRecipe(@NotNull IRecipeLayoutBuilder builder, @NotNull Details details, @NotNull IFocusGroup focuses) {
-		if (details.description == null && Objects.equals(details.price, BigDecimal.ZERO)) return;
+		if (details.description == null || Objects.equals(details.price, BigDecimal.ZERO)) return;
 
 		ItemStack adminShopStack = new ItemStack(ItemBlockReg.ADMIN_SHOP);
 		CompoundTag tag = new CompoundTag();

@@ -19,30 +19,40 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class TicketPreviewWidget<T> extends AbstractWidget {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/ticket_slot_preview.png");
+    private static final ResourceLocation ROUND_ROBIN = ResourceLocation.fromNamespaceAndPath(JacksEconomy.MOD_ID, "textures/gui/round_robin.png");
     private final boolean openable;
     private boolean open = false;
     private final List<T> items;
     private int tickCount;
     private final T selectedDescription;
+    private final boolean roundRobin;
     private final Consumer<T> onSelect;
+    private final Consumer<Boolean> onSetRoundRobin;
     private final Consumer<List<Component>> onTooltip;
 
     public boolean isOpen() {
         return open;
     }
 
-    public TicketPreviewWidget(int pX, int pY, boolean openable, List<T> items, @Nullable T selectedDescription, @Nullable Consumer<T> onSelect, @Nullable Consumer<List<Component>> onTooltip) {
+    public void setOpen(boolean open) {
+        this.open = openable && open;
+    }
+
+    public TicketPreviewWidget(int pX, int pY, boolean openable, List<T> items, @Nullable T selectedDescription, boolean roundRobin, @Nullable Consumer<T> onSelect, @Nullable Consumer<Boolean> onSetRoundRobin, @Nullable Consumer<List<Component>> onTooltip) {
         super(pX, pY, 18, 18, Component.empty());
 
         this.openable = openable;
         this.items = items;
         this.selectedDescription = selectedDescription;
+        this.roundRobin = roundRobin;
         this.onSelect = onSelect;
+        this.onSetRoundRobin = onSetRoundRobin;
         this.onTooltip = onTooltip;
 
         if (items.isEmpty() || !(isItemTicket() || isFluidTicket()))
@@ -60,9 +70,26 @@ public class TicketPreviewWidget<T> extends AbstractWidget {
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         if (open) {
-            this.width = items.size() * 18;
+            this.width = (items.size() + 1) * 18;
             guiGraphics.fill(getX() - 1, getY() - 1, getX() + width + 1, getY() + height + 1, 0xFF444444);
+
             int x = this.getX();
+            guiGraphics.blit(BACKGROUND, x, this.getY(), 0, this.roundRobin ? 18 : 0, 0, 18, 18, 36, 18);
+            guiGraphics.blit(ROUND_ROBIN, x + 1, this.getY() + 1, 0, 0, 0, 16, 16, 16, 16);
+
+            if (pMouseX >= x + 1 && pMouseX <= x + 17 && pMouseY >= getY() + 1 && pMouseY <= getY() + 17) {
+                AbstractContainerScreen.renderSlotHighlight(guiGraphics, x + 1, getY() + 1, 0);
+
+                if (this.onTooltip != null) {
+                    List<Component> tooltip = new ArrayList<>();
+                    tooltip.add(Component.translatable("jackseconomy.round_robin"));
+                    if (roundRobin)
+                        tooltip.add(Component.translatable("jackseconomy.selected").withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_GRAY));
+                    this.onTooltip.accept(tooltip);
+                }
+            }
+
+            x += 18;
             for (T description : items) {
                 guiGraphics.blit(BACKGROUND, x, this.getY(), 0/*this.getBlitOffset()*/, description.equals(this.selectedDescription) ? 18 : 0, 0, 18, 18, 36, 18);
 
@@ -87,7 +114,6 @@ public class TicketPreviewWidget<T> extends AbstractWidget {
 
                 x += 18;
             }
-
         } else {
             this.width = 18;
             RenderSystem.setShaderTexture(0, BACKGROUND);
@@ -129,14 +155,26 @@ public class TicketPreviewWidget<T> extends AbstractWidget {
             return true;
         }
 
-         if (this.onSelect != null && this.open) {
+        if (this.open) {
             int x = this.getX();
-            for (T description : items) {
-                if (pMouseX >= x + 1 && pMouseX <= x + 17 && pMouseY >= getY() + 1 && pMouseY <= getY() + 17) {
-                    this.onSelect.accept(description);
-                    return true;
+            if (this.onSetRoundRobin != null
+                    && pMouseX >= x + 1
+                    && pMouseX <= x + 17
+                    && pMouseY >= getY() + 1
+                    && pMouseY <= getY() + 17
+            ) {
+                this.onSetRoundRobin.accept(!roundRobin);
+                return true;
+            }
+            x += 18;
+            if (this.onSelect != null) {
+                for (T description: items) {
+                    if (pMouseX >= x + 1 && pMouseX <= x + 17 && pMouseY >= getY() + 1 && pMouseY <= getY() + 17) {
+                        this.onSelect.accept(description);
+                        return true;
+                    }
+                    x += 18;
                 }
-                x += 18;
             }
         }
 

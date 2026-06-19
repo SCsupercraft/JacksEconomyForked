@@ -3,10 +3,13 @@ package me.khajiitos.jackseconomy.menu;
 import me.khajiitos.jackseconomy.JacksEconomy;
 import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.data.price.FluidDescription;
+import me.khajiitos.jackseconomy.init.ComponentReg;
 import me.khajiitos.jackseconomy.item.EmptyTicketItem;
 import me.khajiitos.jackseconomy.item.FluidTicketItem;
 import me.khajiitos.jackseconomy.util.ItemHelper;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.item.ItemInput;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -23,10 +26,14 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static me.khajiitos.jackseconomy.init.ComponentReg.isGhostItem;
+import static me.khajiitos.jackseconomy.init.ComponentReg.removeGhostItem;
 
 public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
     public final Container container;
@@ -57,6 +64,12 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
         Slot slot = this.slots.get(index);
         if (slot.hasItem()) {
             ItemStack clickedStack = slot.getItem();
+            if (isGhostItem(clickedStack)) {
+                clickedStack.setCount(0);
+                removeGhostItem(clickedStack);
+                return ItemStack.EMPTY;
+            }
+
             clickedStackCopy = clickedStack.copy();
             if (index < containerSize) {
                 if (!this.moveItemStackTo(clickedStack, containerSize, containerSize + 36, false)) {
@@ -126,6 +139,10 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
             for (int i = 0; i < this.container.getContainerSize(); i++) {
                 ItemStack item = this.container.getItem(i);
 
+                boolean ghost = isGhostItem(item);
+                if (ghost)
+                    removeGhostItem(item);
+
                 if (!item.isEmpty()) {
                     FluidDescription fluidDescription = FluidDescription.ofFluid(item.getCapability(Capabilities.FluidHandler.ITEM).getFluidInTank(0));
 
@@ -133,7 +150,7 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
                         fluidDescriptions.add(fluidDescription);
                     }
 
-                    if (Config.returnManifestItems.get()) {
+                    if (Config.returnManifestItems.get() && !ghost) {
                         if (!serverPlayer.getInventory().add(item)) {
                             ItemHelper.dropItem(item, serverPlayer.level(), serverPlayer.blockPosition());
                         }
@@ -143,13 +160,12 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
             this.container.clearContent();
 
             FluidTicketItem.setFluids(ticketItem, fluidDescriptions);
-
             pPlayer.setItemInHand(hand, ticketItem);
 
-            CompoundTag nbt = (CompoundTag) ticketItem.save(JacksEconomy.server.registryAccess());
-
             if (serverPlayer.hasPermissions(4) && serverPlayer.isCreative()) {
-                String command = "/give @p " + ItemHelper.getItemName(ticketItem.getItem()) + nbt;
+                RegistryAccess.Frozen access = JacksEconomy.server.registryAccess();
+                ItemInput input = new ItemInput(ticketItem.getItemHolder(), ticketItem.getComponentsPatch());
+                String command = "/give @p " + input.serialize(access);
 
                 serverPlayer.sendSystemMessage(Component.translatable("jackseconomy.generate_this_ticket").withStyle(ChatFormatting.GOLD));
                 serverPlayer.sendSystemMessage(Component.literal(command).withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("jackseconomy.copy").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, command)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("jackseconomy.click_to_copy"))).withBold(true).withColor(ChatFormatting.GOLD))));
@@ -159,7 +175,14 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
         super.removed(pPlayer);
     }
 
-    public static class FluidSlot extends Slot {
+    public static boolean mayPlace(ItemStack stack) {
+        IFluidHandlerItem capability = stack.getCapability(Capabilities.FluidHandler.ITEM);
+        return capability != null
+                && capability.getTanks() > 0
+                && !capability.getFluidInTank(0).isEmpty();
+    }
+
+    public static class FluidSlot extends ComponentReg.GhostSlot {
 
         public FluidSlot(Container pContainer, int pSlot, int pX, int pY) {
             super(pContainer, pSlot, pX, pY);
@@ -167,7 +190,7 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
 
         @Override
         public boolean mayPlace(@NotNull ItemStack pStack) {
-            return pStack.getCapability(Capabilities.FluidHandler.ITEM) != null;
+            return FluidTicketCreatorMenu.mayPlace(pStack);
         }
     }
 }

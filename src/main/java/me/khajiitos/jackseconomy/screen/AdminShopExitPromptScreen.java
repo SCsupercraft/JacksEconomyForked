@@ -46,6 +46,8 @@ public class AdminShopExitPromptScreen extends Screen {
 
         // It always will be AdminShopScreen tbh
         if (this.parent instanceof AdminShopScreen adminShopScreen) {
+            if (this.minecraft != null && this.minecraft.player != null)
+                this.minecraft.player.closeContainer();
             adminShopScreen.sendShopUnlocksAcknowledgements();
         }
     }

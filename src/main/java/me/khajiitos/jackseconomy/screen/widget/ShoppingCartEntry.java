@@ -1,5 +1,6 @@
 package me.khajiitos.jackseconomy.screen.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.khajiitos.jackseconomy.screen.AdminShopScreen;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import net.minecraft.ChatFormatting;
@@ -11,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Map;
 
@@ -45,7 +47,7 @@ public class ShoppingCartEntry extends AbstractWidget {
             guiGraphics.pose().pushPose();
             guiGraphics.pose().scale(scale, scale, scale);
         }
-        Component header = itemName.append(Component.literal(" (" + shoppingCartItem.getValue() + ")").withStyle(ChatFormatting.GRAY));
+        Component header = itemName.append(Component.literal(" (" + shoppingCartItem.getValue() * shoppingCartItem.getKey().count() + ")").withStyle(ChatFormatting.GRAY));
         Component footer = Component.literal(oneItemCurrencyMode ? "$" + (long)(shoppingCartItem.getKey().price() * shoppingCartItem.getValue()) : CurrencyHelper.format(shoppingCartItem.getKey().price() * shoppingCartItem.getValue())).withStyle(ChatFormatting.DARK_GRAY);
         guiGraphics.drawString(Minecraft.getInstance().font, header, (int) ((this.getX() + 22) / scale), (int) ((this.getY()) / scale), 0xFFFFFFFF);
         guiGraphics.drawString(Minecraft.getInstance().font, footer, (int) ((this.getX() + 22) / scale), (int) ((this.getY() + 9) / scale), 0xFFFFFFFF);
@@ -75,13 +77,22 @@ public class ShoppingCartEntry extends AbstractWidget {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        int count;
+        if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
+            count = 64;
+        } else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL)) {
+            count = 10;
+        } else {
+            count = 1;
+        }
+
         if (mouseX >= this.getX() + 122 && mouseX <= this.getX() + 137 && mouseY >= this.getY() + 4 && mouseY <= this.getY() + 18) {
             if (shoppingCartItem.getValue() > 1) {
-                shoppingCartItem.setValue(shoppingCartItem.getValue() - 1);
+                shoppingCartItem.setValue(Math.max(shoppingCartItem.getValue() - count, 1));
                 onChange.run();
             }
         } else if (mouseX >= this.getX() + 142 && mouseX <= this.getX() + 157 && mouseY >= this.getY() + 4 && mouseY <= this.getY() + 18) {
-            shoppingCartItem.setValue(shoppingCartItem.getValue() + 1);
+            shoppingCartItem.setValue(shoppingCartItem.getValue() + count);
             onChange.run();
         } else if (mouseX >= this.getX() + 102 && mouseX <= this.getX() + 117 && mouseY >= this.getY() + 4 && mouseY <= this.getY() + 18) {
             onRemoveClicked.run();

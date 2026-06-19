@@ -112,11 +112,12 @@ public class UpdateAdminShopHandler {
 
                 String category = compoundTag.getString("category");
                 double buyPrice = compoundTag.getDouble("adminShopBuyPrice");
+                int buyCount = compoundTag.getInt("adminShopBuyCount");
                 int slot = compoundTag.contains("slot") ? compoundTag.getInt("slot") : -1;
                 String customName = compoundTag.contains("customAdminShopName") ? compoundTag.getString("customAdminShopName") : null;
                 String stage = compoundTag.contains("adminShopStage") ? compoundTag.getString("adminShopStage") : null;
 
-                PriceManager.addPriceInfo(itemDescription, new AdminShopItemPriceInfo(buyPrice, category, slot, customName, stage, msg.adminShopName().orElse(null)));
+                PriceManager.addPriceInfo(itemDescription, new AdminShopItemPriceInfo(buyPrice, buyCount, category, slot, customName, stage, msg.adminShopName().orElse(null)));
             }
         });
 
@@ -124,7 +125,7 @@ public class UpdateAdminShopHandler {
         PriceManager.sendDataToPlayers(false);
         JacksEconomy.server.getPlayerList().getPlayers().forEach(player -> {
             CompoundTag tag = PriceManager.toAdminShopSchemaCompound(player, msg.adminShopName().orElse(null));
-            PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(tag, Optional.ofNullable(msg.adminShopName().orElse(null)), Config.oneItemCurrencyMode.get()));
+            PacketDistributor.sendToPlayer(player, new AdminShopSchemaPacket(tag, msg.adminShopName(), Config.oneItemCurrencyMode.get()));
         });
 
         sender.sendSystemMessage(Component.translatable("jackseconomy.admin_shop_saved").withStyle(ChatFormatting.GREEN));

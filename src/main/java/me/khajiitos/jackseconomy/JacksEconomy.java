@@ -7,6 +7,9 @@ import me.khajiitos.jackseconomy.create.CreateCheck;
 import me.khajiitos.jackseconomy.create.CreateStressProvider;
 import me.khajiitos.jackseconomy.curios.CuriosCheck;
 import me.khajiitos.jackseconomy.curios.CuriosHandler;
+import me.khajiitos.jackseconomy.ftbquests.FtbQuestsCheck;
+import me.khajiitos.jackseconomy.ftbquests.RewardsReg;
+import me.khajiitos.jackseconomy.ftbquests.TasksReg;
 import me.khajiitos.jackseconomy.gamestages.GameStagesManager;
 import me.khajiitos.jackseconomy.init.*;
 import me.khajiitos.jackseconomy.listener.ConfigEventListeners;
@@ -50,9 +53,13 @@ public class JacksEconomy {
             CuriosHandler.init();
         }
 
+        ItemBlockReg.register(modEventBus);
+
+        PoiTypeReg.init(modEventBus);
+        VillagerProfessionReg.init(modEventBus);
+
         ArgumentReg.register(modEventBus);
         ComponentReg.register(modEventBus);
-        ItemBlockReg.register(modEventBus);
         BlockEntityReg.register(modEventBus);
         ContainerReg.register(modEventBus);
         Sounds.register(modEventBus);
@@ -63,6 +70,11 @@ public class JacksEconomy {
 
         if (CreateCheck.isInstalled()) {
             CreateStressProvider.init();
+        }
+
+        if (FtbQuestsCheck.isInstalled()) {
+            RewardsReg.register();
+            TasksReg.register();
         }
 
         GameStagesManager.init();

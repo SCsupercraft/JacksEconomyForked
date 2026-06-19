@@ -84,7 +84,7 @@ public class BulkFluidScreen extends FluidSelectionScreen<BulkFluidScreen.Menu> 
 	}
 
 	private void setExporter(Slot slot) {
-		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, true, (value) -> {
+		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, FloatingEditBoxWidget.Type.DECIMAL, (value) -> {
 			try {
 				List<Pair<FluidDescription, Double>> prices = new ArrayList<>();
 				double newPrice = Double.parseDouble(value);
@@ -101,7 +101,7 @@ public class BulkFluidScreen extends FluidSelectionScreen<BulkFluidScreen.Menu> 
 	}
 
 	private void setImporter(Slot slot) {
-		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, true, (value) -> {
+		this.floatingEditBox = this.addRenderableWidget(new FloatingEditBoxWidget(this.font, getGuiLeft() + imageWidth / 2, getGuiTop() + imageHeight + 28, imageWidth, 15, FloatingEditBoxWidget.Type.DECIMAL, (value) -> {
 			try {
 				List<Pair<FluidDescription, Double>> prices = new ArrayList<>();
 				double newPrice = Double.parseDouble(value);

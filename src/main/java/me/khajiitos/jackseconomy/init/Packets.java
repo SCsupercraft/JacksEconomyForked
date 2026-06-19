@@ -25,6 +25,7 @@ public class Packets {
         registrar.playToServer(       AdminShopPurchasePacket.TYPE,       AdminShopPurchasePacket.STREAM_CODEC,       AdminShopPurchaseHandler::handle);
         registrar.playToServer(      ChangeSelectedItemPacket.TYPE,      ChangeSelectedItemPacket.STREAM_CODEC,      ChangeSelectedItemHandler::handle);
         registrar.playToServer(     ChangeSelectedFluidPacket.TYPE,     ChangeSelectedFluidPacket.STREAM_CODEC,     ChangeSelectedFluidHandler::handle);
+        registrar.playToServer(      ChangeImporterModePacket.TYPE,      ChangeImporterModePacket.STREAM_CODEC,      ChangeImporterModeHandler::handle);
         registrar.playToServer(         UpdateAdminShopPacket.TYPE,         UpdateAdminShopPacket.STREAM_CODEC,         UpdateAdminShopHandler::handle);
         registrar.playToServer(        UpdateSideConfigPacket.TYPE,        UpdateSideConfigPacket.STREAM_CODEC,        UpdateSideConfigHandler::handle);
         registrar.playToServer(          InsertToWalletPacket.TYPE,          InsertToWalletPacket.STREAM_CODEC,          InsertToWalletHandler::handle);
@@ -33,6 +34,7 @@ public class Packets {
         registrar.playToServer(  RequestAdminShopSchemaPacket.TYPE,  RequestAdminShopSchemaPacket.STREAM_CODEC,  RequestAdminShopSchemaHandler::handle);
         registrar.playToServer(        UpdateItemPricesPacket.TYPE,        UpdateItemPricesPacket.STREAM_CODEC,        UpdateItemPricesHandler::handle);
         registrar.playToServer(       UpdateFluidPricesPacket.TYPE,       UpdateFluidPricesPacket.STREAM_CODEC,       UpdateFluidPricesHandler::handle);
+        registrar.playToServer(      JeiInsertGhostItemPacket.TYPE,      JeiInsertGhostItemPacket.STREAM_CODEC,      JeiInsertGhostItemHandler::handle);
         registrar.playToClient(              PricesInfoPacket.TYPE,              PricesInfoPacket.STREAM_CODEC,              PricesInfoHandler::handle);
         registrar.playToClient(     UpdateWalletBalancePacket.TYPE,     UpdateWalletBalancePacket.STREAM_CODEC,     UpdateWalletBalanceHandler::handle);
         registrar.playToClient(        WalletBalanceDifPacket.TYPE,        WalletBalanceDifPacket.STREAM_CODEC,        WalletBalanceDifHandler::handle);

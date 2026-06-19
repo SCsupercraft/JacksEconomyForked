@@ -242,7 +242,6 @@ public abstract class FluidTransactionMachineBlockEntity extends BlockEntity imp
 
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider provider) {
-        pkt.getTag();
         this.loadAdditional(pkt.getTag(), provider);
     }
 
