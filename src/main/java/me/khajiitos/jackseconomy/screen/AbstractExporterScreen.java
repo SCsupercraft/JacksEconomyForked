@@ -110,7 +110,7 @@ public abstract class AbstractExporterScreen<S extends IExporterBlockEntity, T e
         if (ticketItem.getItem() instanceof ExporterTicketItem && (!(ticketItem.getItem() instanceof GoldenExporterTicketItem))) {
             List<ItemDescription> items = TicketItem.getItems(ticketItem);
             if (!items.isEmpty()) {
-                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<>(this.leftPos + 39, this.topPos + 65, false, items, null, null, (tooltip) -> this.tooltip = tooltip));
+                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<>(this.leftPos + 39, this.topPos + 65, false, items, null, false, null, null, (tooltip) -> this.tooltip = tooltip));
             } else {
                 this.ticketPreview = null;
             }

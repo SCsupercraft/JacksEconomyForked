@@ -25,6 +25,7 @@ public class Packets {
         registrar.playToServer(       AdminShopPurchasePacket.TYPE,       AdminShopPurchasePacket.STREAM_CODEC,       AdminShopPurchaseHandler::handle);
         registrar.playToServer(      ChangeSelectedItemPacket.TYPE,      ChangeSelectedItemPacket.STREAM_CODEC,      ChangeSelectedItemHandler::handle);
         registrar.playToServer(     ChangeSelectedFluidPacket.TYPE,     ChangeSelectedFluidPacket.STREAM_CODEC,     ChangeSelectedFluidHandler::handle);
+        registrar.playToServer(      ChangeImporterModePacket.TYPE,      ChangeImporterModePacket.STREAM_CODEC,      ChangeImporterModeHandler::handle);
         registrar.playToServer(         UpdateAdminShopPacket.TYPE,         UpdateAdminShopPacket.STREAM_CODEC,         UpdateAdminShopHandler::handle);
         registrar.playToServer(        UpdateSideConfigPacket.TYPE,        UpdateSideConfigPacket.STREAM_CODEC,        UpdateSideConfigHandler::handle);
         registrar.playToServer(          InsertToWalletPacket.TYPE,          InsertToWalletPacket.STREAM_CODEC,          InsertToWalletHandler::handle);

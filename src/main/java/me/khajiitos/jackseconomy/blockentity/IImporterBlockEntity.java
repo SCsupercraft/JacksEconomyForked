@@ -5,4 +5,7 @@ import me.khajiitos.jackseconomy.data.price.ItemDescription;
 public interface IImporterBlockEntity extends ITransactionMachineBlockEntity {
     void selectItem(ItemDescription itemDescription);
     ItemDescription getSelectedItem();
+
+    void setRoundRobin(boolean enabled);
+    boolean isRoundRobinEnabled();
 }

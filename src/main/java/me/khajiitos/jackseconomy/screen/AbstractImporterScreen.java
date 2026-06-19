@@ -7,6 +7,7 @@ import me.khajiitos.jackseconomy.config.Config;
 import me.khajiitos.jackseconomy.item.ImporterTicketItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.menu.IBlockEntityContainer;
+import me.khajiitos.jackseconomy.packet.ChangeImporterModePacket;
 import me.khajiitos.jackseconomy.packet.ChangeSelectedItemPacket;
 import me.khajiitos.jackseconomy.data.price.ItemDescription;
 import me.khajiitos.jackseconomy.screen.widget.BalanceProgressWidget;
@@ -59,7 +60,7 @@ public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T e
     @Override
     protected void init() {
         super.init();
-        this.refreshTicketPreview();
+        this.refreshTicketPreview(false);
         this.refreshSideConfig();
 
         IImporterBlockEntity blockEntity = this.getBlockEntity();
@@ -83,7 +84,7 @@ public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T e
         guiGraphics.blit(BACKGROUND, this.leftPos + 39, this.topPos + 26, 18, 13, 212, 0, 36, 26, 256, 256);
     }
 
-    public void refreshTicketPreview() {
+    public void refreshTicketPreview(boolean open) {
         if (this.ticketPreview != null) {
             this.removeWidget(this.ticketPreview);
         }
@@ -99,11 +100,16 @@ public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T e
         if (ticketItem.getItem() instanceof ImporterTicketItem) {
             List<ItemDescription> items = TicketItem.getItems(ticketItem);
             if (!items.isEmpty()) {
-                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<>(this.leftPos + 39, this.topPos + 65, true, items, blockEntity.getSelectedItem(), (newItemDescription) -> {
+                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<>(this.leftPos + 39, this.topPos + 65, true, items, blockEntity.getSelectedItem(), blockEntity.isRoundRobinEnabled(), (newItemDescription) -> {
                     blockEntity.selectItem(newItemDescription);
                     PacketDistributor.sendToServer(new ChangeSelectedItemPacket(newItemDescription));
-                    this.refreshTicketPreview();
+                    this.refreshTicketPreview(false);
+                }, roundRobin -> {
+                    blockEntity.setRoundRobin(roundRobin);
+                    PacketDistributor.sendToServer(new ChangeImporterModePacket(roundRobin));
+                    this.refreshTicketPreview(true);
                 }, tooltip -> this.tooltip = tooltip));
+                this.ticketPreview.setOpen(open);
             } else {
                 this.ticketPreview = null;
             }
@@ -196,7 +202,7 @@ public abstract class AbstractImporterScreen<S extends IImporterBlockEntity, T e
             ItemStack ticketItem = blockEntity.getItem(9);
 
             if (ticketItem == null && ticketItemLastTick != null || ticketItem != null && ticketItemLastTick == null || ticketItem != null && !ItemStack.isSameItemSameComponents(ticketItem, ticketItemLastTick)) {
-                this.refreshTicketPreview();
+                this.refreshTicketPreview(false);
                 ticketItemLastTick = ticketItem;
             }
         }

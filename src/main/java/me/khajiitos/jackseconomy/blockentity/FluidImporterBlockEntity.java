@@ -45,6 +45,7 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
     protected SlottedItemStackHandler itemHandlerInput;
     protected SlottedItemStackHandler itemHandlerRejectionOutput;
     public FluidDescription selectedFluid;
+    public boolean roundRobin;
     private float progress;
 
     public FluidImporterBlockEntity(BlockPos pos, BlockState state) {
@@ -107,6 +108,7 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
         if (this.selectedFluid != null) {
             tag.put("SelectedFluid", this.selectedFluid.toNbt());
         }
+        tag.putBoolean("RoundRobin", roundRobin);
     }
 
     @Override
@@ -124,6 +126,7 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
         } else {
             this.selectedFluid = null;
         }
+        roundRobin = tag.getBoolean("RoundRobin");
     }
 
     @Override
@@ -242,6 +245,9 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
 
                     level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5f, 1.5f);
                     serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 1.25, pos.getZ() + 0.5, 3, 0.2, 0.15, 0.2, 0.25);
+
+                    if (importer.roundRobin)
+                        importer.selectedFluid = fluids.get((fluids.indexOf(selectedDescription) + 1) % fluids.size());
                 }
             }
         }
@@ -283,5 +289,15 @@ public class FluidImporterBlockEntity extends FluidTransactionMachineBlockEntity
     @Override
     public FluidDescription getSelectedFluid() {
         return this.selectedFluid;
+    }
+
+    @Override
+    public void setRoundRobin(boolean roundRobin) {
+        this.roundRobin = roundRobin;
+    }
+
+    @Override
+    public boolean isRoundRobinEnabled() {
+        return roundRobin;
     }
 }

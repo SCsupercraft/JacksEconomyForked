@@ -91,6 +91,8 @@
   "jackseconomy.ponder.converting_currency.text_2": "Currency converters don't use power, unlike other machines.",
   "jackseconomy.ponder.converting_currency.text_3": "They convert currencies instantly, so no need to wait.",
 
+  "jackseconomy.round_robin": "Round Robin",
+
   "jackseconomy.click_to_select": "Click to select!",
   "jackseconomy.none_selected": "None selected",
   "jackseconomy.selected": "Selected",
