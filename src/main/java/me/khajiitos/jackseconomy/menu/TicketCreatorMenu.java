@@ -8,6 +8,8 @@ import me.khajiitos.jackseconomy.item.EmptyTicketItem;
 import me.khajiitos.jackseconomy.item.TicketItem;
 import me.khajiitos.jackseconomy.util.ItemHelper;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.item.ItemInput;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -155,13 +157,12 @@ public abstract class TicketCreatorMenu extends AbstractContainerMenu {
             this.container.clearContent();
 
             TicketItem.setItems(ticketItem, itemDescriptions);
-
             pPlayer.setItemInHand(hand, ticketItem);
 
-            CompoundTag nbt = (CompoundTag) ticketItem.save(JacksEconomy.server.registryAccess());
-
             if (serverPlayer.hasPermissions(4) && serverPlayer.isCreative()) {
-                String command = "/give @p " + ItemHelper.getItemName(ticketItem.getItem()) + nbt;
+                RegistryAccess.Frozen access = JacksEconomy.server.registryAccess();
+                ItemInput input = new ItemInput(ticketItem.getItemHolder(), ticketItem.getComponentsPatch());
+                String command = "/give @p " + input.serialize(access);
 
                 serverPlayer.sendSystemMessage(Component.translatable("jackseconomy.generate_this_ticket").withStyle(ChatFormatting.GOLD));
                 serverPlayer.sendSystemMessage(Component.literal(command).withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("jackseconomy.copy").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, command)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("jackseconomy.click_to_copy"))).withBold(true).withColor(ChatFormatting.GOLD))));
