@@ -1,4 +1,6 @@
 {
+  "entity.minecraft.villager.jackseconomy.shopkeeper": "Shopkeeper",
+
   "itemGroup.jackseconomy": "Jack's Economy (Forked)",
 
   "block.jackseconomy.admin_shop": "Admin Shop",
@@ -89,11 +91,16 @@
   "jackseconomy.ponder.converting_currency.text_2": "Currency converters don't use power, unlike other machines.",
   "jackseconomy.ponder.converting_currency.text_3": "They convert currencies instantly, so no need to wait.",
 
+  "jackseconomy.round_robin": "Round Robin",
+
   "jackseconomy.click_to_select": "Click to select!",
   "jackseconomy.none_selected": "None selected",
   "jackseconomy.selected": "Selected",
 
   "jackseconomy.search": "Search...",
+
+  "jackseconomy.price_each": "%s each",
+  "jackseconomy.price_for": "%s for %s items",
 
   "jackseconomy.sell_price": "Sell price (%s): %s",
   "jackseconomy.buy_price": "Buy price (%s): %s",
@@ -136,6 +143,7 @@
 
   "jackseconomy.currency": "Currency: %.1f",
   "jackseconomy.wallet": "Wallet",
+  "jackseconomy.no_wallet": "No wallet!",
 
   "jackseconomy.turn_into_check": "Click to turn the specified balance into a check!",
 
@@ -146,10 +154,12 @@
   "jackseconomy.normal_coins": "Normal Click: 1 item",
 
   "jackseconomy.infinite_money": "Infinite Money",
+  "jackseconomy.infinite": "Infinite",
   "jackseconomy.balance": "Balance: %s",
   "jackseconomy.value": "Value: %s",
   "jackseconomy.wallet_balance": "Wallet: %s",
   "jackseconomy.balance_out_of": "Balance: %s/%s",
+  "jackseconomy.items": "Items: %s",
 
   "jackseconomy.fe_per_tick": "Usage: %s FE/tick",
   "jackseconomy.progress_per_tick": "Speed: %s progress/tick",
@@ -158,17 +168,14 @@
   "jackseconomy.subtitle.cash": "Cash sounds",
   "jackseconomy.subtitle.checkout": "Checkout sounds",
 
-  "jackseconomy.items": "Items: %s",
-
   "jackseconomy.in_cart": "In cart: %s",
   "jackseconomy.to_sell": "To sell: %s",
-
-  "jackseconomy.no_wallet": "No wallet!",
 
   "jackseconomy.purchase": "Purchase",
 
   "jackseconomy.cant_afford": "Can't afford!",
   "jackseconomy.shopping_cart_empty": "Shopping cart is empty!",
+  "jackseconomy.sell_all": "Shift-click to sell all",
 
   "jackseconomy.sold_items": "Sold items: %s",
   "jackseconomy.bought_items": "Bought items: %s",
@@ -212,6 +219,7 @@
 
   "jackseconomy.right_click_to_change": "Right-click to change",
   "jackseconomy.right_click_to_edit_price": "Right-click to edit price",
+  "jackseconomy.shift_left_click_to_edit_count": "L-Shift + Left-click to edit quantity",
   "jackseconomy.middle_click_to_remove": "Middle-click to remove item",
   "jackseconomy.middle_click_to_reset": "Middle-click to reset",
   "jackseconomy.middle_click_to_cancel": "Middle-click to cancel",
@@ -275,8 +283,6 @@
   "jackseconomy.required_game_stage": "Required game stage: %s",
   "jackseconomy.locked_behind_stage": "Locked behind game-stage: %s",
 
-  "jackseconomy.lctrl_right_click_to_change_stage": "L-CTRL + Right-click to change unlock stage",
-
   "jackseconomy.selling": "Selling",
   "jackseconomy.buying": "Buying",
 
@@ -286,6 +292,7 @@
   "jackseconomy.selling_locked": "Selling locked",
   "jackseconomy.selling_locked_behind_gamestage": "Selling locked behind game-stage: %s",
 
+  "jackseconomy.lctrl_right_click_to_change_stage": "L-CTRL + Right-click to change unlock stage",
   "jackseconomy.shift_right_click_to_edit_stage": "L-Shift + Right-click to edit required stage",
   "jackseconomy.shift_middle_click_to_remove_stage": "L-Shift + Middle-click to remove required stage",
 
@@ -318,6 +325,18 @@
 
   "jackseconomy.bulk_admin_shop_not_creative": "You must be in creative mode to edit the admin shop!",
 
+  "jackseconomy.player_no_wallet": "Player %s doesn't have a wallet equipped!",
+  "jackseconomy.player_give_money": "Gave %s to %s.",
+  "jackseconomy.player_remove_money": "Took %s from %s.",
+  "jackseconomy.player_cleared_money": "Took all %s from %s.",
+  "jackseconomy.player_count_money": "%s has %s",
+
   "jackseconomy.jei_placeholder_manifest_required": "Manifest Required!",
-  "jackseconomy.jei_placeholder_wallet_required": "Wallet Required!"
+  "jackseconomy.jei_placeholder_wallet_required": "Wallet Required!",
+
+  "ftbquests.reward.jackseconomy.money": "Money",
+  "ftbquests.reward.jackseconomy.money.amount": "Amount",
+
+  "ftbquests.task.jackseconomy.money": "Money",
+  "ftbquests.task.jackseconomy.money.amount": "Amount"
 }

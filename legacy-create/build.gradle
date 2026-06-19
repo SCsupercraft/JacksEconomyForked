@@ -118,7 +118,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // Jack's Economy (Forked)
-    implementation fg.deobf("${mod_group_id}:jackseconomy-forked:1.2.2-1.6.2")
+    implementation fg.deobf("${mod_group_id}:jackseconomy-forked:1.2.2-1.7.0")
 
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.3.5+1.20.1")
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.3.5+1.20.1:api")
@@ -131,6 +131,11 @@ dependencies {
 
     compileOnly fg.deobf("net.darkhax.gamestages:GameStages-Forge-${minecraft_version}:${gamestages_version}")
     compileOnly fg.deobf("net.darkhax.bookshelf:Bookshelf-Forge-${minecraft_version}:${bookshelf_version}")
+
+    implementation fg.deobf("curse.maven:architectury-api-419699:5137938")
+    implementation fg.deobf("curse.maven:ftb-library-forge-404465:6807424")
+    implementation fg.deobf("curse.maven:ftb-teams-forge-404468:6130786")
+    implementation fg.deobf("curse.maven:ftb-quests-forge-289412:7260736")
 
     //implementation fg.deobf("maven.modrinth:packet-fixer:1.2.1-forge")
 

@@ -20,13 +20,13 @@ public class CurrencyHelper {
 
     public static List<ItemStack> getCurrencyItems(BigDecimal value) {
         List<ItemStack> items = new ArrayList<>();
-        List<CurrencyType> sortedCurrencies = Config.oneItemCurrencyMode.get() ? List.of(CurrencyType.DOLLAR_BILL) : Arrays.stream(CurrencyType.values()).sorted(Comparator.comparing(CurrencyType::getWorth).reversed()).toList();
+        List<CurrencyType> sortedCurrencies = Config.oneItemCurrencyMode.get() ? List.of(CurrencyType.DOLLAR_BILL) : getCurrencyTypesAsOrderedList();
 
         while (value.compareTo(BigDecimal.ZERO) > 0) {
             boolean anything = false;
             for (CurrencyType currencyType : sortedCurrencies) {
                 if (value.compareTo(currencyType.worth) >= 0) {
-                    int count = Math.min(currencyType.item.getMaxStackSize(), value.divide(currencyType.worth, RoundingMode.DOWN).intValue());
+                    int count = Math.min(currencyType.item.getMaxStackSize(), value.divide(currencyType.worth, 0, RoundingMode.DOWN).intValue());
                     items.add(new ItemStack(currencyType.item, count));
                     value = value.subtract(currencyType.worth.multiply(new BigDecimal(count)));
                     anything = true;
@@ -41,6 +41,10 @@ public class CurrencyHelper {
         return items;
     }
 
+    public static List<CurrencyType> getCurrencyTypesAsOrderedList() {
+        return Arrays.stream(CurrencyType.values()).sorted(Comparator.comparing(CurrencyType::getWorth).reversed()).toList();
+    }
+
     public static BigDecimal addMoney(BigDecimal money, ItemStack wallet, Player player) {
         if (wallet.getItem() instanceof WalletItem) {
             BigDecimal balance = WalletItem.getBalance(wallet);
@@ -51,27 +55,20 @@ public class CurrencyHelper {
         }
         return null;
     }
+
     public static BigDecimal giveChange(Player player, ItemStack itemStack) {
-        if (itemStack.getItem() instanceof InfiniteWalletItem walletItem) {
+        if (itemStack.getItem() instanceof InfiniteWalletItem) {
             return WalletItem.getBalance(itemStack);
         } else if (itemStack.getItem() instanceof WalletItem walletItem) {
             BigDecimal capacity = BigDecimal.valueOf(walletItem.getCapacity());
             BigDecimal balance = WalletItem.getBalance(itemStack);
 
             if (balance.compareTo(capacity) > 0) {
-                double change = balance.subtract(capacity).doubleValue();
+                BigDecimal change = balance.subtract(capacity);
 
-                change = giveChange(player, change, CurrencyType.THOUSAND_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.HUNDRED_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.FIFTY_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.TWENTY_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.TEN_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.FIVE_DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.DOLLAR_BILL);
-                change = giveChange(player, change, CurrencyType.QUARTER);
-                change = giveChange(player, change, CurrencyType.DIME);
-                change = giveChange(player, change, CurrencyType.NICKEL);
-                giveChange(player, change, CurrencyType.PENNY);
+                for (CurrencyType type : getCurrencyTypesAsOrderedList()) {
+                    change = giveChange(player, change, type);
+                }
 
                 WalletItem.setBalance(itemStack, capacity);
                 return capacity;
@@ -80,24 +77,25 @@ public class CurrencyHelper {
         }
         return null;
     }
-    public static double giveChange(Player player, double amount, CurrencyType currencyType) {
-        double worth = currencyType.worth.doubleValue();
-        double count = Math.floor(amount / worth);
-        double itemsLeft = count;
+
+    public static BigDecimal giveChange(Player player, BigDecimal amount, CurrencyType currencyType) {
+        BigDecimal worth = currencyType.worth;
+        BigDecimal count = amount.divide(worth, 0, RoundingMode.DOWN);
+        int itemsLeft = count.intValue();
 
         while (itemsLeft > 0) {
-            int items = (int) Math.min(64, count);
+            int items = Math.min(64, itemsLeft);
             ItemStack itemStack = new ItemStack(currencyType.item, items);
 
-            //if (!player.getInventory().add(itemStack)) {
+            if (!player.getInventory().add(itemStack)) {
                 ItemEntity itemEntity = new ItemEntity(player.level(), player.getX(), player.getY(), player.getZ(), itemStack);
                 player.level().addFreshEntity(itemEntity);
-            //}
+            }
 
             itemsLeft -= items;
         }
 
-        return amount - (count * worth);
+        return amount.subtract(count.multiply(worth));
     }
 
     // 1.0 -> $1.00
@@ -105,18 +103,22 @@ public class CurrencyHelper {
         return DecimalFormat.getCurrencyInstance(Locale.US).format(value);
     }
 
+    public static String formatShortened(double value) {
+        return formatShortened(BigDecimal.valueOf(value));
+    }
+
     public static String formatShortened(BigDecimal bigDecimal) {
         String sign = (bigDecimal.compareTo(BigDecimal.ZERO) < 0) ? "-" : "";
         BigDecimal bigDecimalAbs = bigDecimal.abs();
 
         if (bigDecimalAbs.compareTo(TRILLION) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(TRILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "T";
+            return "$" + sign + bigDecimalAbs.divide(TRILLION, 2, RoundingMode.DOWN) + "T";
         } else if (bigDecimalAbs.compareTo(BILLION) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(BILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "B";
+            return "$" + sign + bigDecimalAbs.divide(BILLION, 2, RoundingMode.DOWN) + "B";
         } else if (bigDecimalAbs.compareTo(MILLION) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(MILLION, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "M";
+            return "$" + sign + bigDecimalAbs.divide(MILLION, 2, RoundingMode.DOWN) + "M";
         } else if (bigDecimalAbs.compareTo(THOUSAND) >= 0) {
-            return "$" + sign + bigDecimalAbs.divide(THOUSAND, RoundingMode.DOWN).setScale(2, RoundingMode.DOWN) + "K";
+            return "$" + sign + bigDecimalAbs.divide(THOUSAND, 2, RoundingMode.DOWN) + "K";
         }
         return format(bigDecimal);
     }

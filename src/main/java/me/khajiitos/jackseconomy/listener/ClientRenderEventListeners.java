@@ -24,7 +24,6 @@ import java.math.RoundingMode;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientRenderEventListeners {
-
     protected static final ResourceLocation BALANCE_PROGRESS = new ResourceLocation(JacksEconomy.MOD_ID, "textures/gui/balance_progress.png");
 
     @SubscribeEvent

@@ -9,6 +9,7 @@ import me.khajiitos.jackseconomy.init.Packets;
 import me.khajiitos.jackseconomy.item.FluidImporterTicketItem;
 import me.khajiitos.jackseconomy.item.FluidTicketItem;
 import me.khajiitos.jackseconomy.menu.IBlockEntityContainer;
+import me.khajiitos.jackseconomy.packet.ChangeImporterModePacket;
 import me.khajiitos.jackseconomy.packet.ChangeSelectedFluidPacket;
 import me.khajiitos.jackseconomy.screen.widget.BalanceProgressWidget;
 import me.khajiitos.jackseconomy.screen.widget.RedstoneControlWidget;
@@ -59,7 +60,7 @@ public abstract class AbstractFluidImporterScreen<S extends IFluidImporterBlockE
     @Override
     protected void init() {
         super.init();
-        this.refreshTicketPreview();
+        this.refreshTicketPreview(false);
         this.refreshSideConfig();
 
         IFluidImporterBlockEntity blockEntity = this.getBlockEntity();
@@ -83,7 +84,7 @@ public abstract class AbstractFluidImporterScreen<S extends IFluidImporterBlockE
         guiGraphics.blit(BACKGROUND, this.leftPos + 39, this.topPos + 26, 18, 13, 212, 0, 36, 26, 256, 256);
     }
 
-    public void refreshTicketPreview() {
+    public void refreshTicketPreview(boolean open) {
         if (this.ticketPreview != null) {
             this.removeWidget(this.ticketPreview);
         }
@@ -99,11 +100,16 @@ public abstract class AbstractFluidImporterScreen<S extends IFluidImporterBlockE
         if (ticketItem.getItem() instanceof FluidImporterTicketItem) {
             List<FluidDescription> items = FluidTicketItem.getFluids(ticketItem);
             if (!items.isEmpty()) {
-                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<FluidDescription>(this.leftPos + 39, this.topPos + 65, true, items, blockEntity.getSelectedFluid(), (newFluidDescription) -> {
+                this.ticketPreview = this.addRenderableWidget(new TicketPreviewWidget<>(this.leftPos + 39, this.topPos + 65, true, items, blockEntity.getSelectedFluid(), blockEntity.isRoundRobinEnabled(), (newFluidDescription) -> {
                     blockEntity.selectFluid(newFluidDescription);
                     Packets.sendToServer(new ChangeSelectedFluidPacket(newFluidDescription));
-                    this.refreshTicketPreview();
+                    this.refreshTicketPreview(false);
+                }, roundRobin -> {
+                    blockEntity.setRoundRobin(roundRobin);
+                    Packets.sendToServer(new ChangeImporterModePacket(roundRobin));
+                    this.refreshTicketPreview(true);
                 }, tooltip -> this.tooltip = tooltip));
+                this.ticketPreview.setOpen(open);
             } else {
                 this.ticketPreview = null;
             }
@@ -196,7 +202,7 @@ public abstract class AbstractFluidImporterScreen<S extends IFluidImporterBlockE
             ItemStack ticketItem = blockEntity.getItem(3);
 
             if (ticketItem == null && ticketItemLastTick != null || ticketItem != null && ticketItemLastTick == null || ticketItem != null && !ItemStack.isSameItemSameTags(ticketItem, ticketItemLastTick)) {
-                this.refreshTicketPreview();
+                this.refreshTicketPreview(false);
                 ticketItemLastTick = ticketItem;
             }
         }

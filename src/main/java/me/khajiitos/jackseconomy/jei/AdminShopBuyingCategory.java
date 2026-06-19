@@ -9,6 +9,7 @@ import me.khajiitos.jackseconomy.init.ItemBlockReg;
 import me.khajiitos.jackseconomy.item.CurrencyItem;
 import me.khajiitos.jackseconomy.util.CurrencyHelper;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IJeiHelpers;
@@ -82,15 +83,21 @@ public class AdminShopBuyingCategory implements IRecipeCategory<AdminShopBuyingC
 
 		builder.addSlot(RecipeIngredientRole.CATALYST, 42, 5).addItemStack(adminShopStack);
 		//noinspection removal
-		builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 34, 29).addItemStack(moneyStack).addTooltipCallback((recipeSlotView, tooltip) -> {
+		builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 34, 29).addItemStack(moneyStack).addTooltipCallback((view, tooltip) -> {
 			tooltip.clear();
 			tooltip.add(Component.literal(CurrencyHelper.format(details.price)).withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.YELLOW)));
 		});
-		builder.addOutputSlot(100, 29).addItemStack(details.description().createItemStack());
+
+        IRecipeSlotBuilder output = builder.addOutputSlot(100, 29).addItemStack(details.description().createItemStack());
+        if (details.count != 1)
+            //noinspection removal
+            output.addTooltipCallback((view, tooltip) -> {
+                tooltip.set(0, tooltip.get(0).copy().append(Component.literal(" x" + details.count).withStyle(ChatFormatting.GRAY)));
+            });
 	}
 
 	@Override
-	public void draw(Details details, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+	public void draw(Details details, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphics guiGraphics, double mouseX, double mouseY) {
 		if (details.description == null || Objects.equals(details.price, BigDecimal.ZERO)) {
 			Font font = Minecraft.getInstance().font;
 			guiGraphics.drawCenteredString(font, Component.translatable("jackseconomy.jei_placeholder_wallet_required"), getWidth() / 2, getHeight() / 2 - (font.lineHeight / 2), -1);
@@ -99,7 +106,7 @@ public class AdminShopBuyingCategory implements IRecipeCategory<AdminShopBuyingC
 		guiGraphics.blit(BACKGROUND, 25, 0, 0, 0, 100, 50, 100, 50);
 	}
 
-	public record Details(@Nullable String adminShopName, BigDecimal price, ItemDescription description) {}
+	public record Details(@Nullable String adminShopName, BigDecimal price, int count, ItemDescription description) {}
 
 	public static class RecipeManager implements ISimpleRecipeManagerPlugin<Details> {
 		@Override
@@ -139,7 +146,7 @@ public class AdminShopBuyingCategory implements IRecipeCategory<AdminShopBuyingC
 
 		@Override
 		public @NotNull List<Details> getAllRecipes() {
-			if (!JacksEconomyClient.synced) return Collections.singletonList(new Details(null, BigDecimal.ZERO, null));
+			if (!JacksEconomyClient.synced) return Collections.singletonList(new Details(null, BigDecimal.ZERO, 0, null));
 
 			List<Details> list = new ArrayList<>();
 			if (JacksEconomyClient.defaultAdminShopData != null) addAllRecipes(list, null, JacksEconomyClient.defaultAdminShopData);
@@ -151,7 +158,7 @@ public class AdminShopBuyingCategory implements IRecipeCategory<AdminShopBuyingC
 			data.shopItems().values().stream().map(LinkedHashMap::values).forEach(lists -> lists.forEach(list2 -> list2.forEach(
 					(shopItem) -> {
 						if (hasStage(shopItem.stage())) list.add(
-							new Details(name, BigDecimal.valueOf(shopItem.price()), shopItem.itemDescription())
+							new Details(name, BigDecimal.valueOf(shopItem.price()), shopItem.count(), shopItem.itemDescription())
 						);
 					}
 			)));

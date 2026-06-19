@@ -15,12 +15,12 @@ public class FluidHelper {
             Fluid fluid = ForgeRegistries.FLUIDS.getValue(resourceLocation);
 
             if (fluid == null) {
-                JacksEconomy.LOGGER.info("Invalid fluid: " + name);
+                JacksEconomy.LOGGER.info("Invalid fluid: {}", name);
             }
 
             return fluid;
         } catch (ResourceLocationException e) {
-            JacksEconomy.LOGGER.warn("Invalid resource location: " + name);
+            JacksEconomy.LOGGER.warn("Invalid resource location: {}", name);
         }
 
         return null;

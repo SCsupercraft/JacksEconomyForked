@@ -22,6 +22,8 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -56,6 +58,12 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
         Slot slot = this.slots.get(index);
         if (slot.hasItem()) {
             ItemStack clickedStack = slot.getItem();
+            if (clickedStack.getTag() != null && clickedStack.getTag().getBoolean("jackseconomy_ghost")) {
+                clickedStack.setCount(0);
+                clickedStack.getTag().remove("jackseconomy_ghost");
+                return ItemStack.EMPTY;
+            }
+
             clickedStackCopy = clickedStack.copy();
             if (index < containerSize) {
                 if (!this.moveItemStackTo(clickedStack, containerSize, containerSize + 36, false)) {
@@ -124,6 +132,12 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
 
             for (int i = 0; i < this.container.getContainerSize(); i++) {
                 ItemStack item = this.container.getItem(i);
+                boolean ghost;
+
+                if (item.getTag() != null) {
+                    ghost = item.getTag().getBoolean("jackseconomy_ghost");
+                    item.getTag().remove("jackseconomy_ghost");
+                } else ghost = false;
 
                 if (!item.isEmpty()) {
                     FluidDescription fluidDescription = FluidDescription.ofFluid(item.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElseThrow(RuntimeException::new).getFluidInTank(0));
@@ -132,7 +146,7 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
                         fluidDescriptions.add(fluidDescription);
                     }
 
-                    if (Config.returnManifestItems.get()) {
+                    if (Config.returnManifestItems.get() && !ghost) {
                         if (!serverPlayer.getInventory().add(item)) {
                             ItemHelper.dropItem(item, serverPlayer.level(), serverPlayer.blockPosition());
                         }
@@ -158,7 +172,14 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
         super.removed(pPlayer);
     }
 
-    public static class FluidSlot extends Slot {
+    public static boolean mayPlace(ItemStack stack) {
+        LazyOptional<IFluidHandlerItem> capability = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
+        return capability.isPresent() && capability.map(cap ->
+                        cap.getTanks() > 0 && !cap.getFluidInTank(0).isEmpty())
+                .orElse(false);
+    }
+
+    public static class FluidSlot extends TicketCreatorMenu.GhostSlot {
 
         public FluidSlot(Container pContainer, int pSlot, int pX, int pY) {
             super(pContainer, pSlot, pX, pY);
@@ -166,7 +187,7 @@ public abstract class FluidTicketCreatorMenu extends AbstractContainerMenu {
 
         @Override
         public boolean mayPlace(@NotNull ItemStack pStack) {
-            return pStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent();
+            return FluidTicketCreatorMenu.mayPlace(pStack);
         }
     }
 }

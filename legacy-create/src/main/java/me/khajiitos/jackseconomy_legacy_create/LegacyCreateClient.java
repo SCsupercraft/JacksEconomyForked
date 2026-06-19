@@ -2,13 +2,16 @@ package me.khajiitos.jackseconomy_legacy_create;
 
 import me.khajiitos.jackseconomy.create.CreateCheck;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class LegacyCreateClient {
     public static void init() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(LegacyCreateClient::onClientSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(LegacyCreateClient::onRegisterBlockEntityRenderers);
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        bus.addListener(LegacyCreateClient::onClientSetup);
+        bus.addListener(LegacyCreateClient::onRegisterBlockEntityRenderers);
 
         if (CreateCheck.isLegacyInstalled()) {
             CreatePonder.register();

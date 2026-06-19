@@ -4,9 +4,42 @@
 
 - Stock Market
 - Gui improvements
-- "Shopkeep" villager
-  - Admin shop as workstation
-  - Opens admin shop GUI when interacted with
+
+## 1.2.2-1.7.0
+
+### Planned
+
+- **Banks**: Blocks that store large amounts of money, with wireless versions
+  - Might reduce money capacity of other block to favour the banks
+- **Credit Card**: For use with wireless banks, can't store any money itself
+- **Transfer Link Tool**: For linking blocks/machines to wireless banks
+
+### Possible Additions
+
+- **Player Shops**: Admin shops that can be configured by players
+- **Item Stand (and admin version)**: Like the player shop but for a single type of item
+
+### Added
+
+- **Shopkeeper Villager**: Villagers can use admin shops as a workstation and open the admin shop GUI when interacted with
+- **JEI Improvements**: Ability to drag items from JEI when creating manifests
+- **Shopping Cart Improvements**: Holding the `Shift` and `Control` keys down while pressing the `+` or `-` buttons now applies a multiplier
+  - `Shift` is for 64 items, while `Control` is for 10
+- **Sell All**: By shift-clicking the shopping cart button in the admin shop, all items that you are able to sell will be added to the cart
+- **Admin Shop Set Item Quantities**: You can now give items in the admin shop a set quantity
+  - Items can only be bought in these set quantities
+  - For example, you could let the player buy 16 torches for $1.00
+- **FTB Quests Integration**: Added one new task and one new reward for accepting/giving money.
+- **New Command**: `/economy player` can be used to manipulate the contents of a player's wallet
+- **Importer Improvements**: Importers now have the ability to round-robin multiple items at a time off of a manifest
+
+### Fixed
+
+- **Withdrawal Crash**: Fixed crashes when withdrawing money from the wallet GUI
+- **Incorrect Change**: Fixed issues with incorrect amounts of change being given
+- **Purchase Tracking**: Fixed the issue with the purchase manager not tracking purchases
+- **Generated Commands (1.21.1)**: Fixed the ticket creator menu giving invalid `/give` commands
+- **Loading Errors (1.21.1)**: Fixed errors when loading certain block entities, which resulted in data loss
 
 ## 1.2.2-1.6.2
 

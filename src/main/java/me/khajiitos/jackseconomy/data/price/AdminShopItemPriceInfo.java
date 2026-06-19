@@ -7,14 +7,16 @@ import java.util.List;
 
 public class AdminShopItemPriceInfo extends ItemPriceInfo {
     public double adminShopBuyPrice;
+    public int adminShopBuyCount;
     public String category;
     public int adminShopSlot;
     public String customAdminShopName;
     public String adminShopStage;
     public @Nullable String adminShopName;
 
-    public AdminShopItemPriceInfo(double adminShopBuyPrice, String category, int adminShopSlot, String customAdminShopName, String adminShopStage, @Nullable String adminShopName) {
+    public AdminShopItemPriceInfo(double adminShopBuyPrice, int adminShopBuyCount, String category, int adminShopSlot, String customAdminShopName, String adminShopStage, @Nullable String adminShopName) {
         this.adminShopBuyPrice = adminShopBuyPrice;
+        this.adminShopBuyCount = adminShopBuyCount;
         this.category = category;
         this.adminShopSlot = adminShopSlot;
         this.customAdminShopName = customAdminShopName;
@@ -24,8 +26,9 @@ public class AdminShopItemPriceInfo extends ItemPriceInfo {
 
     protected static @Nullable ItemPriceInfo fromNbtOrNull(CompoundTag compoundTag) {
         try {
-            if (hasAny(compoundTag, List.of("adminShopBuyPrice", "category", "adminShopSlot", "adminShopStage", "customAdminShopName"))) {
+            if (hasAny(compoundTag, List.of("adminShopBuyPrice", "adminShopBuyCount", "category", "adminShopSlot", "adminShopStage", "customAdminShopName"))) {
                 double adminShopBuyPrice = compoundTag.contains("adminShopBuyPrice") ? compoundTag.getDouble("adminShopBuyPrice") : -1;
+                int adminShopBuyCount = compoundTag.contains("adminShopBuyCount") ? compoundTag.getInt("adminShopBuyCount") : 1;
                 String category = compoundTag.contains("category") ? compoundTag.getString("category") : null;
                 int adminShopSlot = compoundTag.contains("adminShopSlot") ? compoundTag.getInt("adminShopSlot") : -1;
                 String customAdminShopName = compoundTag.contains("customAdminShopName") ? compoundTag.getString("customAdminShopName") : null;
@@ -33,7 +36,7 @@ public class AdminShopItemPriceInfo extends ItemPriceInfo {
                 String adminShopName = compoundTag.contains("adminShopName") ? compoundTag.getString("adminShopName") : null;
                 if (adminShopName != null && adminShopName.length() > 32) return null;
 
-                return new AdminShopItemPriceInfo(adminShopBuyPrice, category, adminShopSlot, customAdminShopName, adminShopStage, adminShopName);
+                return new AdminShopItemPriceInfo(adminShopBuyPrice, adminShopBuyCount, category, adminShopSlot, customAdminShopName, adminShopStage, adminShopName);
             }
 
         } catch (NullPointerException | ClassCastException ignored) {}
@@ -47,6 +50,10 @@ public class AdminShopItemPriceInfo extends ItemPriceInfo {
 
         if (this.adminShopBuyPrice != -1) {
             compoundTag.putDouble("adminShopBuyPrice", this.adminShopBuyPrice);
+        }
+
+        if (this.adminShopBuyCount != 1) {
+            compoundTag.putInt("adminShopBuyCount", this.adminShopBuyCount);
         }
 
         if (this.category != null) {

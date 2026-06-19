@@ -126,7 +126,7 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
 
     private static void drawCenteredStringNoShadow(GuiGraphics guiGraphics, Font pFont, Component pText, int pX, int pY, int pColor) {
         FormattedCharSequence formattedcharsequence = pText.getVisualOrderText();
-        guiGraphics.drawString(pFont, formattedcharsequence, (int)(pX - pFont.width(formattedcharsequence) / 2), (int)pY, pColor, false);
+        guiGraphics.drawString(pFont, formattedcharsequence, pX - pFont.width(formattedcharsequence) / 2, pY, pColor, false);
     }
 
     @Override
@@ -291,11 +291,11 @@ public class WalletScreen extends AbstractContainerScreen<WalletMenu> {
                     BigDecimal worth = item.currencyType.worth;
 
                     if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
-                        count = BigDecimal.valueOf(64).min(balance.divide(worth, RoundingMode.DOWN));
+                        count = BigDecimal.valueOf(64).min(balance.divide(worth, 0, RoundingMode.DOWN));
                     } else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL)) {
-                        count = BigDecimal.valueOf(10).min(balance.divide(worth, RoundingMode.DOWN));
+                        count = BigDecimal.valueOf(10).min(balance.divide(worth, 0, RoundingMode.DOWN));
                     } else {
-                        count = BigDecimal.valueOf(1).min(balance.divide(worth, RoundingMode.DOWN));
+                        count = BigDecimal.valueOf(1).min(balance.divide(worth, 0, RoundingMode.DOWN));
                     }
 
                     if (count.compareTo(BigDecimal.ZERO) > 0) {

@@ -210,7 +210,7 @@ public class PurchaseManager {
         }
 
         boolean isEmpty() {
-            return quantity == 0 || description.map(i -> i.item() != Items.AIR, f -> f.fluid() != Fluids.EMPTY);
+            return quantity == 0 || description.map(i -> i.item() == Items.AIR, f -> f.fluid() == Fluids.EMPTY);
         }
     }
 

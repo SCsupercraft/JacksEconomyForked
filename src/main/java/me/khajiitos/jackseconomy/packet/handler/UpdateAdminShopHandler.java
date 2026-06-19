@@ -120,11 +120,12 @@ public class UpdateAdminShopHandler {
 
                 String category = compoundTag.getString("category");
                 double buyPrice = compoundTag.getDouble("adminShopBuyPrice");
+                int buyCount = compoundTag.getInt("adminShopBuyCount");
                 int slot = compoundTag.contains("slot") ? compoundTag.getInt("slot") : -1;
                 String customName = compoundTag.contains("customAdminShopName") ? compoundTag.getString("customAdminShopName") : null;
                 String stage = compoundTag.contains("adminShopStage") ? compoundTag.getString("adminShopStage") : null;
 
-                PriceManager.addPriceInfo(itemDescription, new AdminShopItemPriceInfo(buyPrice, category, slot, customName, stage, msg.adminShopName()));
+                PriceManager.addPriceInfo(itemDescription, new AdminShopItemPriceInfo(buyPrice, buyCount, category, slot, customName, stage, msg.adminShopName()));
             }
         });
 

@@ -24,12 +24,12 @@ public class ItemHelper {
             Item item = ForgeRegistries.ITEMS.getValue(resourceLocation);
 
             if (item == null) {
-                JacksEconomy.LOGGER.info("Invalid item: " + name);
+                JacksEconomy.LOGGER.info("Invalid item: {}", name);
             }
 
             return item;
         } catch (ResourceLocationException e) {
-            JacksEconomy.LOGGER.warn("Invalid resource location: " + name);
+            JacksEconomy.LOGGER.warn("Invalid resource location: {}", name);
         }
 
         return null;
