@@ -167,7 +167,7 @@ public class TicketPreviewWidget<T> extends AbstractWidget {
                 return true;
             }
             x += 18;
-            if (this.onSelect != null) {;
+            if (this.onSelect != null) {
                 for (T description: items) {
                     if (pMouseX >= x + 1 && pMouseX <= x + 17 && pMouseY >= getY() + 1 && pMouseY <= getY() + 17) {
                         this.onSelect.accept(description);
